@@ -1,4 +1,4 @@
-# PLAN — QuantEcon/data → `data-lectures`
+# PLAN — `data-lectures` (formerly `QuantEcon/data`)
 
 **Status:** active roadmap (last updated 2026-07-16)
 
@@ -44,10 +44,10 @@ Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS questio
 - [x] `AGENTS.md` — conventions and gotchas for agents/contributors working here
 - [x] README rewrite: purpose, routing rule, how to add a dataset, links to manual page
 
-### Phase 1 — Identity
+### Phase 1 — Identity ✅ (2026-07-16)
 
-- [ ] Rename `QuantEcon/data` → `data-lectures` once the name settles in meta#336 (GitHub redirects make this non-breaking; can go first)
-- [ ] Add repo description and topics
+- [x] Rename `QuantEcon/data` → `data-lectures` (GitHub redirects preserve all existing URLs, so this was non-breaking)
+- [x] Add repo description and topics (`quantecon`, `datasets`, `economics`, `open-data`, `teaching-materials`)
 
 ### Phase 2 — Layout
 
@@ -117,8 +117,8 @@ The first end-to-end deployment: one dataset per hosting pattern, each the harde
 
 | Decision | Current strawman |
 | --- | --- |
-| Repo name | `data-lectures` |
-| URL form | `data.quantecon.org/lectures/...`; interim `github.com/QuantEcon/data/raw/main/...` |
+| Repo name | **settled 2026-07-16**: renamed `data-lectures` (Phase 1) |
+| URL form | `data.quantecon.org/lectures/...`; interim `github.com/QuantEcon/data-lectures/raw/main/...` |
 | Layout | flat |
 | Licensing review | per-source check before rehosting, recorded in the manifest |
 

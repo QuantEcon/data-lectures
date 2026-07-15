@@ -1,10 +1,10 @@
-# AGENTS.md — working in QuantEcon/data
+# AGENTS.md — working in QuantEcon/data-lectures
 
 Guidance for coding agents (and humans) making changes in this repository. Read `PLAN.md` first — it holds the roadmap and links to the governing issues; this file holds the rules and traps.
 
 ## What this repo is
 
-The canonical home for **data consumed by the QuantEcon lecture series** (to be renamed `data-lectures`, pending [meta#336](https://github.com/QuantEcon/meta/issues/336)). It is **mid-transition**: the current tree is a legacy consumer-keyed layout (`lecture-python-intro/…`) that will become a flat published tree served at `https://data.quantecon.org/lectures/`. The full convention lives in the draft manual page ([QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108)).
+The canonical home for **data consumed by the QuantEcon lecture series** (renamed from `QuantEcon/data` on 2026-07-16, per [meta#336](https://github.com/QuantEcon/meta/issues/336)). It is **mid-transition**: the current tree is a legacy consumer-keyed layout (`lecture-python-intro/…`) that will become a flat published tree served at `https://data.quantecon.org/lectures/`. The full convention lives in the draft manual page ([QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108)).
 
 ## Rules
 
@@ -41,7 +41,7 @@ When writing or reviewing URLs that fetch from this repo (in docs, tests, or lec
 | `github.com/{org}/{repo}/raw/{ref}/…` | ✅ | ✅ |
 | `media.githubusercontent.com/media/…` | ✅ | ❌ 404 |
 
-- Interim safe form (works regardless of storage): `https://github.com/QuantEcon/data/raw/main/<path>`
+- Interim safe form (works regardless of storage): `https://github.com/QuantEcon/data-lectures/raw/main/<path>`
 - Final form once Pages is live: `https://data.quantecon.org/lectures/<filename>`
 - Never reference a non-default branch in a published URL.
 

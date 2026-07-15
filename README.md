@@ -1,8 +1,8 @@
-# QuantEcon data
+# data-lectures
 
 The canonical repository for **data consumed by the QuantEcon lecture series**, referenced by stable URLs.
 
-> **Status:** this repo is being shaped into `data-lectures` per [QuantEcon/meta#336](https://github.com/QuantEcon/meta/issues/336). See [`PLAN.md`](PLAN.md) for the roadmap and [`AGENTS.md`](AGENTS.md) for working conventions. The full data-hosting convention is drafted in [QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108).
+> **Status:** renamed from `QuantEcon/data` (2026-07-16) and being shaped into the canonical lecture-data repo per [QuantEcon/meta#336](https://github.com/QuantEcon/meta/issues/336). See [`PLAN.md`](PLAN.md) for the roadmap and [`AGENTS.md`](AGENTS.md) for working conventions. The full data-hosting convention is drafted in [QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108).
 
 ## The routing rule
 
@@ -15,7 +15,7 @@ The canonical repository for **data consumed by the QuantEcon lecture series**, 
 Until the `data.quantecon.org` Pages deployment is live, use the interim form — it works for both plain-git and LFS-tracked files:
 
 ```
-https://github.com/QuantEcon/data/raw/main/<path>
+https://github.com/QuantEcon/data-lectures/raw/main/<path>
 ```
 
 Once publishing lands (PLAN Phase 4), the canonical form becomes:
