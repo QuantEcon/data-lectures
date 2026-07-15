@@ -1,0 +1,111 @@
+# Manifest for lingcod_msy_recovery.csv — the first manifest written against
+# the schema sketched in ../manifest-schema.yml (PLAN Phase 8, pilot P1).
+
+filename: lingcod_msy_recovery.csv
+title: Pacific Coast lingcod — biomass and fishing pressure relative to MSY
+description: >
+  Annual B/Bmsy and F/Fmsy for the U.S. Pacific Coast lingcod (Ophiodon
+  elongatus) fishery, 1928-2009. Illustrates a stock fished below its MSY
+  reference points and subsequently rebuilt.
+
+# Constructed, not verbatim: these are two ratio series for a single stock,
+# subset out of a database that ships as a multi-table release. Selecting the
+# stock and the columns is our processing, so the class is `constructed` — and
+# a constructed dataset is supposed to ship its builder. This one does not.
+# See `builder` below.
+class: constructed
+
+source:
+  name: RAM Legacy Stock Assessment Database
+  url: https://www.ramlegacy.org/
+  doi: 10.5281/zenodo.14043031
+  version: v4.66-assessment-only    # current upstream release; NOT known to be
+                                    # the release this extract was taken from
+  citation: >
+    Ricard, D., Minto, C., Jensen, O. P., & Baum, J. K. (2012). Evaluating the
+    knowledge base and status of commercially exploited marine species with the
+    RAM Legacy Stock Assessment Database. Fish and Fisheries, 13(4), 380-398.
+
+license:
+  name: CC BY 4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+  redistribution: permitted
+  verified: 2026-07-16
+  # Established against the Zenodo record for v4.66, which reports license id
+  # "cc-by-4.0" and access_right "open". Not stated on ramlegacy.org itself --
+  # the homepage gives only the citation, so the Zenodo record is the
+  # authority. Attribution is the sole condition and the citation above
+  # carries it, so rehosting this extract is permitted.
+
+retrieved: null                     # unrecorded -- see integrity.upstream
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Two independent questions with different answers here, which is why they are
+# recorded separately rather than as one status field:
+#   migration -- does this match what the lecture consumed before the repoint?
+#   upstream  -- is this actually what RAM Legacy says?
+# A file can be a perfect copy of a lecture's data and still have unprovable
+# provenance. Collapsing both into one "verified" would overstate this file.
+
+integrity:
+  sha256: fc2f873f97a9b7c6d335ca88203c321b4451cf4b94feb16ca40e99551c49c092
+
+  migration:
+    status: verified
+    date: 2026-07-16
+    method: >
+      sha256 byte-compare against lecture-python-intro's copy at
+      lectures/datasets/lingcod_msy_recovery.csv, immediately before the
+      repoint. Identical, so the repoint cannot change lecture output.
+
+  upstream:
+    status: unverifiable
+    date: 2026-07-16
+    method: >
+      Cannot be re-derived. The extract does not record which RAM Legacy stock
+      id it came from, which database version, or what transformation produced
+      the two ratio columns, and no builder was committed with it. Verifying
+      would mean re-identifying the stock in a current release and confirming
+      the series match -- possible in principle, not done. Treat the values as
+      trusted-by-provenance-of-the-author, not as independently checked.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: csv
+  columns:
+    - {name: year, dtype: int64, description: calendar year}
+    - {name: B_over_Bmsy, dtype: float64, description: stock biomass relative to the biomass supporting MSY}
+    - {name: F_over_Fmsy, dtype: float64, description: fishing pressure relative to the pressure achieving MSY}
+  row_count_floor: 82
+  date_range: {start: 1928, end: 2009}
+  # F_over_Fmsy is null in the terminal year (2009) -- expected, and normal for
+  # a terminal assessment year. Recorded so PR validation does not "fix" it:
+  # a blanket no-nulls rule would reject this file wrongly.
+  known_nulls:
+    F_over_Fmsy: 1
+
+# ---------------------------------------------------------------------------
+# Consumers -- how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/msy_fishery.md
+
+# ---------------------------------------------------------------------------
+# Builder
+# ---------------------------------------------------------------------------
+# AGENTS.md: "A constructed dataset without its committed builder is a bug."
+# This file is that bug, inherited rather than introduced -- it is one of the
+# constructed-but-unscripted set PLAN Phase 9 tracks. Recorded explicitly
+# instead of being quietly misclassified as verbatim, so the gap is visible in
+# the generated catalog rather than lost.
+
+builder: null
+builder_status: unrecovered         # unrecovered | committed | not-applicable
