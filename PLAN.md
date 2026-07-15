@@ -16,7 +16,11 @@ This repository is being shaped into the **single canonical repository for data 
 | [QuantEcon/data#1](https://github.com/QuantEcon/data/issues/1), [#2](https://github.com/QuantEcon/data/issues/2), [#4](https://github.com/QuantEcon/data/issues/4) | Pre-existing execution items (LFS, fold in `high_dim_data`, repoint lectures) |
 | [QuantEcon/workspace-lectures#14](https://github.com/QuantEcon/workspace-lectures/issues/14) | Session work plan: pilot kickoff sequencing (meta#337 risks → P1 → P2) |
 
-## Where we are (audit, 2026-07-15)
+## Where we are
+
+**Update 2026-07-16 — the layout below has been flattened (Phase 2).** The 8 in-use static files and `business_cycle_data.csv` now sit directly in `lectures/`; `scripts/` moved to the root; the 3 no-consumer files were dropped (see Phase 6). The audit that follows is retained as the record of what was migrated and what state each file was in — it is the input to Phases 6 and 7, and the `consumers` column of the manifests still has to be backfilled from it.
+
+### The audit (2026-07-15)
 
 - 12 data files for `lecture-python-intro` under a **consumer-keyed layout** (`lecture-python-intro/{static,dynamic,scripts}/`), in three distinct states:
   - **8 duplicates of data in active use** — `mpd2020.xlsx`, `longprices.xls`, `chapter_3.xlsx`, `assignat.xlsx`, `dette.xlsx`, `fig_3.xlsx`, `caron.npy`, `nom_balances.npy` are consumed by intro lectures (`long_run_growth`, `inflation_history`, `french_rev`), but via intro's **own copies** (own-repo URLs, or local paths for the `.npy` pair) — these are the Phase 8 repoint targets
@@ -49,11 +53,13 @@ Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS questio
 - [x] Rename `QuantEcon/data` → `data-lectures` (GitHub redirects preserve all existing URLs, so this was non-breaking)
 - [x] Add repo description and topics (`quantecon`, `datasets`, `economics`, `open-data`, `teaching-materials`)
 
-### Phase 2 — Layout
+### Phase 2 — Layout (2026-07-16 — catalog outstanding)
 
-- [ ] Restructure consumer-keyed tree → flat published tree (strawman: `lectures/` as the published root; no folder implies series ownership)
-- [ ] Decide where non-published assets live relative to the published tree (`scripts/`, per-dataset `manifest.yml`, tests)
+- [x] Restructure consumer-keyed tree → flat published tree — `lectures/` is the published root; no folder implies series ownership. Done while zero lectures referenced the repo, so no consumer could break; **that window is now closed**
+- [x] Decide where non-published assets live relative to the published tree — `scripts/` and `manifest-schema.yml` sit at the root, outside `lectures/`, and are never served. Manifests are the exception: they live *inside* `lectures/` as sidecars named `<filename>.yml`, so a dataset cannot be moved or removed without its metadata, and CI can assert the pairing with a glob
 - [ ] Generate an index/catalog page from the manifests — doubles as the dataset registry
+
+The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.yml`) because a stem-keyed sidecar collides when one dataset ships in two formats — exactly the `fig_3.xlsx` / `fig_3.ods` case this repo already had. Strawman until the pilot tests it; see `manifest-schema.yml`.
 
 ### Phase 3 — Storage
 
@@ -80,10 +86,13 @@ Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS questio
 
 ### Phase 6 — Metadata backfill for existing holdings
 
-- [ ] `manifest.yml` per dataset for the 12 existing data files: source, license, retrieval date, schema, consumers, provenance class
+- [ ] Manifest per dataset for the **9** files now in `lectures/`: source, license, retrieval date, schema, consumers, provenance class. Schema sketched in `manifest-schema.yml` (Phase 2); backfill is per-file work gated on the license check below
 - [ ] Classify: the 8 static intro files are author-assembled or verbatim; `business_cycle_data.csv` is the one dynamic snapshot and needs its cadence declared
-- [ ] License check per file before this repo is promoted as the canonical public home
-- [ ] Keep-or-drop decision for the files with no consumer anywhere: the two orphaned World Bank CSVs (dead on both ends — intro's copies are unreferenced too) and `fig_3.ods` (source-format twin of `fig_3.xlsx`)
+- [ ] License check per file before this repo is promoted as the canonical public home. One is already answered: `business_cycle_metadata.md` records the World Bank series as **CC BY-4.0** — that dump is the model for what a manifest should capture, and the other 8 need the equivalent established by hand
+- [x] Keep-or-drop decision for the files with no consumer anywhere — **dropped 2026-07-16** in the Phase 2 restructure, rather than promoting them into the published namespace:
+  - `GDP_per_capita_world_bank.csv` and `Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv` — an org-wide code search returns **zero** references to either, they are freely re-downloadable from the World Bank, and their licence was never established. Rehosting a stale snapshot nobody reads is the opposite of this repo's purpose
+  - `fig_3.ods` — confirmed to carry no provenance the published `.xlsx` lacks: both parse to a single `Sheet1` of identical shape (34×6) and `DataFrame.equals` returns true, so it is a pure format twin
+  - All three remain recoverable from git history
 
 ### Phase 7 — Data integrity verification
 

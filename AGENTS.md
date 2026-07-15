@@ -68,16 +68,20 @@ Before adding any file, confirm the upstream license permits redistribution and 
 - Changes here often pair with PRs in lecture repos and issues in `QuantEcon/meta`. In commit messages and PR bodies, **never place a GitHub closing keyword (`fixes`, `closes`, `resolves`, …) immediately before a cross-repo reference** like `QuantEcon/meta#336` — GitHub will auto-close the referenced issue when the commit lands on the default branch. Write "See QuantEcon/meta#336" or "Part of QuantEcon/meta#336".
 - When a decision marked **(open)** in `PLAN.md` gets settled upstream, update `PLAN.md` and this file in the same PR that acts on it.
 
-## Repo map (current, legacy layout)
+## Repo map
 
 ```
-lecture-python-intro/
-  static/     # 11 static data files migrated from lecture-python-intro in Feb 2025 (data#5)
-  dynamic/    # business_cycle_data.csv — the one dynamic snapshot (manual refresh)
-  scripts/    # business_cycle.py — its builder
+lectures/            # the published tree — flat, served at data.quantecon.org/lectures/
+                     #   9 datasets + business_cycle's upstream metadata dumps
+                     #   manifests live here as sidecars: <filename>.yml
+scripts/             # builders — NOT published
+  business_cycle.py  #   writes business_cycle_data.csv into lectures/
+manifest-schema.yml  # per-dataset manifest schema (strawman)
 requirements.txt
-PLAN.md       # roadmap — start here
-AGENTS.md     # this file
+PLAN.md              # roadmap — start here
+AGENTS.md            # this file
 ```
 
-No lecture references these files yet (the repoints happen in PLAN Phases 8–9 / data#4) — which means the legacy layout can still be restructured without breaking consumers. That freedom ends the moment the first repoint merges.
+The Feb 2025 consumer-keyed layout (`lecture-python-intro/{static,dynamic,scripts}/`) was flattened into this tree on 2026-07-16, while nothing referenced the repo.
+
+**That freedom is now spent.** The restructure was free only because zero lectures pointed here; as soon as the first repoint merges (PLAN Phase 8), every move or rename in `lectures/` is a breaking change for a live lecture build. From that point on, treat published filenames as an API: corrections in place, new vintages under new names, and check `consumers` before touching anything.
