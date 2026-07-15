@@ -1,0 +1,83 @@
+# AGENTS.md — working in QuantEcon/data-lectures
+
+Guidance for coding agents (and humans) making changes in this repository. Read `PLAN.md` first — it holds the roadmap and links to the governing issues; this file holds the rules and traps.
+
+## What this repo is
+
+The canonical home for **data consumed by the QuantEcon lecture series** (renamed from `QuantEcon/data` on 2026-07-16, per [meta#336](https://github.com/QuantEcon/meta/issues/336)). It is **mid-transition**: the current tree is a legacy consumer-keyed layout (`lecture-python-intro/…`) that will become a flat published tree served at `https://data.quantecon.org/lectures/`. The full convention lives in the draft manual page ([QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108)).
+
+## Rules
+
+### Layout
+
+- Do **not** add new consumer-keyed directories (no `lecture-xyz/` folders). New datasets go in the flat published tree; if the restructure (PLAN Phase 2) hasn't landed yet, put new files where the pilot ([meta#338](https://github.com/QuantEcon/meta/issues/338)) is landing them and note it in the PR.
+- No folder may imply ownership by a lecture series — any lecture can consume any file.
+
+### Every dataset needs a class and a manifest
+
+Classify as exactly one of:
+
+| Class | Meaning | Must ship with the file |
+| --- | --- | --- |
+| **verbatim** | third-party file republished as distributed | source URL, citation, license, retrieval date |
+| **constructed** | built from upstream sources by our processing | all of the above **plus the builder script, committed here** |
+| **dynamic snapshot** | constructed, tracking a moving source (FRED, World Bank) | all of the above **plus a refresh cadence** |
+
+A constructed dataset without its committed builder is a bug. Manifest fields: `source`, `license`, `retrieved`, `schema`, `consumers` (repo + lecture file, machine-readable), `maintainer`, `cadence` (dynamic only).
+
+### Corrections vs vintages
+
+- **Corrections** (bad parse, wrong units, corrupt rows): fix **in place**, same filename — every consumer should get the fix. Use the manifest's `consumers` list to know which lectures to rebuild/review.
+- **New vintages** (e.g. Maddison 2020 → 2023): **new filename** — the old vintage stays valid; consumers opt in.
+- Never delete or rename a published file without checking `consumers` (and, until manifests are backfilled, grepping the lecture repos).
+
+### URL forms — the LFS trap
+
+When writing or reviewing URLs that fetch from this repo (in docs, tests, or lecture repoints):
+
+| Form | LFS-tracked file | plain-git file |
+| --- | --- | --- |
+| `raw.githubusercontent.com/…` | ❌ returns pointer text | ✅ |
+| `github.com/{org}/{repo}/raw/{ref}/…` | ✅ | ✅ |
+| `media.githubusercontent.com/media/…` | ✅ | ❌ 404 |
+
+- Interim safe form (works regardless of storage): `https://github.com/QuantEcon/data-lectures/raw/main/<path>`
+- Final form once Pages is live: `https://data.quantecon.org/lectures/<filename>`
+- Never reference a non-default branch in a published URL.
+
+### LFS
+
+- LFS is **per-path**, opt-in, large binaries only. Never add a blanket rule like `*.csv filter=lfs`.
+- Do not LFS-track an **existing** file until you've confirmed no consumer fetches it via `raw.githubusercontent.com` — converting silently turns their download into a pointer file.
+- The Pages deploy workflow must checkout with `lfs: true` or it publishes pointer files.
+
+### Dynamic builders
+
+Builders follow four stages — **fetch → pre-process → validate → write** — and only write on validation pass (expected columns/dtypes, row-count floor, recency of date range, no all-NaN columns, values unchanged in the overlap window with the previous vintage). Lectures always read the last-good snapshot: an upstream outage may fail a refresh, it must never break a lecture build.
+
+### Live APIs
+
+Live API calls are for *teaching data access*, not for getting data. Don't propose "the lecture should just call the API" as a fix — the fix is a snapshot here plus an automated refresh.
+
+### Licensing
+
+Before adding any file, confirm the upstream license permits redistribution and record it in the manifest. This repo is on track to be a promoted public host; unlicensed rehosting is a blocker, not a nice-to-have.
+
+## Cross-repo hygiene
+
+- Changes here often pair with PRs in lecture repos and issues in `QuantEcon/meta`. In commit messages and PR bodies, **never place a GitHub closing keyword (`fixes`, `closes`, `resolves`, …) immediately before a cross-repo reference** like `QuantEcon/meta#336` — GitHub will auto-close the referenced issue when the commit lands on the default branch. Write "See QuantEcon/meta#336" or "Part of QuantEcon/meta#336".
+- When a decision marked **(open)** in `PLAN.md` gets settled upstream, update `PLAN.md` and this file in the same PR that acts on it.
+
+## Repo map (current, legacy layout)
+
+```
+lecture-python-intro/
+  static/     # 11 static data files migrated from lecture-python-intro in Feb 2025 (data#5)
+  dynamic/    # business_cycle_data.csv — the one dynamic snapshot (manual refresh)
+  scripts/    # business_cycle.py — its builder
+requirements.txt
+PLAN.md       # roadmap — start here
+AGENTS.md     # this file
+```
+
+No lecture references these files yet (the repoints happen in PLAN Phases 8–9 / data#4) — which means the legacy layout can still be restructured without breaking consumers. That freedom ends the moment the first repoint merges.
