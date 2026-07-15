@@ -80,7 +80,7 @@ Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS questio
 
 ### Phase 6 — Metadata backfill for existing holdings
 
-- [ ] `manifest.yml` per dataset for the 10 existing files: source, license, retrieval date, schema, consumers, provenance class
+- [ ] `manifest.yml` per dataset for the 12 existing data files: source, license, retrieval date, schema, consumers, provenance class
 - [ ] Classify: the 8 static intro files are author-assembled or verbatim; `business_cycle_data.csv` is the one dynamic snapshot and needs its cadence declared
 - [ ] License check per file before this repo is promoted as the canonical public home
 - [ ] Keep-or-drop decision for the files with no consumer anywhere: the two orphaned World Bank CSVs (dead on both ends — intro's copies are unreferenced too) and `fig_3.ods` (source-format twin of `fig_3.xlsx`)

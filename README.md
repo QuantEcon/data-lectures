@@ -40,6 +40,6 @@ See the [draft convention](https://github.com/QuantEcon/QuantEcon.manual/pull/10
 
 | Path | What |
 | --- | --- |
-| `lecture-python-intro/static/` | 10 static files migrated from `lecture-python-intro` (Feb 2025) — legacy consumer-keyed layout, restructure pending |
+| `lecture-python-intro/static/` | 11 static data files migrated from `lecture-python-intro` (Feb 2025) — legacy consumer-keyed layout, restructure pending |
 | `lecture-python-intro/dynamic/` | `business_cycle_data.csv`, the one dynamic snapshot |
 | `lecture-python-intro/scripts/` | `business_cycle.py`, its builder (manual refresh for now) |

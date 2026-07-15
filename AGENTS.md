@@ -72,7 +72,7 @@ Before adding any file, confirm the upstream license permits redistribution and 
 
 ```
 lecture-python-intro/
-  static/     # 10 files migrated from lecture-python-intro in Feb 2025 (data#5)
+  static/     # 11 static data files migrated from lecture-python-intro in Feb 2025 (data#5)
   dynamic/    # business_cycle_data.csv — the one dynamic snapshot (manual refresh)
   scripts/    # business_cycle.py — its builder
 requirements.txt
