@@ -66,40 +66,36 @@ retrieved: 2024-04-10                   # ISO date the bytes were obtained, or
                                         # null for inherited-undated files —
                                         # never invent one from git history.
                                         # A null here MUST be paired with an
-                                        # integrity.upstream reason (AGENTS.md,
+                                        # integrity.upstream note (AGENTS.md,
                                         # "Two inherited-file states").
 maintainer: QuantEcon                   # who fixes this when it breaks
 
 # ---------------------------------------------------------------------------
 # Integrity (PLAN Phase 7) — record the status honestly, don't fake it
 # ---------------------------------------------------------------------------
-# Two independent questions, and P1 (lingcod) proved they get different answers:
-# that file is a byte-perfect copy of what the lecture consumed, while its
-# upstream provenance cannot be re-derived at all. One combined "verified" field
-# would have had to either overstate or understate it, so they are split.
+# One permanent axis: is this file actually what the upstream source says?
+# (How to check, by class, lives once in AGENTS.md, not per manifest.)
+#
+# Migration safety — does the file match what the consuming lecture used before
+# a repoint? — is deliberately NOT a manifest field. It is a one-time check that
+# lives in the repoint PR (a Phase 8 gate), and the sha256 below is what makes
+# it reproducible at any later date. P1 (lingcod) proved the two questions get
+# different answers: byte-perfect copy of what the lecture consumed, upstream
+# provenance unrecoverable.
 
 integrity:
   sha256: null                          # of the committed file
-
-  # Does this match what the consuming lecture used before the repoint?
-  # Guards the migration: a mismatch means repointing silently changes output.
-  # Hard prerequisite for Phase 8.
-  migration:
-    status: unverified                  # verified | unverified | failing | not-applicable
-    date: null
-    method: null                        # e.g. sha256 compare against <repo>'s copy
-
-  # Is this actually what the upstream source says?
-  # Guards the provenance claim above.
   upstream:
     status: unverified                  # verified | spot-checked | unverifiable | unverified | failing
-    date: null
-    method: >
-      re-fetch-and-compare for verbatim; re-run the builder and compare the
-      overlap window for constructed/dynamic; spot-check against the cited
-      publication for author-assembled. Say so plainly when verification is
-      impossible — `unverifiable` with a reason is an honest answer and is
-      what the catalog should show. Silence is not.
+    date: null                          # ISO date of the last check
+    against: null                       # what a verified check compared to (URL,
+                                        # DOI, or repo path) — makes "verified"
+                                        # auditable rather than a bare assertion
+    note: null                          # ONE line, only when status is not a
+                                        # clean verified — e.g. why a file is
+                                        # unverifiable. An honest `unverifiable`
+                                        # with a note is a known status the
+                                        # catalog can show; silence is not.
 
 # ---------------------------------------------------------------------------
 # Shape — what a consumer can rely on; also the basis for PR validation tests

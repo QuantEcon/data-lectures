@@ -43,34 +43,22 @@ maintainer: QuantEcon
 # ---------------------------------------------------------------------------
 # Integrity (PLAN Phase 7)
 # ---------------------------------------------------------------------------
-# Two independent questions with different answers here, which is why they are
-# recorded separately rather than as one status field:
-#   migration -- does this match what the lecture consumed before the repoint?
-#   upstream  -- is this actually what RAM Legacy says?
-# A file can be a perfect copy of a lecture's data and still have unprovable
-# provenance. Collapsing both into one "verified" would overstate this file.
+# Migration check (not a manifest field — it is a one-time repoint gate):
+# verified 2026-07-16 by sha256 byte-compare against lecture-python-intro's
+# copy at lectures/datasets/lingcod_msy_recovery.csv, so the repoint cannot
+# change lecture output. Recorded in data-lectures#12 / lecture-python-intro#792
+# and reproducible from the hash below at any later date.
 
 integrity:
   sha256: fc2f873f97a9b7c6d335ca88203c321b4451cf4b94feb16ca40e99551c49c092
-
-  migration:
-    status: verified
-    date: 2026-07-16
-    method: >
-      sha256 byte-compare against lecture-python-intro's copy at
-      lectures/datasets/lingcod_msy_recovery.csv, immediately before the
-      repoint. Identical, so the repoint cannot change lecture output.
-
   upstream:
     status: unverifiable
     date: 2026-07-16
-    method: >
-      Cannot be re-derived. The extract does not record which RAM Legacy stock
-      id it came from, which database version, or what transformation produced
-      the two ratio columns, and no builder was committed with it. Verifying
-      would mean re-identifying the stock in a current release and confirming
-      the series match -- possible in principle, not done. Treat the values as
-      trusted-by-provenance-of-the-author, not as independently checked.
+    against: null
+    note: >
+      No RAM Legacy stock id, database version, or transformation recorded, and
+      no builder committed — cannot be re-derived. Trust rests on the
+      provenance of the author, not an independent check.
 
 # ---------------------------------------------------------------------------
 # Shape
