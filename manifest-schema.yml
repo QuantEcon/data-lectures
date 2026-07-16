@@ -108,7 +108,10 @@ schema:
     - {name: economy, dtype: string, description: ISO3 country code}
     - {name: Country, dtype: string, description: Country name}
     - {name: YR1960, dtype: float, description: Annual GDP growth (%), one column per year}
-  row_count_floor: 5                    # PR validation fails below this
+  row_count_floor: 5                    # PR validation fails below this. For a
+                                        # frozen historical extract set it to the
+                                        # exact row count by design (P1 lingcod =
+                                        # 82); a loose floor is for files that grow.
   date_range: {start: 1960, end: null}  # null end = tracks the moving source
 
   # Nulls that are correct and must not fail validation. P1 found a real one:

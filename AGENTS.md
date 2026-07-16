@@ -23,7 +23,7 @@ Classify as exactly one of:
 | **constructed** | built from upstream sources by our processing | all of the above **plus the builder script, committed here** |
 | **dynamic snapshot** | constructed, tracking a moving source (FRED, World Bank) | all of the above **plus a refresh cadence** |
 
-A constructed dataset without its committed builder is a bug. Manifest fields: `source`, `license`, `retrieved`, `schema`, `consumers` (repo + lecture file, machine-readable), `maintainer`, `cadence` (dynamic only).
+A constructed dataset without its committed builder is a bug. Manifest fields: `source`, `license` (with the `verified` date it was established), `retrieved`, `integrity` (split into `migration` and `upstream`, see Phase 7), `schema` (including `known_nulls`), `consumers` (repo + lecture file, machine-readable), `maintainer`, `builder` / `builder_status`, `cadence` (dynamic only). `manifest-schema.yml` is the authoritative, commented field reference — keep it and this list in step.
 
 #### Two inherited-file states that look like violations but are tracked, not hidden
 
