@@ -36,10 +36,14 @@ Avoid `raw.githubusercontent.com` (serves pointer text for LFS-tracked files), `
 
 See the [draft convention](https://github.com/QuantEcon/QuantEcon.manual/pull/108) for the full checklist and manifest schema.
 
-## Current contents
+## Layout
 
-| Path | What |
-| --- | --- |
-| `lecture-python-intro/static/` | 11 static data files migrated from `lecture-python-intro` (Feb 2025) — legacy consumer-keyed layout, restructure pending |
-| `lecture-python-intro/dynamic/` | `business_cycle_data.csv`, the one dynamic snapshot |
-| `lecture-python-intro/scripts/` | `business_cycle.py`, its builder (manual refresh for now) |
+| Path | What | Published |
+| --- | --- | --- |
+| `lectures/` | the published tree — flat. Every dataset lives here, directly. No folder implies ownership by a lecture series: any lecture may consume any file | yes |
+| `scripts/` | builders for constructed and dynamic datasets | no |
+| `manifest-schema.yml` | the per-dataset manifest schema (strawman — see [`PLAN.md`](PLAN.md) Phase 2) | no |
+
+The tree is flat because the URL is the interface: `lectures/<filename>` maps to
+`data.quantecon.org/lectures/<filename>`, so a file can never be re-filed under a
+new owner and break its consumers. Anything outside `lectures/` is not served.
