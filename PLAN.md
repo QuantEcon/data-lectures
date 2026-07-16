@@ -34,7 +34,7 @@ This repository is being shaped into the **single canonical repository for data 
 ## Where we're going (per the draft convention)
 
 - **Flat published tree** served at `https://data.quantecon.org/lectures/<filename>` via GitHub Pages (custom domain), CORS-open for pyodide/JupyterLite
-- Every dataset classified **verbatim / constructed / dynamic snapshot**, each with a manifest (`source`, `license`, `retrieved`, `schema`, `consumers`, `maintainer`, `cadence`)
+- Every dataset classified **verbatim / constructed / dynamic snapshot**, each with a manifest — authoritative field reference in `manifest-schema.yml`, as revised by the P1 pilot (`integrity`, `builder_status`, `known_nulls` and `license.verified` joined the original sketch of `source` / `license` / `retrieved` / `schema` / `consumers` / `maintainer` / `cadence`)
 - Constructed and dynamic datasets ship their **builder**; dynamic datasets get **scheduled refresh-as-PR** plus a weekly **sources-alive canary**
 - Per-path LFS for large binaries only; storage choice invisible to consumers because URLs decouple from hosting
 
@@ -77,8 +77,8 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 
 ### Phase 5 — Automation (`.github/`)
 
-- [ ] PR validation: manifest schema check + per-dataset invariant tests (expected columns/dtypes, row-count floor, date-range recency, no all-NaN columns, overlap-window agreement with the previous vintage) on every PR touching data
-- [ ] Retrofit `scripts/business_cycle.py` to the four-stage builder contract — it has fetch/transform/write today but **no validate stage**
+- [ ] PR validation: manifest schema check + per-dataset invariant tests (expected columns/dtypes, row-count floor, date-range recency, no all-NaN columns, overlap-window agreement with the previous vintage) on every PR touching data. The schema decisions these tests force — column patterns for wide files, `known_nulls` exact-vs-ceiling, a canonical dtype vocabulary — are researched in [#14](https://github.com/QuantEcon/data-lectures/issues/14)
+- [ ] Retrofit `scripts/business_cycle.py` to the four-stage builder contract — it has fetch/transform/write today but **no validate stage**. Builder architecture and a copy-able template: [#14](https://github.com/QuantEcon/data-lectures/issues/14)
 - [ ] Scheduled refresh workflow for dynamic datasets — cron per cadence class, runs the builder (fetch → pre-process → validate → write), lands the result as a PR whose diff summary (rows added, date-range delta, overlap-window changes) is the review surface; low-risk series may auto-merge on green (first consumer: the UNRATE pilot, meta#338 P4)
 - [ ] Weekly sources-alive canary: fetch + validate, no commit, opens an issue on failure — relocates API fragility from 7 lecture repos' CI into one scheduled job here
 - [ ] Consumer fan-out: a merged refresh or in-place correction dispatches rebuilds of the repos in the dataset's machine-readable `consumers` list
@@ -88,7 +88,7 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 
 - [ ] Manifest per dataset for the **9** files now in `lectures/`: source, license, retrieval date, schema, consumers, provenance class. Schema sketched in `manifest-schema.yml` (Phase 2); backfill is per-file work gated on the license check below
 - [ ] Classify: the 8 static intro files are author-assembled or verbatim; `business_cycle_data.csv` is the one dynamic snapshot and needs its cadence declared
-- [ ] License check per file before this repo is promoted as the canonical public home. One is already answered: `business_cycle_metadata.md` records the World Bank series as **CC BY-4.0** — that dump is the model for what a manifest should capture, and the other 8 need the equivalent established by hand
+- [ ] Licence check **per source**, not per file: the question is *"may this source be cached and served publicly, with attribution?"* — a cheap binary gate (`redistribution: permitted | restricted`, see AGENTS.md "Licensing and attribution"), a fast yes for public data sources. Two sources already answered: World Bank is **CC BY-4.0** (`business_cycle_metadata.md`, the model for what a manifest should capture) and RAM Legacy is **CC BY 4.0** (established against its Zenodo DOI record, P1). The remaining sources need the equivalent established by hand
 - [x] Keep-or-drop decision for the files with no consumer anywhere — **dropped 2026-07-16** in the Phase 2 restructure, rather than promoting them into the published namespace:
   - `GDP_per_capita_world_bank.csv` and `Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv` — an org-wide code search returns **zero** references to either, they are freely re-downloadable from the World Bank, and their licence was never established. Rehosting a stale snapshot nobody reads is the opposite of this repo's purpose
   - `fig_3.ods` — confirmed to carry no provenance the published `.xlsx` lacks: both parse to a single `Sheet1` of identical shape (34×6) and `DataFrame.equals` returns true, so it is a pure format twin
@@ -98,10 +98,10 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 
 Verify that what this repo holds is actually the data it claims to be — against upstream sources, and against the copies lectures consume today — before any lecture is repointed here.
 
-- [ ] **Byte-compare against the in-use copies**: each file migrated in Feb 2025 must be identical to the copy `lecture-python-intro` currently consumes (git blob hash compare). If a copy diverged, a repoint silently changes lecture output — this check is a hard prerequisite for Phase 8
-- [ ] **Verbatim files**: re-fetch from the upstream source and compare (e.g. `mpd2020.xlsx` against the published Maddison Project 2020 release); record checksum, verification method, and date in the manifest
+- [ ] **Byte-compare against the in-use copies**: each file migrated in Feb 2025 must be identical to the copy `lecture-python-intro` currently consumes (git blob hash compare). If a copy diverged, a repoint silently changes lecture output — this check is a hard prerequisite for Phase 8. Recorded **in the repoint PR** as a one-time gate, reproducible later from the manifest's `sha256` — not a manifest field (P1 decision)
+- [ ] **Verbatim files**: re-fetch from the upstream source and compare (e.g. `mpd2020.xlsx` against the published Maddison Project 2020 release); record `sha256`, `status`, what it was compared `against`, and the date in the manifest's `integrity.upstream`
 - [ ] **Constructed / dynamic files**: re-run the committed builder (`scripts/business_cycle.py` → `business_cycle_data.csv`) and confirm values agree in the overlap window with the committed snapshot
-- [ ] **Author-assembled files** (the French Revolution spreadsheets, `caron.npy`, `nom_balances.npy` — prose-only provenance): spot-check key values against the cited publication and record what was checked; full verification may be impossible, and the manifest should say so
+- [ ] **Author-assembled files** (the French Revolution spreadsheets, `caron.npy`, `nom_balances.npy` — prose-only provenance): spot-check key values against the cited publication and record what was checked; full verification may be impossible, and the manifest should say so (`status: unverifiable` with a one-line `note` — the honest known status, per P1)
 - [ ] **Unverifiable or failing files**: flag in the manifest and open an issue — do not promote a file to the canonical URL namespace with a known-bad or unknown integrity status
 
 ### Phase 8 — Pilot deployment (meta#338)
@@ -129,6 +129,6 @@ The first end-to-end deployment: one dataset per hosting pattern, each the harde
 | Repo name | **settled 2026-07-16**: renamed `data-lectures` (Phase 1) |
 | URL form | `data.quantecon.org/lectures/...`; interim `github.com/QuantEcon/data-lectures/raw/main/...` |
 | Layout | flat |
-| Licensing review | per-source check before rehosting, recorded in the manifest |
+| Licensing review | per-source cache-and-serve-with-attribution gate (`redistribution: permitted \| restricted`), recorded in the manifest — this repo is a stability cache, not a content host |
 
 When one of these settles, update this PLAN and `AGENTS.md` in the same PR that acts on it.

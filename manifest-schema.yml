@@ -50,26 +50,52 @@ source:
 license:
   name: CC BY-4.0
   url: https://datacatalog.worldbank.org/public-licenses#cc-by
-  # Redistribution must be confirmed before a file is served from this repo —
-  # unlicensed rehosting is a blocker, not a nice-to-have (AGENTS.md).
-  redistribution: permitted
+  # This repo is a stability cache, not a content host: the question is whether
+  # the source may be cached and served publicly WITH attribution, not whether
+  # we may republish it as our own. A cheap binary gate (AGENTS.md, "Licensing
+  # and attribution") — a fast yes for public data sources, blocking only the
+  # genuinely restricted ones (e.g. FRED third-party series).
+  redistribution: permitted             # permitted | restricted
+  verified: 2026-07-16                  # when, and against what, this was
+                                        # established — a licence claim with no
+                                        # date is not evidence. P1 found the
+                                        # authority is often not the project
+                                        # homepage but its Zenodo/DOI record.
 
-retrieved: 2024-04-10                   # ISO date the bytes were obtained
+retrieved: 2024-04-10                   # ISO date the bytes were obtained, or
+                                        # null for inherited-undated files —
+                                        # never invent one from git history.
+                                        # A null here MUST be paired with an
+                                        # integrity.upstream note (AGENTS.md,
+                                        # "Two inherited-file states").
 maintainer: QuantEcon                   # who fixes this when it breaks
 
 # ---------------------------------------------------------------------------
-# Integrity (PLAN Phase 7) — a file is not promoted with unknown status
+# Integrity (PLAN Phase 7) — record the status honestly, don't fake it
 # ---------------------------------------------------------------------------
+# One permanent axis: is this file actually what the upstream source says?
+# (How to check, by class, lives once in AGENTS.md, not per manifest.)
+#
+# Migration safety — does the file match what the consuming lecture used before
+# a repoint? — is deliberately NOT a manifest field. It is a one-time check that
+# lives in the repoint PR (a Phase 8 gate), and the sha256 below is what makes
+# it reproducible at any later date. P1 (lingcod) proved the two questions get
+# different answers: byte-perfect copy of what the lecture consumed, upstream
+# provenance unrecoverable.
 
 integrity:
   sha256: null                          # of the committed file
-  verified: null                        # ISO date of the last check
-  method: >
-    How this was checked: re-fetch-and-compare for verbatim; re-run the builder
-    and compare the overlap window for constructed/dynamic; spot-check against
-    the cited publication for author-assembled. Say so plainly when full
-    verification is not possible.
-  status: unverified                    # verified | spot-checked | unverified | failing
+  upstream:
+    status: unverified                  # verified | spot-checked | unverifiable | unverified | failing
+    date: null                          # ISO date of the last check
+    against: null                       # what a verified check compared to (URL,
+                                        # DOI, or repo path) — makes "verified"
+                                        # auditable rather than a bare assertion
+    note: null                          # ONE line, only when status is not a
+                                        # clean verified — e.g. why a file is
+                                        # unverifiable. An honest `unverifiable`
+                                        # with a note is a known status the
+                                        # catalog can show; silence is not.
 
 # ---------------------------------------------------------------------------
 # Shape — what a consumer can rely on; also the basis for PR validation tests
@@ -81,8 +107,17 @@ schema:
     - {name: economy, dtype: string, description: ISO3 country code}
     - {name: Country, dtype: string, description: Country name}
     - {name: YR1960, dtype: float, description: Annual GDP growth (%), one column per year}
-  row_count_floor: 5                    # PR validation fails below this
+  row_count_floor: 5                    # PR validation fails below this. For a
+                                        # frozen historical extract set it to the
+                                        # exact row count by design (P1 lingcod =
+                                        # 82); a loose floor is for files that grow.
   date_range: {start: 1960, end: null}  # null end = tracks the moving source
+
+  # Nulls that are correct and must not fail validation. P1 found a real one:
+  # lingcod's F/Fmsy is null in its terminal assessment year, which a blanket
+  # no-nulls rule would reject. Declaring them makes the invariant tests
+  # (Phase 5) enforceable without hand-waving.
+  known_nulls: {}                       # e.g. {F_over_Fmsy: 1}
 
 # ---------------------------------------------------------------------------
 # Consumers — machine-readable, so a correction knows what to rebuild
@@ -100,7 +135,15 @@ consumers: []
 # Builder — required for constructed and dynamic-snapshot; omit for verbatim
 # ---------------------------------------------------------------------------
 
-builder: scripts/business_cycle.py
+builder: scripts/business_cycle.py      # path to the committed builder, or null
+
+# AGENTS.md says a constructed dataset without its builder is a bug — but the
+# repo has inherited several (PLAN Phase 9), and P1's own pilot file is one.
+# The tempting workaround is to misclassify them as `verbatim`, which buries
+# the gap. This field keeps it visible in the generated catalog instead.
+# `unrecovered` is for inherited files only; a NEW constructed file must ship
+# its builder (AGENTS.md, "Two inherited-file states").
+builder_status: committed               # committed | unrecovered | not-applicable
 
 # Dynamic snapshots only. Drives the scheduled refresh-as-PR (PLAN Phase 5).
 cadence: annual                         # e.g. daily | weekly | monthly | annual
