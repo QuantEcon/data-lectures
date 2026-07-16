@@ -50,9 +50,12 @@ source:
 license:
   name: CC BY-4.0
   url: https://datacatalog.worldbank.org/public-licenses#cc-by
-  # Redistribution must be confirmed before a file is served from this repo —
-  # unlicensed rehosting is a blocker, not a nice-to-have (AGENTS.md).
-  redistribution: permitted
+  # This repo is a stability cache, not a content host: the question is whether
+  # the source may be cached and served publicly WITH attribution, not whether
+  # we may republish it as our own. A cheap binary gate (AGENTS.md, "Licensing
+  # and attribution") — a fast yes for public data sources, blocking only the
+  # genuinely restricted ones (e.g. FRED third-party series).
+  redistribution: permitted             # permitted | restricted
   verified: 2026-07-16                  # when, and against what, this was
                                         # established — a licence claim with no
                                         # date is not evidence. P1 found the
@@ -68,7 +71,7 @@ retrieved: 2024-04-10                   # ISO date the bytes were obtained, or
 maintainer: QuantEcon                   # who fixes this when it breaks
 
 # ---------------------------------------------------------------------------
-# Integrity (PLAN Phase 7) — a file is not promoted with unknown status
+# Integrity (PLAN Phase 7) — record the status honestly, don't fake it
 # ---------------------------------------------------------------------------
 # Two independent questions, and P1 (lingcod) proved they get different answers:
 # that file is a byte-perfect copy of what the lecture consumed, while its

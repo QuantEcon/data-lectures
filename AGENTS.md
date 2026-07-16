@@ -4,7 +4,7 @@ Guidance for coding agents (and humans) making changes in this repository. Read 
 
 ## What this repo is
 
-The canonical home for **data consumed by the QuantEcon lecture series** (renamed from `QuantEcon/data` on 2026-07-16, per [meta#336](https://github.com/QuantEcon/meta/issues/336)). It is **mid-transition**: the current tree is a legacy consumer-keyed layout (`lecture-python-intro/…`) that will become a flat published tree served at `https://data.quantecon.org/lectures/`. The full convention lives in the draft manual page ([QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108)).
+The canonical home for **data consumed by the QuantEcon lecture series** (renamed from `QuantEcon/data` on 2026-07-16, per [meta#336](https://github.com/QuantEcon/meta/issues/336)). Its purpose is **stability**: it snapshots upstream sources — with attribution to each source carried in the manifest — so a lecture build never depends on a live API or a third-party host staying up. It is a **cache, not a content-distribution host**. It is **mid-transition**: the current tree is a legacy consumer-keyed layout (`lecture-python-intro/…`) that will become a flat published tree served at `https://data.quantecon.org/lectures/`. The full convention lives in the draft manual page ([QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108)).
 
 ## Rules
 
@@ -24,6 +24,8 @@ Classify as exactly one of:
 | **dynamic snapshot** | constructed, tracking a moving source (FRED, World Bank) | all of the above **plus a refresh cadence** |
 
 A constructed dataset without its committed builder is a bug. Manifest fields: `source`, `license` (with the `verified` date it was established), `retrieved`, `integrity` (split into `migration` and `upstream`, see Phase 7), `schema` (including `known_nulls`), `consumers` (repo + lecture file, machine-readable), `maintainer`, `builder` / `builder_status`, `cadence` (dynamic only). `manifest-schema.yml` is the authoritative, commented field reference — keep it and this list in step.
+
+**Capture what the source gives you; never let a missing field block a useful dataset.** Rich provenance — DOI, upstream version, exact retrieval date, licence id — is always welcome and worth recording whenever it is available, because it makes the data auditable years later at almost no ongoing cost. But effort scales with what the source actually provides: where a field is genuinely unavailable, record it as an explicit, reasoned gap (see the inherited-file states below) rather than fabricating it or refusing the file. A clean, well-documented source should produce a short manifest; only genuinely messy provenance earns a long one.
 
 #### Two inherited-file states that look like violations but are tracked, not hidden
 
@@ -66,9 +68,11 @@ Builders follow four stages — **fetch → pre-process → validate → write**
 
 Live API calls are for *teaching data access*, not for getting data. Don't propose "the lecture should just call the API" as a fix — the fix is a snapshot here plus an automated refresh.
 
-### Licensing
+### Licensing and attribution
 
-Before adding any file, confirm the upstream license permits redistribution and record it in the manifest. This repo is on track to be a promoted public host; unlicensed rehosting is a blocker, not a nice-to-have.
+Because this repo is a **stability cache, not a content-distribution host** (see "What this repo is"), the licence question is *"is this source OK to cache and serve publicly, with attribution?"* — not *"may we republish this as our own?"*. Attribution to the upstream source is carried in every manifest (`source`: name, url, series, citation), and that is the primary obligation.
+
+For the public data sources most snapshots come from (World Bank, FRED, Eurostat, …) the answer is a **known yes, recorded once per source** — permissive terms plus attribution. Record what the source states and move on; don't re-litigate it per snapshot. Treat the manifest's `redistribution` field as a **cheap binary gate** (`permitted` / `restricted`): a fast `permitted` for public statistics agencies, `restricted` blocking only the genuinely restricted source before it goes public — e.g. FRED re-serves third-party series that may not be redistributed, and anything under non-commercial or no-redistribution terms must not be cached here, since attribution alone does not cure those. Capture licence detail richly when the source provides it; where it is genuinely unavailable, record the gap rather than blocking the file.
 
 ## Cross-repo hygiene
 
