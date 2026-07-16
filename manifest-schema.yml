@@ -59,7 +59,12 @@ license:
                                         # authority is often not the project
                                         # homepage but its Zenodo/DOI record.
 
-retrieved: 2024-04-10                   # ISO date the bytes were obtained
+retrieved: 2024-04-10                   # ISO date the bytes were obtained, or
+                                        # null for inherited-undated files —
+                                        # never invent one from git history.
+                                        # A null here MUST be paired with an
+                                        # integrity.upstream reason (AGENTS.md,
+                                        # "Two inherited-file states").
 maintainer: QuantEcon                   # who fixes this when it breaks
 
 # ---------------------------------------------------------------------------
@@ -134,6 +139,8 @@ builder: scripts/business_cycle.py      # path to the committed builder, or null
 # repo has inherited several (PLAN Phase 9), and P1's own pilot file is one.
 # The tempting workaround is to misclassify them as `verbatim`, which buries
 # the gap. This field keeps it visible in the generated catalog instead.
+# `unrecovered` is for inherited files only; a NEW constructed file must ship
+# its builder (AGENTS.md, "Two inherited-file states").
 builder_status: committed               # committed | unrecovered | not-applicable
 
 # Dynamic snapshots only. Drives the scheduled refresh-as-PR (PLAN Phase 5).

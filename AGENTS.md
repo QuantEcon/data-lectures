@@ -25,6 +25,13 @@ Classify as exactly one of:
 
 A constructed dataset without its committed builder is a bug. Manifest fields: `source`, `license`, `retrieved`, `schema`, `consumers` (repo + lecture file, machine-readable), `maintainer`, `cadence` (dynamic only).
 
+#### Two inherited-file states that look like violations but are tracked, not hidden
+
+The Feb 2025 migration left files that cannot fully satisfy the rules above. The manifest records each gap **explicitly** — visible in the generated catalog — rather than burying it by misclassification. Both are provisional decisions from the P1 pilot ([meta#338](https://github.com/QuantEcon/meta/issues/338)), to be folded into [manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108).
+
+- **`retrieved: null` — inherited-undated bytes.** `retrieved` is required, but may be `null` when the bytes were inherited (e.g. from a lecture repo) with **no recorded upstream-retrieval date**. Do **not** reconstruct one from git history — that records when QuantEcon acquired the file, not when it was retrieved from the source, and the false precision is worse than an honest null. A null `retrieved` must be paired with an `integrity.upstream` entry that says why (`status: unverifiable` with a reason).
+- **`builder_status: unrecovered` — constructed without a recoverable builder.** A constructed dataset ships its builder, and one that omits it *silently* is the bug. Several inherited files are constructed with no recoverable extraction steps (PLAN Phase 9 tracks them). Keep `class: constructed` — reclassifying to `verbatim` to dodge the rule is misclassification — set `builder: null` and `builder_status: unrecovered`, and the gap stays visible for Phase 9 to recover. `unrecovered` is for **inherited files only**; never introduce a *new* constructed file without its builder.
+
 ### Corrections vs vintages
 
 - **Corrections** (bad parse, wrong units, corrupt rows): fix **in place**, same filename — every consumer should get the fix. Use the manifest's `consumers` list to know which lectures to rebuild/review.
