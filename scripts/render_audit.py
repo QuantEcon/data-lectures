@@ -488,24 +488,29 @@ STATUS_META = {
 
 
 def dataset_status(fname: str, migration: dict) -> tuple[str, str]:
-    """→ (status, pilot) for any static dataset the audit sees."""
+    """→ (status, pilot) for any static dataset the audit sees. A record still
+    at lifecycle `pending` reads as `queued` — same reader-facing meaning as a
+    file named in a pending wave."""
     rec = (migration.get("datasets") or {}).get(fname)
     if rec:
-        return rec.get("status", "pending"), rec.get("pilot", "")
+        status = rec.get("status", "pending")
+        return ("queued" if status == "pending" else status), rec.get("pilot", "")
     for wave in migration.get("pending") or []:
         if fname in (wave.get("datasets") or []):
             return "queued", wave.get("pilot", "")
     return "unscheduled", ""
 
 
-STATUS_RANK = {"unscheduled": 0, "queued": 1, "landed": 2, "repointed": 3, "final": 3}
+STATUS_RANK = {"unscheduled": 0, "pending": 1, "queued": 1, "landed": 2,
+               "repointed": 3, "final": 3}
 
 
 def series_manifest(audit: dict) -> str:
     """Every static dataset with its migration status, grouped by the lecture
     series it belongs to — migrated files stay in the series they came FROM
     (green rows at the bottom of each group), so each group reads as that
-    series' progress. A file consumed by two series appears in both groups."""
+    series' progress. A MIGRATED file consumed by two series appears in both
+    groups; before migration a file has one home — the repo owning the bytes."""
     migration = audit["migration"] or {}
     manifests = audit["manifests"]
     groups: dict[str, list] = {}
@@ -578,8 +583,8 @@ def series_manifest(audit: dict) -> str:
 <h2>All datasets by series</h2>
 <p class="lede">Every static file the lectures read, grouped by the lecture series it belongs
 to. Migrated files stay listed in the series they came from — the green rows at the bottom of
-each group — so each group reads as that series' progress. A file consumed by two series
-appears in both groups (marked <em>shared</em>); the tiles above count distinct files.
+each group — so each group reads as that series' progress. A migrated file consumed by two
+series appears in both groups (marked <em>shared</em>); the tiles above count distinct files.
 <em>Not scheduled</em> means no milestone has claimed the file yet; the broad sweep (see the
 milestones below) eventually covers them all. Data written by the lectures themselves and
 live-API reads are not migration targets and are tracked on the
