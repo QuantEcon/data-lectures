@@ -601,7 +601,7 @@ def milestones(audit: dict) -> str:
         entries = by_pilot[pilot]
         files = sorted(f for f, _ in entries)
         done = all(r.get("status") in ("repointed", "final") for _, r in entries)
-        dates = [str(r.get("repoints", [{}])[-1].get("date", "")) for _, r in entries]
+        dates = [str((r.get("repoints") or [{}])[-1].get("date", "")) for _, r in entries]
         series = {c["repo"] for f, _ in entries
                   for c in (manifests.get(f, {}).get("consumers") or [])}
         n_series = len(series)
@@ -688,7 +688,8 @@ def render_migration(audit: dict) -> str:
 
     n_re = sum(1 for r in recs.values() if r.get("status") in ("repointed", "final"))
     queued = {f for w in (mig.get("pending") or []) for f in w.get("datasets") or []}
-    n_total = audit["stats"]["static_files"]
+    n_unsched = sum(1 for d in audit["datasets"]
+                    if dataset_status(d["file"], mig)[0] == "unscheduled")
     body = f"""
 <header class="doc">
 <p class="eyebrow">Migration tracker · generated and verified on every build</p>
@@ -702,7 +703,7 @@ claim a migration that didn't happen.</p>
 <div class="stats">
 <div class="stat ok"><b>{n_re}</b><span>datasets migrated — every consuming lecture reads the central copy</span></div>
 <div class="stat"><b>{len(queued)}</b><span>queued for the next waves</span></div>
-<div class="stat"><b>{n_total - n_re - len(queued)}</b><span>not yet scheduled (the broad sweep)</span></div>
+<div class="stat"><b>{n_unsched}</b><span>not yet scheduled (the broad sweep)</span></div>
 </div>
 <h3>How a dataset moves</h3>
 <p><b>pending</b> — identified for migration; nothing has moved yet.
