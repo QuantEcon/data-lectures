@@ -53,11 +53,11 @@ Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS questio
 - [x] Rename `QuantEcon/data` → `data-lectures` (GitHub redirects preserve all existing URLs, so this was non-breaking)
 - [x] Add repo description and topics (`quantecon`, `datasets`, `economics`, `open-data`, `teaching-materials`)
 
-### Phase 2 — Layout (2026-07-16 — catalog outstanding)
+### Phase 2 — Layout (2026-07-16)
 
 - [x] Restructure consumer-keyed tree → flat published tree — `lectures/` is the published root; no folder implies series ownership. Done while zero lectures referenced the repo, so no consumer could break; **that window is now closed**
 - [x] Decide where non-published assets live relative to the published tree — `scripts/` and `manifest-schema.yml` sit at the root, outside `lectures/`, and are never served. Manifests are the exception: they live *inside* `lectures/` as sidecars named `<filename>.yml`, so a dataset cannot be moved or removed without its metadata, and CI can assert the pairing with a glob
-- [ ] Generate an index/catalog page from the manifests — doubles as the dataset registry
+- [x] Generate an index/catalog page from the manifests — doubles as the dataset registry. `scripts/build_catalog.py` emits `CATALOG.md` (migrated-only registry) from `lectures/*.yml`; regenerate on any manifest change, and a Phase 5 CI check will assert it is current (`git diff --exit-code`). Feeds the Pages index at Phase 4
 
 The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.yml`) because a stem-keyed sidecar collides when one dataset ships in two formats — exactly the `fig_3.xlsx` / `fig_3.ods` case this repo already had. Strawman until the pilot tests it; see `manifest-schema.yml`.
 
