@@ -462,13 +462,13 @@ def render_index(audit: dict) -> str:
 <header class="doc">
 <p class="eyebrow">QuantEcon · generated data audit · Python lecture family</p>
 <h1>Lecture data — audit &amp; migration dashboard</h1>
-<p class="meta">Every dataset referenced by lecture source across the 8 synced Python-family repos,
+<p class="meta">Every dataset referenced by lecture source across the {len(audit["repos"])} synced Python-family repos,
 regenerated from each repo's <code>main</code> by
 <a href="{DL}/blob/main/scripts/build_audit.py">a script</a> — not maintained by hand.
 Companion to the migration of lecture data into
 <a href="{DL}">QuantEcon/data-lectures</a>.</p>
 <span id="freshness" class="freshness" data-generated="{esc(audit["generated"])}"
-title="Every build re-runs the full audit scan across the 8 lecture repos — this date IS the last audit run. It runs on every change to data-lectures, weekly on schedule, and on demand; a badge older than a week means the scheduled run has stopped succeeding.">
+title="Every build re-runs the full audit scan across the {len(audit["repos"])} lecture repos — this date IS the last audit run. It runs on every change to data-lectures, weekly on schedule, and on demand; a badge older than a week means the scheduled run has stopped succeeding.">
 ● audit ran {esc(audit["generated"])}</span>
 <script>
 (function () {{
@@ -1107,7 +1107,7 @@ def render_audit_page(audit: dict) -> str:
 <header class="doc">
 <p class="eyebrow">Full audit · regenerated from each repo's <code>main</code></p>
 <h1>Dataset registry — Python lecture family</h1>
-<p class="meta">Every dataset referenced by lecture source across the 8 synced repos.
+<p class="meta">Every dataset referenced by lecture source across the {len(audit["repos"])} synced repos.
 The successor to the hand-built {PREV_SNAPSHOT} audit — same taxonomy, now generated.</p>
 </header>
 <div class="stats">
