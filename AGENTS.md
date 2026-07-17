@@ -97,4 +97,4 @@ AGENTS.md            # this file
 
 The Feb 2025 consumer-keyed layout (`lecture-python-intro/{static,dynamic,scripts}/`) was flattened into this tree on 2026-07-16, while nothing referenced the repo.
 
-**That freedom is now spent.** The restructure was free only because zero lectures pointed here; as soon as the first repoint merges (PLAN Phase 8), every move or rename in `lectures/` is a breaking change for a live lecture build. From that point on, treat published filenames as an API: corrections in place, new vintages under new names, and check `consumers` before touching anything.
+**That freedom is now spent — the repo is live.** The first repoint merged on 2026-07-17 (P1: `msy_fishery` in lecture-python-intro reads `lectures/lingcod_msy_recovery.csv` from `raw/main`), so every move or rename in `lectures/` is a breaking change for a live lecture build. Treat published filenames as an API: corrections in place, new vintages under new names, and check `consumers` before touching anything. Enforced by the `protect-main` ruleset (PRs only, no force-push, and the `consumed-files` check is **required** — a PR that breaks a consumed file cannot merge).
