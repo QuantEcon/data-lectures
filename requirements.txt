@@ -1,1 +1,2 @@
 wbgapi==1.0.12
+PyYAML==6.0.3        # scripts/build_catalog.py — parse the sidecar manifests
