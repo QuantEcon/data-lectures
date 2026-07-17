@@ -49,7 +49,7 @@ def oneline(text) -> str:
 def load_manifests():
     manifests = []
     for path in sorted(LECTURES.glob("*.yml")):
-        with path.open() as f:
+        with path.open(encoding="utf-8") as f:
             m = yaml.safe_load(f)
         if not isinstance(m, dict) or "filename" not in m:
             print(f"skip (not a manifest): {path.name}", file=sys.stderr)
@@ -178,7 +178,7 @@ def main() -> int:
     if not manifests:
         print("no manifests found under lectures/*.yml", file=sys.stderr)
         return 1
-    OUT.write_text(build(manifests))
+    OUT.write_text(build(manifests), encoding="utf-8")
     print(f"wrote {OUT.relative_to(REPO)} — {len(manifests)} datasets")
     return 0
 
