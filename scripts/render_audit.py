@@ -205,6 +205,7 @@ li { margin: 3px 0; }
 .meter .seg + .seg { margin-left: 2px; }
 .meter .seg.a { background: var(--meter-a); }
 .meter .seg.b { background: var(--meter-b); }
+.meter.mini { height: 8px; max-width: 340px; margin: 6px 0 2px; border-radius: 4px; }
 /* bar list — one measure, single hue, labeled rows */
 .barlist { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 12px; align-items: center; margin: 14px 0; }
 .barlist .lbl { font-size: 13px; }
@@ -360,13 +361,13 @@ def migration_meter(audit: dict) -> str:
 <h3>Migration progress</h3>
 <div class="meter" role="img" aria-label="{n_repointed} of {n_total} static datasets repointed to data-lectures">{segs}</div>
 <div class="legend">
-<span class="key"><span class="swatch" style="background:var(--meter-a)"></span>repointed — consumers read data-lectures ({n_repointed})</span>
-<span class="key"><span class="swatch" style="background:var(--meter-b)"></span>landed here, consumers not yet repointed ({n_landed})</span>
-<span class="key"><span class="swatch" style="background:var(--meter-track); border:1px solid var(--line)"></span>not migrated ({n_total - n_repointed - n_landed}, of which {len(queued)} queued in P3)</span>
+<span class="key"><span class="swatch" style="background:var(--meter-a)"></span>migrated — every consuming lecture reads the central copy ({n_repointed})</span>
+<span class="key"><span class="swatch" style="background:var(--meter-b)"></span>copied here, lectures not yet switched ({n_landed})</span>
+<span class="key"><span class="swatch" style="background:var(--meter-track); border:1px solid var(--line)"></span>not migrated ({n_total - n_repointed - n_landed}, of which {len(queued)} queued for the next waves)</span>
 </div>
-<p class="note">Denominator: the {n_total} distinct static files lectures read today. The interim→final
-URL cutover ({issue_link("QuantEcon/data-lectures#15")}) advances datasets from <em>repointed</em> to
-<em>final</em> once <code>data.quantecon.org</code> is live; no dataset is final yet.</p>
+<p class="note">Denominator: the {n_total} distinct static files lectures read today. The full
+per-series manifest and the milestone plan are on the
+<a href="migration.html">migration tracker</a>.</p>
 """
 
 
@@ -400,11 +401,12 @@ def what_changed() -> str:
 <h2>What moved since the {PREV_SNAPSHOT} snapshot</h2>
 <p class="lede">The audit was first taken by hand on {PREV_SNAPSHOT}. Regenerating from live
 repo state two days later, the picture has already changed — which is why this dashboard is generated.</p>
-<div class="finding ok"><b>4 datasets migrated and repointed.</b>
-<p>P1 moved <code>lingcod_msy_recovery.csv</code> (was a Colab-breaking local path);
-P2 moved the <code>pandas_panel</code> trio <code>realwage.csv</code> / <code>countries.csv</code> /
-<code>employ.csv</code> (5 of their 6 reads pointed at the retired legacy repo). All consumers
-now read data-lectures. Details on the <a href="migration.html">migration tracker</a>.</p></div>
+<div class="finding ok"><b>4 datasets migrated.</b>
+<p>The first two migration waves moved <code>lingcod_msy_recovery.csv</code> (was a
+Colab-breaking local path) and the <code>pandas_panel</code> trio <code>realwage.csv</code> /
+<code>countries.csv</code> / <code>employ.csv</code> (5 of their 6 reads pointed at the retired
+legacy repo). Every consuming lecture now reads the central copy. Details on the
+<a href="migration.html">migration tracker</a>.</p></div>
 <div class="finding ok"><b>Legacy-repo URLs: 8 → 0.</b>
 <p>The pre-MyST <code>QuantEcon/lecture-python</code> repo was renamed to
 <code>lecture-python.rst</code> and archived; the P2 repoints plus the <code>ols</code>
@@ -471,6 +473,88 @@ Companion to the migration of lecture data into
 # Page: migration tracker
 # ---------------------------------------------------------------------------
 
+# Reader-facing status labels — the dashboard is read by people who are not
+# doing the migration, so the manifest speaks plainly; the lifecycle terms
+# (pending/landed/repointed/final) appear only in the explained stepper detail.
+STATUS_META = {
+    # status → (pill css, label)
+    "final": ("p-local", "✓ migrated"),
+    "repointed": ("p-local", "✓ migrated"),
+    "landed": ("p-own", "● copied, not yet switched"),
+    "queued": ("p-legacy", "queued"),
+    "unscheduled": ("p-embed", "not scheduled"),
+}
+
+
+def dataset_status(fname: str, migration: dict) -> tuple[str, str]:
+    """→ (status, pilot) for any static dataset the audit sees."""
+    rec = (migration.get("datasets") or {}).get(fname)
+    if rec:
+        return rec.get("status", "pending"), rec.get("pilot", "")
+    for wave in migration.get("pending") or []:
+        if fname in (wave.get("datasets") or []):
+            return "queued", wave.get("pilot", "")
+    return "unscheduled", ""
+
+
+def series_manifest(audit: dict) -> str:
+    """Every static dataset, grouped by the lecture series that owns the bytes
+    today, with its migration status — the how-far-along view."""
+    migration = audit["migration"] or {}
+    groups: dict[str, list] = {}
+    for d in audit["datasets"]:
+        groups.setdefault(repo_of_record(d), []).append(d)
+    order = ["lecture-python-intro", "lecture-python-programming",
+             "lecture-python.myst", "lecture-python-advanced.myst",
+             "data-lectures"]
+    rows = ""
+    for repo in [r for r in order if r in groups] + sorted(set(groups) - set(order)):
+        ds = sorted(groups[repo], key=lambda x: x["file"])
+        statuses = [dataset_status(d["file"], migration)[0] for d in ds]
+        n = len(ds)
+        n_done = sum(1 for s in statuses if s in ("repointed", "final"))
+        n_landed = statuses.count("landed")
+        n_queued = statuses.count("queued")
+        counts = [f"{n_done} migrated" if n_done else "",
+                  f"{n_landed} copied, not switched" if n_landed else "",
+                  f"{n_queued} queued" if n_queued else "",
+                  f"{n - n_done - n_landed - n_queued} not scheduled"
+                  if n - n_done - n_landed - n_queued else ""]
+        pct = lambda k: max(0.8, 100 * k / n) if k else 0
+        segs = ""
+        if n_done:
+            segs += f'<div class="seg a" style="width:{pct(n_done):.1f}%"></div>'
+        if n_landed:
+            segs += f'<div class="seg b" style="width:{pct(n_landed):.1f}%"></div>'
+        rows += (f'<tr class="group"><td colspan="4">{esc(repo)} — '
+                 f'{n} file{"s" if n != 1 else ""} · '
+                 f'{esc(" · ".join(c for c in counts if c))}'
+                 f'<div class="meter mini" role="img" aria-label="{n_done} of {n} repointed">{segs}</div>'
+                 f'</td></tr>')
+        for d, status_pilot in zip(ds, (dataset_status(d["file"], migration) for d in ds)):
+            status, pilot = status_pilot
+            css, label = STATUS_META.get(status, ("p-embed", status))
+            if pilot and status == "queued":
+                label += f" · wave {pilot}"
+            pills = " ".join(pattern_pill(p) for p in d["patterns"])
+            rows += (f'<tr><td class="mono">{esc(d["file"])}</td>'
+                     f'<td class="note">{esc(d["description"])}</td>'
+                     f'<td>{pills}</td>'
+                     f'<td><span class="pill {css}">{esc(label)}</span></td></tr>')
+    return f"""
+<h2>All datasets by series</h2>
+<p class="lede">Every static file the lectures read today, grouped by the series that owns the
+bytes, with its migration status — the how-far-along view. <em>Not scheduled</em> means no
+milestone has claimed the file yet; the broad sweep (see the milestones below) eventually
+covers them all. Data written by the lectures themselves and live-API reads are not migration
+targets and are tracked on the <a href="audit.html">audit page</a>.</p>
+<div class="tablewrap"><table>
+<tr><th>File</th><th>Contents</th><th>Hosting today</th><th>Status</th></tr>
+{rows}
+</table></div>
+"""
+
+
 def stepper(fname: str, rec: dict, verified: bool) -> str:
     status = rec.get("status", "pending")
     if status not in STATUS_STEPS:
@@ -499,6 +583,73 @@ def stepper(fname: str, rec: dict, verified: bool) -> str:
     return f'<div class="steps">{steps}</div><p class="note" style="margin-bottom:0">{check}</p>'
 
 
+def milestones(audit: dict) -> str:
+    """The migration programme as reader-facing milestones — completed waves
+    (derived from migration.yml records), upcoming waves, the broad sweep, and
+    the final-URL switch. This section is what lets the rest of the dashboard
+    stay plan-agnostic: wave codes like P3 mean something only because they
+    are presented here."""
+    mig = audit["migration"] or {}
+    recs = mig.get("datasets") or {}
+    manifests = audit["manifests"]
+
+    by_pilot: dict[str, list] = {}
+    for fname, rec in recs.items():
+        by_pilot.setdefault(rec.get("pilot", "?"), []).append((fname, rec))
+    items = ""
+    for pilot in sorted(by_pilot):
+        entries = by_pilot[pilot]
+        files = sorted(f for f, _ in entries)
+        done = all(r.get("status") in ("repointed", "final") for _, r in entries)
+        dates = [str(r.get("repoints", [{}])[-1].get("date", "")) for _, r in entries]
+        series = {c["repo"] for f, _ in entries
+                  for c in (manifests.get(f, {}).get("consumers") or [])}
+        n_series = len(series)
+        mark, cls = ("✓", "ok") if done else ("○", "")
+        items += f"""
+<div class="finding {cls}">
+<b>{mark} Wave {esc(pilot)} — {len(files)} dataset{"s" if len(files) != 1 else ""},
+consumed by {n_series} lecture series{" — completed " + esc(max(dates)) if done and max(dates) else ""}</b>
+<p>{" · ".join(f"<code>{esc(f)}</code>" for f in files)}</p>
+</div>
+"""
+    for w in mig.get("pending") or []:
+        files = w.get("datasets") or []
+        flist = (" · ".join(f"<code>{esc(f)}</code>" for f in sorted(files))
+                 if files else "produces new snapshot files here; no existing file moves")
+        tracking = " · ".join(issue_link(t) for t in w.get("tracking") or [])
+        items += f"""
+<div class="finding">
+<b>○ Wave {esc(w.get("pilot", ""))} — {esc(w.get("title", w.get("scope", "")))}</b>
+<p>{flist}</p>
+<p>Tracking: {tracking}</p>
+</div>
+"""
+    n_unsched = sum(1 for d in audit["datasets"]
+                    if dataset_status(d["file"], mig)[0] == "unscheduled")
+    items += f"""
+<div class="finding">
+<b>○ Broad sweep — every remaining static file</b>
+<p>The {n_unsched} not-yet-scheduled files move once the waves above have proven the
+process for each kind of data. Mechanical from there: one data PR here, one switch PR
+per consuming lecture repo.</p>
+</div>
+<div class="finding">
+<b>○ Final URLs — serve everything from <code>data.quantecon.org</code></b>
+<p>Migrated lectures currently read this repository's GitHub URL. Once the custom domain
+is live, every migrated dataset switches to its permanent
+<code>data.quantecon.org/lectures/…</code> address in a single sweep
+({issue_link("QuantEcon/data-lectures#15")}). No dataset has made this step yet.</p>
+</div>
+"""
+    return f"""
+<h2>Milestones</h2>
+<p class="lede">The migration proceeds in small waves, each proving the process for a harder
+kind of data before the broad sweep moves the rest.</p>
+{items}
+"""
+
+
 def render_migration(audit: dict) -> str:
     mig = audit["migration"] or {}
     recs = mig.get("datasets") or {}
@@ -518,7 +669,7 @@ def render_migration(audit: dict) -> str:
 <div class="pipeline">
 <div class="head">
 <span class="name mono">{esc(fname)}</span>
-<span class="pill p-dl">{esc(rec.get("pilot", ""))}</span>
+<span class="pill p-dl">wave {esc(rec.get("pilot", ""))}</span>
 {pattern_pill(prior)} <span class="note">→</span> {pattern_pill("data-lectures")}
 <span class="note" style="margin-left:auto"><a href="{RAW}/{esc(fname)}">file</a> ·
 <a href="{DL}/blob/main/lectures/{esc(fname)}.yml">manifest</a></span>
@@ -528,57 +679,45 @@ def render_migration(audit: dict) -> str:
 </div>
 """
 
-    waves = ""
-    for w in mig.get("pending") or []:
-        files = "".join(f'<li><code>{esc(f)}</code> — {esc((by_name.get(f) or {}).get("description", ""))}</li>'
-                        for f in w.get("datasets") or []) or \
-                "<li class='note'>produces a new file here; no existing static file moves</li>"
-        tracking = " · ".join(issue_link(t) for t in w.get("tracking") or [])
-        waves += f"""
-<div class="finding">
-<b>{esc(w.get("pilot", ""))} — {esc(w.get("scope", ""))}</b>
-<ul>{files}</ul>
-<p>Tracking: {tracking}</p>
-</div>
-"""
-
     problems = audit["problems"]["migration_inconsistencies"]
     consistency = ('<div class="finding ok"><b>Consistency check: clean.</b>'
-                   '<p>migration.yml, the manifests and today\'s scan of every consumer repo agree.</p></div>'
+                   '<p>The tracker, the dataset manifests and today\'s scan of every lecture repo agree.</p></div>'
                    if not problems else
                    '<div class="finding crit"><b>Consistency check: FAILING.</b><ul>'
                    + "".join(f"<li>{esc(p)}</li>" for p in problems) + "</ul></div>")
 
     n_re = sum(1 for r in recs.values() if r.get("status") in ("repointed", "final"))
     queued = {f for w in (mig.get("pending") or []) for f in w.get("datasets") or []}
+    n_total = audit["stats"]["static_files"]
     body = f"""
 <header class="doc">
-<p class="eyebrow">Migration tracker · source of truth: <code>migration.yml</code> + <code>lectures/*.yml</code></p>
-<h1>Datasets moving into data-lectures</h1>
-<p class="meta">Each dataset's position in the lifecycle
-<em>pending → landed → repointed → final</em>, with the PRs that moved it. The build
-verifies every status against a fresh scan of the consumer repos, so this page cannot
+<p class="eyebrow">Migration tracker · generated and verified on every build</p>
+<h1>Moving lecture data into one central repository</h1>
+<p class="meta">The QuantEcon lectures read data from many places — their own repos, local
+files, retired repos, live APIs. This tracker shows the move to a single canonical home
+(<a href="{DL}">data-lectures</a>): what has moved, what's next, and how far along it is.
+Every status is verified against a fresh scan of the lecture repos, so this page cannot
 claim a migration that didn't happen.</p>
 </header>
 <div class="stats">
-<div class="stat ok"><b>{n_re}</b><span>repointed — consumers read data-lectures today</span></div>
-<div class="stat"><b>{len(queued)}</b><span>queued in pending waves (P3)</span></div>
-<div class="stat"><b>0</b><span>final — on data.quantecon.org (gated on DNS, {issue_link("QuantEcon/data-lectures#15")})</span></div>
+<div class="stat ok"><b>{n_re}</b><span>datasets migrated — every consuming lecture reads the central copy</span></div>
+<div class="stat"><b>{len(queued)}</b><span>queued for the next waves</span></div>
+<div class="stat"><b>{n_total - n_re - len(queued)}</b><span>not yet scheduled (the broad sweep)</span></div>
 </div>
+<h3>How a dataset moves</h3>
+<p><b>pending</b> — identified for migration; nothing has moved yet.
+<b>landed</b> — the file and its metadata are merged into the central repo; lectures unchanged.
+<b>repointed</b> — every consuming lecture now reads the central copy (shown as
+<em>✓ migrated</em> in the table below).
+<b>final</b> — the lecture reads the permanent <code>data.quantecon.org</code> address
+(the last milestone below).</p>
 {consistency}
-<h2>Migrated datasets</h2>
+{series_manifest(audit)}
+{milestones(audit)}
+<h2>Migration record — dataset by dataset</h2>
+<p class="lede">The full provenance for each migrated dataset: which pull requests landed the
+data and switched each consuming lecture, and where it sits in the lifecycle.</p>
 {pipelines}
-<h2>Pending waves</h2>
-<p class="lede">Scoped but not landed. Files listed here still appear under their current
-hosting pattern in the <a href="audit.html">audit</a>.</p>
-{waves}
-<h2>How a dataset moves</h2>
-<p><b>pending</b> — identified for migration; nothing in data-lectures yet.
-<b>landed</b> — file + manifest merged here; consumers unchanged.
-<b>repointed</b> — every consumer reads this repo's interim raw URL
-(<code>github.com/QuantEcon/data-lectures/raw/main/lectures/…</code>).
-<b>final</b> — every consumer reads <code>https://data.quantecon.org/lectures/…</code>;
-the cutover is one sweep tracked in {issue_link("QuantEcon/data-lectures#15")}, gated on Phase 4 DNS.</p>
 """
     return page("Migration tracker — data-lectures", "migration", body, audit)
 

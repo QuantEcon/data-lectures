@@ -82,8 +82,11 @@ datasets:
 
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
+# `title` is the reader-facing milestone name (the dashboard is read by people
+# who are not doing the migration); `scope` carries the insider detail.
 pending:
   - pilot: P3
+    title: Large data files, and the external data repository
     scope: the LFS case — heavy_tails Forbes/cities set + SCF extracts (fold in high_dim_data)
     datasets:
       - forbes-global2000.csv
@@ -96,6 +99,7 @@ pending:
       - QuantEcon/data-lectures#2
       - QuantEcon/meta#337
   - pilot: P4
+    title: Maintained snapshots for lectures that fetch live API data
     scope: the dynamic-snapshot case — a maintained UNRATE twin for the incidental FRED consumers
     datasets: []          # produces a NEW file here; no existing static file moves
     tracking:
