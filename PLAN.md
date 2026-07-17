@@ -40,7 +40,7 @@ This repository is being shaped into the **single canonical repository for data 
 
 ## Phases
 
-Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS question resolved; phase 5 follows layout; phase 7 needs the sources recorded in phase 6; phase 8 (the pilot) is the first end-to-end pass through phases 2–7's machinery and requires phase 7's byte-compare for the files it touches; phase 9 follows the pilot (interim URL form makes repoints churn-tolerant to start earlier).
+Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS question resolved; phase 5 follows layout, **except its go-live guardrails, which must precede the first repoint**; phase 7 needs the sources recorded in phase 6; phase 8 (the pilot) is the first end-to-end pass through phases 2–7's machinery and requires phase 7's byte-compare for the files it touches **plus phase 5's go-live guardrails** — the first repoint turns `raw/main` into a production URL, so the repo must not go live unprotected; phase 9 follows the pilot (interim URL form makes repoints churn-tolerant to start earlier).
 
 ### Phase 0 — Scaffolding (this PR)
 
@@ -76,6 +76,13 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 - [ ] Monitor Pages soft limits (~1 GB site, 100 GB/month)
 
 ### Phase 5 — Automation (`.github/`)
+
+**Go-live guardrails** — the minimal subset that must precede the first repoint (Phase 8); the rest of this phase follows at its own pace:
+
+- [x] Branch protection on `main`: PRs required (no direct pushes; zero approvals so a solo maintainer can still merge), force-pushes and deletion blocked. Once a lecture repoints, `raw/main` is a production URL and an accidental force-push is a lecture outage (ruleset added 2026-07-17)
+- [ ] Minimal consumed-file check: CI that asserts every file in `lectures/` whose manifest has a non-empty `consumers` list still exists and matches its manifest `sha256` — the narrowest possible test that a PR cannot break a live lecture. Subsumed later by the full PR validation below
+
+Full automation:
 
 - [ ] PR validation: manifest schema check + per-dataset invariant tests (expected columns/dtypes, row-count floor, date-range recency, no all-NaN columns, overlap-window agreement with the previous vintage) on every PR touching data. The schema decisions these tests force — column patterns for wide files, `known_nulls` exact-vs-ceiling, a canonical dtype vocabulary — are researched in [#14](https://github.com/QuantEcon/data-lectures/issues/14)
 - [ ] Retrofit `scripts/business_cycle.py` to the four-stage builder contract — it has fetch/transform/write today but **no validate stage**. Builder architecture and a copy-able template: [#14](https://github.com/QuantEcon/data-lectures/issues/14)
