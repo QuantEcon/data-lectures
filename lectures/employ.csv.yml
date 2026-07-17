@@ -1,0 +1,80 @@
+# Manifest for employ.csv — pandas_panel pilot (PLAN Phase 8, P2).
+# Shared static consumed by TWO series (programming + python.myst); see consumers.
+
+filename: employ.csv
+title: Eurostat employment in Europe — by age and sex, 2007–2016
+description: >
+  Employment figures for Europe in long format, broken down by geography, age,
+  sex and indicator (INDIC_EM). Used by the pandas panel-data lecture's
+  MultiIndex exercise to pivot a long panel into wide form.
+
+# Constructed: leading pandas row index and a re-serialised long-format layout,
+# so it is our processing of the Eurostat extract, not the file as distributed.
+# No builder was committed with it — an inherited constructed file (PLAN Phase 9).
+class: constructed
+
+source:
+  name: Eurostat — Employment database
+  url: https://ec.europa.eu/eurostat/data/database
+  citation: >
+    Eurostat (n.d.), Employment by sex, age and other breakdowns [dataset],
+    Eurostat online database.
+
+license:
+  name: Eurostat reuse (Commission Decision 2011/833/EU)
+  url: https://ec.europa.eu/eurostat/about-us/policies/copyright
+  # Reuse authorised for commercial and non-commercial purposes provided the
+  # source is acknowledged. Cache-and-serve-with-attribution: yes.
+  redistribution: permitted
+  verified: 2026-07-17
+
+retrieved: null                 # inherited from the lecture repos; original
+                                # Eurostat retrieval date not recorded -- see
+                                # integrity.upstream
+maintainer: QuantEcon
+
+integrity:
+  sha256: 2ff176e99e4a4669b7b24c603fe1889a2061eff4149d4c356fd84175803149d7
+  upstream:
+    status: unverifiable
+    date: 2026-07-17
+    against: null
+    note: >
+      Eurostat employment extract, but the exact table code, query and vintage
+      were not recorded and no builder was committed, so it is not independently
+      re-derivable. Byte-identical across both consuming repos (compared
+      2026-07-17).
+
+schema:
+  format: csv
+  columns:
+    - {name: "", dtype: int64, description: pandas row index (0-based), not used by the lecture}
+    - {name: GEO, dtype: string, description: geography (country or EU aggregate)}
+    - {name: AGE, dtype: string, description: age band (e.g. "From 15 to 24 years")}
+    - {name: UNIT, dtype: string, description: unit of measure (e.g. "Thousand persons")}
+    - {name: SEX, dtype: string, description: Total / Males / Females}
+    - {name: INDIC_EM, dtype: string, description: employment indicator (e.g. "Active population")}
+    - {name: Value, dtype: float64, description: measured value in UNIT}
+    - {name: DATE, dtype: string, description: observation year as ISO date (YYYY-01-01)}
+  row_count_floor: 15120         # frozen historical extract -- exact row count
+  date_range: {start: 2007-01-01, end: 2016-01-01}
+  # 1080 rows carry a row index but are otherwise entirely blank -- spacer rows
+  # from the original export. The lecture's pivot_table ignores them; recorded so
+  # a future no-nulls / non-empty-row check does not "fix" the file wrongly.
+  known_nulls:
+    GEO: 1080
+    AGE: 1080
+    UNIT: 1080
+    SEX: 1080
+    INDIC_EM: 1080
+    Value: 1080
+    DATE: 1080
+
+consumers:
+  - repo: QuantEcon/lecture-python-programming
+    file: lectures/pandas_panel.md
+  - repo: QuantEcon/lecture-python.myst
+    file: lectures/pandas_panel.md
+
+builder: null
+builder_status: unrecovered      # inherited constructed file (PLAN Phase 9)

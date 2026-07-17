@@ -1,0 +1,72 @@
+# Manifest for realwage.csv — pandas_panel pilot (PLAN Phase 8, P2).
+# Shared static consumed by TWO series (programming + python.myst); see consumers.
+
+filename: realwage.csv
+title: OECD real minimum wages — 32 countries, 2006–2016
+description: >
+  Real minimum wages for 32 OECD countries in long format
+  (Time, Country, Series, Pay period, value). Used by the pandas panel-data
+  lecture to build multi-dimensional summaries, a cross-country time series,
+  and kernel-density estimates by continent.
+
+# Constructed: the committed file carries a pandas row index (leading unnamed
+# column) and a filtered country/series selection, so it was re-serialised from
+# the OECD source by our processing, not republished as distributed. The
+# extraction script was never committed with it — an inherited constructed file
+# (PLAN Phase 9), recorded honestly rather than misclassified as verbatim.
+class: constructed
+
+source:
+  name: OECD — Real minimum wages (RMW)
+  url: https://stats.oecd.org/Index.aspx?DataSetCode=RMW
+  citation: >
+    OECD (n.d.), Real minimum wages [dataset], OECD.Stat, series code RMW.
+
+license:
+  name: CC BY 4.0
+  url: https://www.oecd.org/en/about/terms-conditions.html
+  # OECD content is CC BY 4.0 (attribution). As a stability cache the test is
+  # "OK to cache and serve with attribution?" — yes; attribution is the source
+  # block above.
+  redistribution: permitted
+  verified: 2026-07-17
+
+retrieved: null                 # inherited from the lecture repos; the original
+                                # OECD retrieval date was not recorded -- see
+                                # integrity.upstream
+maintainer: QuantEcon
+
+integrity:
+  sha256: cd60e36dc4a9e7ac1d7859dc06d5666e32f619dc6272be7c60dd0136c77fd511
+  upstream:
+    status: unverifiable
+    date: 2026-07-17
+    against: null
+    note: >
+      OECD real minimum wages, but the exact query/vintage and the filtering
+      that produced this extract were not recorded and no builder was committed,
+      so it is not independently re-derivable. Byte-identical across both
+      consuming repos (compared 2026-07-17).
+
+schema:
+  format: csv
+  columns:
+    - {name: "", dtype: int64, description: pandas row index (0-based), not used by the lecture}
+    - {name: Time, dtype: string, description: observation year as ISO date (YYYY-01-01)}
+    - {name: Country, dtype: string, description: OECD country name}
+    - {name: Series, dtype: string, description: price basis (e.g. "In 2015 constant prices at 2015 USD PPPs")}
+    - {name: Pay period, dtype: string, description: Annual / Hourly}
+    - {name: value, dtype: float64, description: real minimum wage}
+  row_count_floor: 1408          # frozen historical extract -- exact row count
+  date_range: {start: 2006-01-01, end: 2016-01-01}
+  known_nulls:
+    value: 68                    # OECD gaps for some country/year/series cells
+
+consumers:
+  - repo: QuantEcon/lecture-python-programming
+    file: lectures/pandas_panel.md
+  - repo: QuantEcon/lecture-python.myst
+    file: lectures/pandas_panel.md
+
+builder: null
+builder_status: unrecovered      # inherited constructed file (PLAN Phase 9)
