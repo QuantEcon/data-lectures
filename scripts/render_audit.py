@@ -27,6 +27,7 @@ PATTERN_META = {
     "local-path": ("p-local", "local path", "pd.read_csv('…') relative path — no URL; breaks in Colab/download"),
     "sibling": ("p-sib", "sibling repo URL", "fetches another lecture repo's committed copy by URL"),
     "external": ("p-ext", "external data repo", "QuantEcon/high_dim_data via raw and media (LFS) hosts"),
+    "external-web": ("p-ext", "external web host", "fetches a data file from a non-GitHub host by URL"),
     "legacy": ("p-legacy", "legacy-repo URL", "fetches from the retired pre-MyST lecture-python repo"),
     "embedded": ("p-embed", "%%file embedded", "written by the lecture itself, then read back"),
     "api": ("p-api", "live API", "fetched at build time from a third-party service"),
@@ -470,8 +471,13 @@ Companion to the migration of lecture data into
 # Page: migration tracker
 # ---------------------------------------------------------------------------
 
-def stepper(rec: dict, verified: bool) -> str:
+def stepper(fname: str, rec: dict, verified: bool) -> str:
     status = rec.get("status", "pending")
+    if status not in STATUS_STEPS:
+        raise SystemExit(
+            f"migration.yml: unknown status {status!r} for {fname} — expected one of "
+            f"{', '.join(STATUS_STEPS)} (the strict scan flags this too; run "
+            f"build_audit.py scan --strict)")
     reached = STATUS_STEPS.index(status)
     detail = {
         "pending": "",
@@ -518,7 +524,7 @@ def render_migration(audit: dict) -> str:
 <a href="{DL}/blob/main/lectures/{esc(fname)}.yml">manifest</a></span>
 </div>
 <p class="note" style="margin:0 0 10px">{esc(m.get("title", ""))} — consumed by {consumers or "—"}</p>
-{stepper(rec, verified)}
+{stepper(fname, rec, verified)}
 </div>
 """
 

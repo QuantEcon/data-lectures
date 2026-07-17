@@ -63,6 +63,9 @@ LEGACY_REPO_NAMES = {"lecture-python", "lecture-python.rst"}  # retired pre-MyST
 DATA_EXT = {".csv", ".xlsx", ".xls", ".dta", ".npy", ".mat", ".json", ".txt",
             ".parquet", ".pkl", ".zip", ".ods"}
 
+# migration.yml lifecycle vocabulary (mirrored by the renderer's stepper)
+MIGRATION_STATUSES = ("pending", "landed", "repointed", "final")
+
 # Committed paths that carry a data extension but are not datasets.
 COMMITTED_IGNORE = re.compile(
     r"(^|/)(\.github|_notebook_repo|_build)/"
@@ -211,6 +214,14 @@ def scan_repo(name: str, repos_dir: Path):
 
     lecture_files = [p for p in tree
                      if p.startswith("lectures/") and p.endswith(".md")]
+    # Every lecture source today is MyST .md; the only notebooks under
+    # lectures/ are builder/figure helpers in _static/, which are deliberately
+    # NOT consumers (a builder reading raw data is provenance, not a data
+    # read). If a notebook-format lecture ever appears, refuse to miss it
+    # silently — surface it as a problem instead.
+    unexpected_notebooks = [p for p in tree
+                            if p.startswith("lectures/") and p.endswith(".ipynb")
+                            and "/_static/" not in p]
     committed = [p for p in tree
                  if Path(p).suffix.lower() in DATA_EXT
                  and not COMMITTED_IGNORE.search(p)]
@@ -287,7 +298,8 @@ def scan_repo(name: str, repos_dir: Path):
             out.append(r)
     api = sorted({(l, p, a) for l, p, a in api_uses})
     return {"sha": sha, "refs": out, "committed": committed,
-            "api": [{"lecture": l, "provider": p, "access": a} for l, p, a in api]}
+            "api": [{"lecture": l, "provider": p, "access": a} for l, p, a in api],
+            "unexpected_notebooks": unexpected_notebooks}
 
 
 def committed_referenced(repo: str, committed: list[str], all_refs: list[dict]):
@@ -342,7 +354,7 @@ def scan(repos_dir: Path):
     manifests = load_manifests()
     migration = load_yaml(MIGRATION)
 
-    repos, all_refs, all_api = {}, [], []
+    repos, all_refs, all_api, unscanned_nb = {}, [], [], []
     for name in SCAN_REPOS:
         res = scan_repo(name, repos_dir)
         res["refs"] = [r for r in res["refs"] if r["target"] not in ignore]
@@ -350,6 +362,7 @@ def scan(repos_dir: Path):
         all_refs += res["refs"]
         for a in res["api"]:
             all_api.append({"repo": name, **a})
+        unscanned_nb += [f"{name}:{p}" for p in res["unexpected_notebooks"]]
 
     # committed-but-unreferenced sweep
     orphans = []
@@ -415,6 +428,11 @@ def scan(repos_dir: Path):
     for fname, rec in (migration.get("datasets") or {}).items():
         d = by_name.get(fname)
         status = rec.get("status")
+        if status not in MIGRATION_STATUSES:
+            mig_problems.append(
+                f"{fname}: unknown status {status!r} — expected one of "
+                f"{', '.join(MIGRATION_STATUSES)}")
+            continue
         if status in ("repointed", "final"):
             if d is None:
                 mig_problems.append(
@@ -462,6 +480,7 @@ def scan(repos_dir: Path):
             "missing_annotations": sorted(missing_ann),
             "missing_api_annotations": sorted(api_missing),
             "migration_inconsistencies": mig_problems,
+            "unscanned_notebooks": sorted(unscanned_nb),
         },
         "stats": {
             "static_files": len(datasets),
