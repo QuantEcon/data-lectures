@@ -1,0 +1,82 @@
+# The generated data-audit dashboard (data-lectures#20): scan the 8 Python-
+# family lecture repos, verify migration.yml + the manifests against what the
+# lectures actually read, render the dashboard, and deploy it to GitHub Pages
+# together with the published lectures/ tree.
+#
+# The scan is strict: an unannotated data reference or a migration.yml status
+# that disagrees with reality fails the build — the dashboard cannot rot into
+# a hand-tended snapshot. On PRs the build runs as a guardrail; deploys happen
+# only from main (push / weekly schedule / manual dispatch).
+
+name: audit-dashboard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 5 * * 1"    # weekly — lecture repos move under us
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - migration.yml
+      - lectures/*.yml
+      - scripts/build_audit.py
+      - scripts/render_audit.py
+      - scripts/audit_annotations.yml
+      - .github/workflows/audit-dashboard.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true    # published files must be bytes, never LFS pointers
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Clone the 8 lecture repos (shallow, main only)
+        run: |
+          mkdir -p repos
+          for repo in lecture-python-intro lecture-python-programming \
+                      lecture-python.myst lecture-python-advanced.myst \
+                      lecture-jax lecture-dp lecture-wasm continuous_time_mcs; do
+            git clone --quiet --depth 1 --branch main \
+              "https://github.com/QuantEcon/$repo" "repos/$repo"
+          done
+      - name: Build the dashboard (strict — fails on unannotated refs or migration drift)
+        run: python scripts/build_audit.py all --strict --repos-dir repos -o site
+      - name: Assemble the Pages tree (dashboard at /, data at /lectures/)
+        run: |
+          mkdir -p _site
+          cp -r site/. _site/
+          cp -r lectures _site/lectures
+          cp audit.json _site/audit.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - id: deployment
+        uses: actions/deploy-pages@v4
