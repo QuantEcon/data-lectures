@@ -38,7 +38,18 @@ def main() -> int:
     checked = 0
 
     for manifest_path in manifests:
-        manifest = yaml.safe_load(manifest_path.read_text())
+        try:
+            manifest = yaml.safe_load(manifest_path.read_text())
+        except yaml.YAMLError as exc:
+            errors.append(f"{manifest_path.name}: invalid YAML — {exc}")
+            continue
+        if not isinstance(manifest, dict):
+            errors.append(
+                f"{manifest_path.name}: manifest must be a YAML mapping, got "
+                f"{type(manifest).__name__} — is the file empty or malformed?"
+            )
+            continue
+
         declared = manifest.get("filename")
         expected = manifest_path.name[: -len(".yml")]
         if declared != expected:
@@ -61,7 +72,10 @@ def main() -> int:
             )
             continue
 
-        recorded = (manifest.get("integrity") or {}).get("sha256")
+        integrity = manifest.get("integrity")
+        # A non-dict integrity (e.g. a stray string) is treated as missing, so
+        # it lands in the "not recorded" error below instead of crashing here.
+        recorded = integrity.get("sha256") if isinstance(integrity, dict) else None
         if not recorded:
             errors.append(
                 f"{declared}: consumed but integrity.sha256 is not recorded — "
