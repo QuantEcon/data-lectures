@@ -206,6 +206,7 @@ li { margin: 3px 0; }
 .meter .seg.a { background: var(--meter-a); }
 .meter .seg.b { background: var(--meter-b); }
 .meter.mini { height: 8px; max-width: 340px; margin: 6px 0 2px; border-radius: 4px; }
+tr.row-migrated td { background: var(--ok-bg); }
 /* bar list — one measure, single hue, labeled rows */
 .barlist { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 12px; align-items: center; margin: 14px 0; }
 .barlist .lbl { font-size: 13px; }
@@ -487,29 +488,53 @@ STATUS_META = {
 
 
 def dataset_status(fname: str, migration: dict) -> tuple[str, str]:
-    """→ (status, pilot) for any static dataset the audit sees."""
+    """→ (status, pilot) for any static dataset the audit sees. A record still
+    at lifecycle `pending` reads as `queued` — same reader-facing meaning as a
+    file named in a pending wave."""
     rec = (migration.get("datasets") or {}).get(fname)
     if rec:
-        return rec.get("status", "pending"), rec.get("pilot", "")
+        status = rec.get("status", "pending")
+        return ("queued" if status == "pending" else status), rec.get("pilot", "")
     for wave in migration.get("pending") or []:
         if fname in (wave.get("datasets") or []):
             return "queued", wave.get("pilot", "")
     return "unscheduled", ""
 
 
+STATUS_RANK = {"unscheduled": 0, "pending": 1, "queued": 1, "landed": 2,
+               "repointed": 3, "final": 3}
+
+
 def series_manifest(audit: dict) -> str:
-    """Every static dataset, grouped by the lecture series that owns the bytes
-    today, with its migration status — the how-far-along view."""
+    """Every static dataset with its migration status, grouped by the lecture
+    series it belongs to — migrated files stay in the series they came FROM
+    (green rows at the bottom of each group), so each group reads as that
+    series' progress. A MIGRATED file consumed by two series appears in both
+    groups; before migration a file has one home — the repo owning the bytes."""
     migration = audit["migration"] or {}
+    manifests = audit["manifests"]
     groups: dict[str, list] = {}
+    shared: dict[str, list] = {}
     for d in audit["datasets"]:
-        groups.setdefault(repo_of_record(d), []).append(d)
+        home = repo_of_record(d)
+        if home == "data-lectures":
+            # migrated — list it where it was: under each series whose
+            # lectures consume it (the manifest's consumers)
+            homes = sorted({c["repo"].split("/")[-1]
+                            for c in manifests.get(d["file"], {}).get("consumers", [])}) \
+                    or [d["refs"][0]["repo"]]
+            shared[d["file"]] = homes
+            for h in homes:
+                groups.setdefault(h, []).append(d)
+        else:
+            groups.setdefault(home, []).append(d)
     order = ["lecture-python-intro", "lecture-python-programming",
-             "lecture-python.myst", "lecture-python-advanced.myst",
-             "data-lectures"]
+             "lecture-python.myst", "lecture-python-advanced.myst"]
     rows = ""
     for repo in [r for r in order if r in groups] + sorted(set(groups) - set(order)):
-        ds = sorted(groups[repo], key=lambda x: x["file"])
+        ds = sorted(groups[repo],
+                    key=lambda x: (STATUS_RANK.get(
+                        dataset_status(x["file"], migration)[0], 0), x["file"]))
         statuses = [dataset_status(d["file"], migration)[0] for d in ds]
         n = len(ds)
         n_done = sum(1 for s in statuses if s in ("repointed", "final"))
@@ -529,25 +554,41 @@ def series_manifest(audit: dict) -> str:
         rows += (f'<tr class="group"><td colspan="4">{esc(repo)} — '
                  f'{n} file{"s" if n != 1 else ""} · '
                  f'{esc(" · ".join(c for c in counts if c))}'
-                 f'<div class="meter mini" role="img" aria-label="{n_done} of {n} repointed">{segs}</div>'
+                 f'<div class="meter mini" role="img" aria-label="{n_done} of {n} migrated">{segs}</div>'
                  f'</td></tr>')
         for d, status_pilot in zip(ds, (dataset_status(d["file"], migration) for d in ds)):
             status, pilot = status_pilot
             css, label = STATUS_META.get(status, ("p-embed", status))
             if pilot and status == "queued":
                 label += f" · wave {pilot}"
+            migrated = status in ("repointed", "final")
             pills = " ".join(pattern_pill(p) for p in d["patterns"])
-            rows += (f'<tr><td class="mono">{esc(d["file"])}</td>'
+            if migrated:
+                rec = (migration.get("datasets") or {}).get(d["file"]) or {}
+                prior = rec.get("prior_pattern")
+                if prior:
+                    _, plabel, _ = PATTERN_META.get(prior, ("", prior, ""))
+                    pills += f'<div class="note">was: {esc(plabel)}</div>'
+                others = [h.replace("lecture-", "") for h in shared.get(d["file"], [])
+                          if h != repo]
+                if others:
+                    pills += (f'<div class="note">shared — also listed under '
+                              f'{esc(", ".join(others))}</div>')
+            rows += (f'<tr{" class=\"row-migrated\"" if migrated else ""}>'
+                     f'<td class="mono">{esc(d["file"])}</td>'
                      f'<td class="note">{esc(d["description"])}</td>'
                      f'<td>{pills}</td>'
                      f'<td><span class="pill {css}">{esc(label)}</span></td></tr>')
     return f"""
 <h2>All datasets by series</h2>
-<p class="lede">Every static file the lectures read today, grouped by the series that owns the
-bytes, with its migration status — the how-far-along view. <em>Not scheduled</em> means no
-milestone has claimed the file yet; the broad sweep (see the milestones below) eventually
-covers them all. Data written by the lectures themselves and live-API reads are not migration
-targets and are tracked on the <a href="audit.html">audit page</a>.</p>
+<p class="lede">Every static file the lectures read, grouped by the lecture series it belongs
+to. Migrated files stay listed in the series they came from — the green rows at the bottom of
+each group — so each group reads as that series' progress. A migrated file consumed by two
+series appears in both groups (marked <em>shared</em>); the tiles above count distinct files.
+<em>Not scheduled</em> means no milestone has claimed the file yet; the broad sweep (see the
+milestones below) eventually covers them all. Data written by the lectures themselves and
+live-API reads are not migration targets and are tracked on the
+<a href="audit.html">audit page</a>.</p>
 <div class="tablewrap"><table>
 <tr><th>File</th><th>Contents</th><th>Hosting today</th><th>Status</th></tr>
 {rows}
