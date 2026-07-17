@@ -70,7 +70,7 @@ schema:
     - {name: Government form, dtype: string, description: form of government}
     - {name: Currency, dtype: string, description: currency name}
     - {name: Currency code, dtype: string, description: ISO 4217 currency code}
-    - {name: Dialing prefix, dtype: int64, description: international dialing prefix}
+    - {name: Dialing prefix, dtype: string, description: international dialing prefix (e.g. "1-684" for territories)}
     - {name: Birthrate, dtype: float64, description: births per 1000}
     - {name: Deathrate, dtype: float64, description: deaths per 1000}
     - {name: Life expectancy, dtype: float64, description: life expectancy (years)}
