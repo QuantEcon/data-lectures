@@ -1,6 +1,6 @@
 # PLAN — `data-lectures` (formerly `QuantEcon/data`)
 
-**Status:** active roadmap (last updated 2026-07-16)
+**Status:** active roadmap (last updated 2026-07-17) — **the repo is LIVE**: the first repoint merged 2026-07-17 (P1, `lingcod_msy_recovery.csv` → `msy_fishery`), so published filenames are an API from here on
 
 This repository is being shaped into the **single canonical repository for data consumed by the QuantEcon lecture series**, referenced by stable URLs and documented in the manual.
 
@@ -80,7 +80,7 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 **Go-live guardrails** — the minimal subset that must precede the first repoint (Phase 8); the rest of this phase follows at its own pace:
 
 - [x] Branch protection on `main`: PRs required (no direct pushes; zero approvals so a solo maintainer can still merge), force-pushes and deletion blocked. Once a lecture repoints, `raw/main` is a production URL and an accidental force-push is a lecture outage (ruleset added 2026-07-17)
-- [x] Minimal consumed-file check: CI that asserts every file in `lectures/` whose manifest has a non-empty `consumers` list still exists and matches its manifest `sha256` — the narrowest possible test that a PR cannot break a live lecture. Subsumed later by the full PR validation below (added 2026-07-17: `.github/workflows/consumed-file-check.yml`)
+- [x] Minimal consumed-file check: CI that asserts every file in `lectures/` whose manifest has a non-empty `consumers` list still exists and matches its manifest `sha256` — the narrowest possible test that a PR cannot break a live lecture. Subsumed later by the full PR validation below (added 2026-07-17: `.github/workflows/consumed-file-check.yml`, and made a **required status check** in the `protect-main` ruleset the same day — a red check blocks the merge)
 
 Full automation:
 
@@ -115,7 +115,7 @@ Verify that what this repo holds is actually the data it claims to be — agains
 
 The first end-to-end deployment: one dataset per hosting pattern, each the hardest representative of its class, carried through the full chain — layout, manifest, integrity check, publish, lecture repoint. Validates the convention empirically before anything is written into a standard. Sequence P1 → P2 → P3 → P4, each a small PR set (data repo + consuming lecture repos).
 
-- [ ] **P1 — local-path static**: `lingcod_msy_recovery.csv` (`msy_fishery`, intro). Tests: single-PR green build under `-nW`, Colab-unchanged download, catalog metadata for an author-assembled file
+- [x] **P1 — local-path static**: `lingcod_msy_recovery.csv` (`msy_fishery`, intro). Tests: single-PR green build under `-nW`, Colab-unchanged download, catalog metadata for an author-assembled file. **Complete 2026-07-17** — data half #12, repoint QuantEcon/lecture-python-intro#792 (lecture build green in the single repoint PR); served URL verified byte-identical to the manifest `sha256`; Colab holds by construction (the lecture now reads a public URL, where the old relative path was exactly what broke downloaded notebooks); metadata findings recorded in meta#338. **The repo is live from this merge** — the pyodide/CORS check below remains open
 - [ ] **P2 — cross-series shared static**: the `pandas_panel` trio (`realwage.csv`, `countries.csv`, `employ.csv`), consumed by programming **and** python.myst. Tests: flat namespace with two consuming series, one data PR updating two lecture repos; retires 5 of the 8 legacy-repo references as a side effect
 - [ ] **P3 — external-repo static with LFS**: the `heavy_tails` set (Forbes ×2, cities ×2) plus the SCF pair from `high_dim_data`. Tests: served URL makes the raw-vs-media LFS trap invisible, Pages handles LFS objects (`lfs: true`), builders (`webscrape_forbes.ipynb`, `generating_mini.md`) migrate alongside their data
 - [ ] **P4 — dynamic snapshot twin**: `UNRATE`, consumed today by 4 lectures across 3 repos via 2 access methods. Tests: the full dynamic template — manifest, four-stage builder, refresh-as-PR, canary catching an induced failure — plus the documented live-call ↔ snapshot switch mechanism
