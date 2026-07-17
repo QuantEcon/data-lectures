@@ -1,0 +1,94 @@
+# Manifest for countries.csv — pandas_panel pilot (PLAN Phase 8, P2).
+# Shared static consumed by TWO series (programming + python.myst); see consumers.
+#
+# LICENCE NOTE: this source is `restricted` (no redistribution grant). It is
+# cached here as an inherited exposure — the lectures have served it publicly
+# for years — recorded honestly and logged for licence review in
+# QuantEcon/workspace-lectures#20. It must be resolved (permission confirmed,
+# replaced with an open equivalent, or removed) before data.quantecon.org is
+# promoted as a public open-data host.
+
+filename: countries.csv
+title: WorldData.info country reference table
+description: >
+  Per-country reference attributes (continent, capital, population, area,
+  currency, vital statistics, …), semicolon-separated. The pandas panel-data
+  lecture uses only two columns — "Country (en)" and "Continent" — to attach a
+  continent to each country in a merge.
+
+# Verbatim: the WorldData.info download as distributed — original column names
+# and semicolon delimiter preserved, no re-serialisation.
+class: verbatim
+
+source:
+  name: WorldData.info — country data downloads
+  url: https://www.worlddata.info/downloads/
+  citation: >
+    WorldData.info, country reference data (https://www.worlddata.info/downloads/).
+
+license:
+  name: Proprietary — © WorldData.info, all rights reserved
+  url: https://www.worlddata.info/downloads/
+  # "Data without guarantee © WorldData.info, all rights reserved" — no
+  # redistribution grant stated. Attribution alone does not cure a
+  # no-redistribution term, so this is `restricted`, not `permitted`.
+  redistribution: restricted
+  verified: 2026-07-17
+  note: >
+    Inherited exposure (served by the lectures for years); cached here pending
+    licence review — see QuantEcon/workspace-lectures#20. Not a blessed
+    exception: resolve before promoting data.quantecon.org publicly.
+
+retrieved: null                 # inherited from the lecture repos; original
+                                # WorldData.info retrieval date not recorded
+maintainer: QuantEcon
+
+integrity:
+  sha256: b334ddac9bf8b1788c6b9abf626959e2ff98a7f40a9dcdaa22e226d84595c3be
+  upstream:
+    status: unverifiable
+    date: 2026-07-17
+    against: null
+    note: >
+      WorldData.info updates this table over time (population, vital stats), so
+      a current re-fetch will not byte-match this retrieval. Byte-identical
+      across both consuming repos (compared 2026-07-17).
+
+schema:
+  format: csv
+  delimiter: ";"                 # read with pd.read_csv(url, sep=';')
+  columns:
+    - {name: Country (en), dtype: string, description: country name in English (used by the lecture)}
+    - {name: Country (de), dtype: string, description: country name in German}
+    - {name: Country (local), dtype: string, description: local-language country name}
+    - {name: Country code, dtype: string, description: ISO 3166 alpha-2 code}
+    - {name: Continent, dtype: string, description: continent (used by the lecture)}
+    - {name: Capital, dtype: string, description: capital city}
+    - {name: Population, dtype: int64, description: population count}
+    - {name: Area, dtype: int64, description: land area (km²)}
+    - {name: Coastline, dtype: int64, description: coastline length (km)}
+    - {name: Government form, dtype: string, description: form of government}
+    - {name: Currency, dtype: string, description: currency name}
+    - {name: Currency code, dtype: string, description: ISO 4217 currency code}
+    - {name: Dialing prefix, dtype: int64, description: international dialing prefix}
+    - {name: Birthrate, dtype: float64, description: births per 1000}
+    - {name: Deathrate, dtype: float64, description: deaths per 1000}
+    - {name: Life expectancy, dtype: float64, description: life expectancy (years)}
+    - {name: Url, dtype: string, description: source page on laenderdaten.info}
+  row_count_floor: 248           # frozen historical extract -- exact row count
+  # date_range omitted: country-attribute table, no time dimension.
+  known_nulls:
+    Capital: 248                 # Capital column is empty throughout this export
+    Country (local): 3
+    Currency: 1
+    Currency code: 1
+    Dialing prefix: 5
+
+consumers:
+  - repo: QuantEcon/lecture-python-programming
+    file: lectures/pandas_panel.md
+  - repo: QuantEcon/lecture-python.myst
+    file: lectures/pandas_panel.md
+
+# verbatim — no builder
+builder_status: not-applicable
