@@ -207,6 +207,13 @@ li { margin: 3px 0; }
 .meter .seg.b { background: var(--meter-b); }
 .meter.mini { height: 8px; max-width: 340px; margin: 6px 0 2px; border-radius: 4px; }
 tr.row-migrated td { background: var(--ok-bg); }
+.freshness {
+  display: inline-block; border-radius: 6px; padding: 4px 12px; margin-top: 12px;
+  font-size: 13px; font-weight: 600;
+  background: var(--ok-bg); color: var(--ok); border: 1px solid var(--line);
+}
+.freshness.warn { background: var(--warn-bg); color: var(--warn); }
+.freshness.crit { background: var(--crit-bg); color: var(--crit); }
 /* bar list — one measure, single hue, labeled rows */
 .barlist { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 12px; align-items: center; margin: 14px 0; }
 .barlist .lbl { font-size: 13px; }
@@ -460,6 +467,27 @@ regenerated from each repo's <code>main</code> by
 <a href="{DL}/blob/main/scripts/build_audit.py">a script</a> — not maintained by hand.
 Companion to the migration of lecture data into
 <a href="{DL}">QuantEcon/data-lectures</a>.</p>
+<span id="freshness" class="freshness" data-generated="{esc(audit["generated"])}"
+title="Rebuilt on every change to data-lectures and weekly on schedule — a badge older than a week means the scheduled rebuild has stopped.">
+● generated {esc(audit["generated"])}</span>
+<script>
+(function () {{
+  var el = document.getElementById('freshness');
+  var gen = new Date(el.dataset.generated + 'T00:00:00Z');
+  var days = Math.floor((Date.now() - gen.getTime()) / 86400000);
+  if (isNaN(days)) return;
+  var age = days <= 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago';
+  if (days > 14) {{
+    el.classList.add('crit');
+    el.textContent = '✗ stale — last updated ' + age + ' (' + el.dataset.generated + '); the scheduled rebuild has stopped';
+  }} else if (days > 7) {{
+    el.classList.add('warn');
+    el.textContent = '⚠ last updated ' + age + ' (' + el.dataset.generated + ') — the weekly rebuild is overdue';
+  }} else {{
+    el.textContent = '● up to date — last updated ' + age + ' (' + el.dataset.generated + ')';
+  }}
+}})();
+</script>
 </header>
 {tiles}
 {migration_meter(audit)}
