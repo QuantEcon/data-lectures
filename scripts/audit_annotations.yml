@@ -1,0 +1,358 @@
+# audit_annotations.yml — curated judgment for the data-audit dashboard.
+#
+# The scanner (build_audit.py) derives every mechanical fact from the lecture
+# repos themselves: who reads what, from where, by which URL form. What it
+# cannot derive is judgment — what a file contains, how it came to exist, why
+# a lecture calls a live API. That lives here, keyed by the scanner's output,
+# and the scan warns (or fails with --strict) whenever a NEW reference appears
+# with no entry, so this file cannot silently rot.
+#
+# Migrated datasets (lectures/*.yml manifests) do NOT get entries in
+# `datasets:` — the manifest is their source of truth.
+#
+# provenance values (prior audit §7, feeding manual#108):
+#   verbatim              third-party file as distributed; citation is the provenance
+#   constructed-committed built by a script/notebook that is committed somewhere
+#   constructed-lost      construction documented but the pipeline never committed
+#   author-assembled      hand-built by authors; provenance is lecture prose only
+#   toy                   invented in-lecture teaching table
+
+datasets:
+  SCF_plus_mini.csv:
+    description: SCF+ wealth/income survey extract
+    provenance: constructed-committed
+    note: built by generating_mini.md (executable MyST) in high_dim_data from SCF_plus.dta
+  SCF_plus_mini_no_weights.csv:
+    description: SCF+ extract, no survey weights
+    provenance: constructed-committed
+    note: >
+      variant of the SCF_plus_mini pipeline. Was pinned to feature branch
+      update_scf_noweights (critical flag in the 2026-07-15 audit); reads
+      high_dim_data main since lecture-python-intro#793
+  acs_data_summary.csv:
+    description: ACS occupation summary
+    provenance: constructed-lost
+    note: construction (ACS filters, grouping, sorting) described in lecture prose only
+  assignat.xlsx:
+    description: Assignat issuance / price data, French Revolution
+    provenance: author-assembled
+  bbh_macro_quarterly.csv:
+    description: Macro quarterly series (Bhandari et al.)
+    provenance: constructed-lost
+    note: extracted from the paper's replication package (Zenodo DOI, CC BY 4.0); extraction not scripted
+  bbh_michigan_monthly.csv:
+    description: Michigan survey monthly series (Bhandari et al.)
+    provenance: constructed-lost
+    note: same Zenodo replication package; extraction not scripted
+  caron.npy:
+    description: French Revolution money balances (Caron)
+    provenance: author-assembled
+    note: hand-prepared NumPy array, no construction record
+  chapter_3.xlsx:
+    description: Hyperinflation tables, Sargent "Ends of Four Big Inflations"
+    provenance: author-assembled
+    note: hand-transcribed by authors
+  cities_brazil.csv:
+    description: Brazilian city populations
+    provenance: author-assembled
+    note: manual download from worldpopulationreview.com, documented in high_dim_data README
+  cities_us.csv:
+    description: US city populations
+    provenance: author-assembled
+    note: manual download from worldpopulationreview.com, documented in high_dim_data README
+  dataBHS.mat:
+    description: US consumption/income series, MATLAB replication bundle
+    provenance: verbatim
+    flags: [lectures-root]
+  dette.xlsx:
+    description: French government debt series
+    provenance: author-assembled
+  fig_3.xlsx:
+    description: French Revolution fiscal data
+    provenance: author-assembled
+  forbes-billionaires.csv:
+    description: Forbes billionaires list
+    provenance: constructed-committed
+    note: webscrape_forbes.ipynb in high_dim_data (Forbes API)
+  forbes-global2000.csv:
+    description: Forbes Global 2000 firm size
+    provenance: constructed-committed
+    note: webscrape_forbes.ipynb in high_dim_data (Forbes API)
+  fp.dta:
+    description: Treisman (2016) Russia billionaires replication data
+    provenance: verbatim
+  fred_data.csv:
+    description: FRED snapshot — GS1, GS5, GS10, DFII5, DFII10, USREC
+    provenance: constructed-lost
+    note: lecture names the FRED series; no build script anywhere
+  graph.txt:
+    description: 15-node weighted digraph for the shortest-path problem
+    provenance: toy
+    note: >
+      maintained as %%file blocks in intro, dp and jax; lecture-wasm instead
+      fetches intro's committed copy by URL (requests.get), making that copy
+      load-bearing — it was merely "shadowed" in the 2026-07-15 audit
+  hansen_jagannathan_1991_data.json:
+    description: Hansen–Jagannathan (1991) asset-returns bundle
+    provenance: constructed-lost
+    note: lecture documents 3 sources (FRED yields deflated by CPIAUCSL, …); no build script
+  hansen_singleton_1982_data.csv:
+    description: FRED-derived consumption/returns snapshot
+    provenance: constructed-committed
+    note: make_data.py + README beside the data (exact series and sample documented)
+  hansen_singleton_1983_data.csv:
+    description: FRED-derived snapshot
+    provenance: constructed-committed
+    note: make_data.py + README beside the data
+  japan_population_by_age.xlsx:
+    description: Japan population by age group (prob_dist bimodality example)
+    provenance: author-assembled
+    flags: [new-since-2026-07-15]
+    note: added by lecture-python-intro#790; upstream source not yet recorded
+  life-expectancy-vs-gdp-per-capita.csv:
+    description: Our World in Data, life expectancy vs GDP per capita
+    provenance: verbatim
+    note: OWID export, as downloaded
+  longprices.xls:
+    description: Long-run price levels (Sargent–Velde)
+    provenance: author-assembled
+    note: hand-transcribed by authors
+  maketable1.dta:
+    description: Acemoglu–Johnson–Robinson (2001) replication, table 1
+    provenance: verbatim
+  maketable2.dta:
+    description: AJR (2001) replication, table 2
+    provenance: verbatim
+  maketable4.dta:
+    description: AJR (2001) replication, table 4
+    provenance: verbatim
+  mpd2020.xlsx:
+    description: Maddison Project Database 2020 (GDP per capita, long run)
+    provenance: verbatim
+  nom_balances.npy:
+    description: Nominal balances, French Revolution
+    provenance: author-assembled
+    note: hand-prepared NumPy array, no construction record
+  test_pwt.csv:
+    description: Penn World Table 7.0 extract
+    provenance: author-assembled
+  us_adult_heights.csv:
+    description: Heights of US adults, from NHANES (prob_dist motivating example)
+    provenance: constructed-lost
+    flags: [new-since-2026-07-15]
+    note: added by lecture-python-intro#790; NHANES-derived, extraction not scripted
+  usa-gini-nwealth-tincome-lincome.csv:
+    description: US Gini coefficients, wealth & income (long series)
+    provenance: constructed-committed
+    note: built by inequality/data.ipynb (committed beside it) from SCF_plus_mini
+
+# ---------------------------------------------------------------------------
+# Live-API uses, keyed repo:lecture:access. `pedagogy` says WHY the call is
+# live (prior audit §8): "lesson" = the fetch workflow is the teaching point;
+# "mixed" = discovery workflow is taught but the plots could read a snapshot;
+# "incidental" = the lecture just needs a series — snapshot-ready.
+# ---------------------------------------------------------------------------
+api:
+  lecture-python-intro:business_cycle:wbgapi:
+    series: NY.GDP.MKTP.KD.ZG, SL.UEM.TOTL.NE.ZS, FS.AST.PRVT.GD.ZS
+    pedagogy: mixed
+    note: teaches wb.series.info querying and metadata as part of the narrative
+  lecture-python-intro:business_cycle:pandas_datareader:
+    series: UNRATE, USREC, M0892AUSM156SNBR, UMCSENT, CPILFESL, INDPRO
+    pedagogy: mixed
+    note: snapshot pipeline already exists (data-lectures business_cycle_data.csv) but is unadopted
+  lecture-python-intro:commod_price:yfinance:
+    series: CT=F
+    pedagogy: incidental
+  lecture-python-intro:heavy_tails:wbgapi:
+    series: NY.GDP.MKTP.CD
+    pedagogy: incidental
+  lecture-python-intro:heavy_tails:yfinance:
+    series: AMZN, BTC-USD
+    pedagogy: incidental
+  lecture-python-intro:inequality:wbgapi:
+    series: SI.POV.GINI, NY.GDP.PCAP.KD
+    pedagogy: mixed
+    note: demonstrates searching for the Gini series ID with wbgapi
+  lecture-python-intro:prob_dist:yfinance:
+    series: AMZN, COST
+    pedagogy: incidental
+  lecture-python-programming:pandas:wbgapi:
+    series: GC.DOD.TOTL.GD.ZS
+    pedagogy: lesson
+    note: the section is literally "Using wbgapi and yfinance to Access Data"
+  lecture-python-programming:pandas:yfinance:
+    series: 11-ticker exercise list
+    pedagogy: lesson
+  lecture-python-programming:pandas:fredgraph.csv URL:
+    series: UNRATE
+    pedagogy: lesson
+  lecture-python.myst:kesten_processes:yfinance:
+    series: ^IXIC
+    pedagogy: incidental
+  lecture-python.myst:unemployment_linear:pandas_datareader:
+    series: UNRATE
+    pedagogy: incidental
+  lecture-python.myst:unemployment_shocks:pandas_datareader:
+    series: UNRATE
+    pedagogy: incidental
+  lecture-python-advanced.myst:doubts_or_variability:fredgraph.csv URL:
+    series: PCND, PCESV, DPCERD3Q086SBEA, CNP16OV
+    pedagogy: incidental
+  lecture-python-advanced.myst:subjective_beliefs_business_cycles:fredgraph.csv URL:
+    series: USREC
+    pedagogy: incidental
+  # lecture-wasm mirrors intro's sources; live APIs are the repo's core problem
+  # (pyodide cannot reach them — meta#143), so every entry here is a migration
+  # target, not an endorsement.
+  lecture-wasm:business_cycle:wbgapi:
+    series: NY.GDP.MKTP.KD.ZG, SL.UEM.TOTL.NE.ZS, FS.AST.PRVT.GD.ZS
+    pedagogy: mixed
+    note: mirror of intro's business_cycle; cannot run under pyodide
+  lecture-wasm:business_cycle:pandas_datareader:
+    series: UNRATE, USREC, M0892AUSM156SNBR, UMCSENT, CPILFESL, INDPRO
+    pedagogy: mixed
+    note: mirror of intro's business_cycle; cannot run under pyodide
+  lecture-wasm:commod_price:yfinance:
+    series: CT=F
+    pedagogy: incidental
+    note: mirror of intro's commod_price
+  lecture-wasm:heavy_tails:wbgapi:
+    series: NY.GDP.MKTP.CD
+    pedagogy: incidental
+    note: mirror of intro's heavy_tails
+  lecture-wasm:heavy_tails:pandas_datareader:
+    series: historical mirror — intro has since moved off pandas_datareader here
+    pedagogy: incidental
+    note: mirror of an older intro heavy_tails
+  lecture-wasm:heavy_tails:yfinance:
+    series: AMZN, BTC-USD
+    pedagogy: incidental
+    note: mirror of intro's heavy_tails
+  lecture-wasm:inequality:wbgapi:
+    series: SI.POV.GINI, NY.GDP.PCAP.KD
+    pedagogy: mixed
+    note: mirror of intro's inequality
+  lecture-wasm:prob_dist:yfinance:
+    series: AMZN, COST
+    pedagogy: incidental
+    note: mirror of intro's prob_dist
+
+# ---------------------------------------------------------------------------
+# Committed data files no code-cell reads, keyed repo:path.
+# kind: orphan (dead weight) | shadowed (a %%file cell regenerates it at
+# build time) | superseded (lecture reads another copy) | mirror-orphan
+# (lecture-wasm copy; the wasm lecture reads intro's URL instead) |
+# exercise-download (prose link target — referenced, just not by a code cell)
+# ---------------------------------------------------------------------------
+committed_unreferenced:
+  lecture-python-intro:lectures/datasets/GDP_per_capita_world_bank.csv:
+    kind: orphan
+    note: no reference anywhere; the QuantEcon/data copy was dropped at Phase 2
+  lecture-python-intro:lectures/datasets/Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv:
+    kind: orphan
+    note: metadata twin of the World Bank GDP-per-capita orphan
+  lecture-python-intro:lectures/datasets/fig_3.ods:
+    kind: orphan
+    note: source-format twin of fig_3.xlsx; referenced by nothing
+  lecture-python-programming:lectures/_static/lecture_specific/pandas/data/ticker_data.csv:
+    kind: orphan
+    note: no reference anywhere
+  lecture-python-programming:lectures/_static/lecture_specific/python_advanced_features/numbers.txt:
+    kind: shadowed
+    note: debugging lecture writes it with %%file
+  lecture-python-programming:lectures/_static/lecture_specific/python_advanced_features/test_table.csv:
+    kind: exercise-download
+    note: prose exercise link tells the reader to download this exact URL — keep
+  lecture-python-programming:lectures/_static/lecture_specific/python_foundations/test_table.csv:
+    kind: orphan
+    note: duplicate of the python_advanced_features copy
+  lecture-python-programming:lectures/_static/lecture_specific/python_foundations/us_cities.txt:
+    kind: shadowed
+    note: python_essentials writes it with %%writefile
+  lecture-python.myst:lectures/_static/lecture_specific/finite_markov/web_graph_data.txt:
+    kind: shadowed
+    note: finite_markov writes it with %%file
+  lecture-python.myst:lectures/web_graph_data.txt:
+    kind: shadowed
+    note: shadowed duplicate at lectures/ root
+  lecture-dp:lectures/graph.txt:
+    kind: shadowed
+    note: short_path regenerates it via %%file
+  lecture-dp:lectures/_static/lecture_specific/finite_markov/web_graph_data.txt:
+    kind: orphan
+    note: inherited from python.myst; no finite_markov data reference in this repo
+  lecture-dp:lectures/_static/lecture_specific/match_transport/acs_data_summary.csv:
+    kind: orphan
+    note: inherited copy, no consuming lecture in this repo
+  lecture-dp:lectures/_static/lecture_specific/mle/fp.dta:
+    kind: orphan
+    note: inherited from python.myst, no consuming lecture
+  lecture-dp:lectures/_static/lecture_specific/ols/maketable1.dta:
+    kind: orphan
+    note: inherited from python.myst, no consuming lecture
+  lecture-dp:lectures/_static/lecture_specific/ols/maketable2.dta:
+    kind: orphan
+    note: inherited from python.myst, no consuming lecture
+  lecture-dp:lectures/_static/lecture_specific/ols/maketable4.dta:
+    kind: orphan
+    note: inherited from python.myst, no consuming lecture
+  lecture-dp:lectures/_static/lecture_specific/pandas_panel/countries.csv:
+    kind: orphan
+    note: inherited copy; the consuming lectures live in other repos and now read data-lectures
+  lecture-dp:lectures/_static/lecture_specific/pandas_panel/employ.csv:
+    kind: orphan
+    note: inherited copy; the consuming lectures live in other repos and now read data-lectures
+  lecture-dp:lectures/_static/lecture_specific/pandas_panel/realwage.csv:
+    kind: orphan
+    note: inherited copy; the consuming lectures live in other repos and now read data-lectures
+  lecture-wasm:lectures/graph.txt:
+    kind: mirror-orphan
+    note: wasm's short_path fetches intro's committed graph.txt by URL, not this copy
+  lecture-wasm:lectures/_static/lecture_specific/inequality/usa-gini-nwealth-tincome-lincome.csv:
+    kind: mirror-orphan
+    note: wasm's inequality reads intro's copy by URL
+  lecture-wasm:lectures/_static/lecture_specific/simple_linear_regression/life-expectancy-vs-gdp-per-capita.csv:
+    kind: mirror-orphan
+    note: wasm's simple_linear_regression reads intro's copy by URL
+  lecture-wasm:lectures/datasets/GDP_per_capita_world_bank.csv:
+    kind: mirror-orphan
+    note: orphan in intro, mirrored into wasm
+  lecture-wasm:lectures/datasets/Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv:
+    kind: mirror-orphan
+    note: orphan in intro, mirrored into wasm
+  lecture-wasm:lectures/datasets/assignat.xlsx:
+    kind: mirror-orphan
+    note: wasm's french_rev reads intro's copy by URL
+  lecture-wasm:lectures/datasets/caron.npy:
+    kind: mirror-orphan
+    note: wasm's french_rev reads intro's copy by URL
+  lecture-wasm:lectures/datasets/chapter_3.xlsx:
+    kind: mirror-orphan
+    note: wasm's inflation_history reads intro's copy by URL
+  lecture-wasm:lectures/datasets/dette.xlsx:
+    kind: mirror-orphan
+    note: wasm's french_rev reads intro's copy by URL
+  lecture-wasm:lectures/datasets/fig_3.ods:
+    kind: mirror-orphan
+    note: orphan in intro, mirrored into wasm
+  lecture-wasm:lectures/datasets/fig_3.xlsx:
+    kind: mirror-orphan
+    note: wasm's french_rev reads intro's copy by URL
+  lecture-wasm:lectures/datasets/longprices.xls:
+    kind: mirror-orphan
+    note: wasm's inflation_history reads intro's copy by URL
+  lecture-wasm:lectures/datasets/mpd2020.xlsx:
+    kind: mirror-orphan
+    note: wasm's long_run_growth reads intro's copy by URL
+  lecture-wasm:lectures/datasets/nom_balances.npy:
+    kind: mirror-orphan
+    note: wasm's french_rev reads intro's copy by URL
+  continuous_time_mcs:lectures/old_stuff.txt:
+    kind: orphan
+    note: scratch file at lectures/ root; referenced by nothing
+
+# Scanner-visible targets that are not datasets (tutorial artifacts the
+# lecture itself creates, code files, etc.) — suppressed from the audit.
+ignore_targets: []
+ignore_committed: []

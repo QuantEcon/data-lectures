@@ -1,0 +1,105 @@
+# migration.yml — the migration lifecycle tracker for data-lectures.
+#
+# One record per dataset moving into this repo, holding the PROCESS facts the
+# manifests deliberately do not: which PRs landed the file, which PRs repointed
+# each consumer, and where the dataset sits in the lifecycle. Manifests
+# (lectures/*.yml) are the permanent record of a dataset; this file documents
+# a transition and can be archived once the migration programme completes,
+# without touching a single manifest.
+#
+# The audit dashboard (scripts/build_audit.py) renders this file and VERIFIES
+# it against reality on every build: a dataset marked `repointed` whose
+# consumers still read an old URL (or vice versa) fails the consistency check.
+#
+# Lifecycle (status):
+#   pending    identified for migration; nothing landed here yet
+#   landed     file + manifest merged in data-lectures; consumers unchanged
+#   repointed  every consumer reads this repo's interim raw URL
+#   final      every consumer reads https://data.quantecon.org/lectures/…
+#              (gated on the Phase 4 DNS work — data-lectures#15)
+
+datasets:
+  lingcod_msy_recovery.csv:
+    pilot: P1
+    status: repointed
+    prior_pattern: local-path
+    landed:
+      pr: QuantEcon/data-lectures#12
+      date: 2026-07-15
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#792
+        date: 2026-07-17
+    cutover: null
+
+  realwage.csv:
+    pilot: P2
+    status: repointed
+    prior_pattern: legacy
+    landed:
+      pr: QuantEcon/data-lectures#17
+      date: 2026-07-17
+    repoints:
+      - repo: QuantEcon/lecture-python-programming
+        pr: QuantEcon/lecture-python-programming#578
+        date: 2026-07-17
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#973
+        date: 2026-07-17
+    cutover: null
+
+  countries.csv:
+    pilot: P2
+    status: repointed
+    prior_pattern: legacy
+    landed:
+      pr: QuantEcon/data-lectures#17
+      date: 2026-07-17
+    repoints:
+      - repo: QuantEcon/lecture-python-programming
+        pr: QuantEcon/lecture-python-programming#578
+        date: 2026-07-17
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#973
+        date: 2026-07-17
+    cutover: null
+
+  employ.csv:
+    pilot: P2
+    status: repointed
+    prior_pattern: legacy   # programming read the legacy repo; python.myst its own copy
+    landed:
+      pr: QuantEcon/data-lectures#17
+      date: 2026-07-17
+    repoints:
+      - repo: QuantEcon/lecture-python-programming
+        pr: QuantEcon/lecture-python-programming#578
+        date: 2026-07-17
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#973
+        date: 2026-07-17
+    cutover: null
+
+# Planned waves that have not landed anything here yet. `datasets` names the
+# files as the audit sees them today, so the dashboard can join the two views.
+pending:
+  - pilot: P3
+    scope: the LFS case — heavy_tails Forbes/cities set + SCF extracts (fold in high_dim_data)
+    datasets:
+      - forbes-global2000.csv
+      - forbes-billionaires.csv
+      - cities_us.csv
+      - cities_brazil.csv
+      - SCF_plus_mini.csv
+      - SCF_plus_mini_no_weights.csv
+    tracking:
+      - QuantEcon/data-lectures#2
+      - QuantEcon/meta#337
+  - pilot: P4
+    scope: the dynamic-snapshot case — a maintained UNRATE twin for the incidental FRED consumers
+    datasets: []          # produces a NEW file here; no existing static file moves
+    tracking:
+      - QuantEcon/meta#338
+
+# Interim → final URL cutover (status: repointed → final) is tracked as one
+# sweep, not per dataset: QuantEcon/data-lectures#15, gated on Phase 4 DNS.
