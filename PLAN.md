@@ -80,7 +80,7 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 **Go-live guardrails** — the minimal subset that must precede the first repoint (Phase 8); the rest of this phase follows at its own pace:
 
 - [x] Branch protection on `main`: PRs required (no direct pushes; zero approvals so a solo maintainer can still merge), force-pushes and deletion blocked. Once a lecture repoints, `raw/main` is a production URL and an accidental force-push is a lecture outage (ruleset added 2026-07-17)
-- [ ] Minimal consumed-file check: CI that asserts every file in `lectures/` whose manifest has a non-empty `consumers` list still exists and matches its manifest `sha256` — the narrowest possible test that a PR cannot break a live lecture. Subsumed later by the full PR validation below
+- [x] Minimal consumed-file check: CI that asserts every file in `lectures/` whose manifest has a non-empty `consumers` list still exists and matches its manifest `sha256` — the narrowest possible test that a PR cannot break a live lecture. Subsumed later by the full PR validation below (added 2026-07-17: `.github/workflows/consumed-file-check.yml`)
 
 Full automation:
 

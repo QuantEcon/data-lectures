@@ -1,0 +1,27 @@
+# Go-live guardrail (PLAN Phase 5): a PR must not break a file a live lecture
+# consumes. The narrowest possible check — full PR validation (manifest schema,
+# dtypes, invariant tests) comes later in Phase 5 and will subsume this job.
+
+name: consumed-file-check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  consumed-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # No LFS-tracked files today (PLAN Phase 3). Set proactively: if a
+          # consumed file is ever LFS-tracked, this job must hash the bytes,
+          # not the pointer — a pointer hash would fail loudly here, which is
+          # the correct behaviour, but only with lfs available to fetch.
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python .github/scripts/check_consumed_files.py
