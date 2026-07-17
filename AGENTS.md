@@ -78,6 +78,16 @@ For the public data sources most snapshots come from (World Bank, FRED, Eurostat
 
 One exception: a `restricted` file the lectures have already served publicly may be cached here if it is marked `redistribution: restricted` with a `note` and logged for licence review in the migration-licensing tracker ([workspace-lectures#20](https://github.com/QuantEcon/workspace-lectures/issues/20)) — resolve it (permission, an open replacement, or removal) before `data.quantecon.org` is promoted as a public open-data host.
 
+### The audit dashboard stays truthful
+
+The generated dashboard (`scripts/build_audit.py`, [#20](https://github.com/QuantEcon/data-lectures/issues/20)) verifies its three inputs against a fresh scan of the lecture repos, and the strict build **fails** when they drift. Keep them current in the same PR as the change that moves reality:
+
+- **Landing or repointing a dataset** → update its `migration.yml` record (status, PR refs, dates). A dataset marked `repointed` whose consumers still read an old URL — or the reverse — is a build failure, by design.
+- **A new manifest** (`lectures/*.yml`) → add its `migration.yml` record; delete any stale entry for the same file in `scripts/audit_annotations.yml` (manifested datasets must not be annotated there).
+- **The weekly scan flags an unannotated reference** (a lecture repo started reading a new file) → classify it and add an entry to `scripts/audit_annotations.yml`; that file holds judgment (description, provenance, why-live), never facts the scan can derive.
+
+`site/` and `audit.json` are generated — never commit them; CI rebuilds and deploys on every push to `main`.
+
 ## Cross-repo hygiene
 
 - Changes here often pair with PRs in lecture repos and issues in `QuantEcon/meta`. In commit messages and PR bodies, **never place a GitHub closing keyword (`fixes`, `closes`, `resolves`, …) immediately before a cross-repo reference** like `QuantEcon/meta#336` — GitHub will auto-close the referenced issue when the commit lands on the default branch. Write "See QuantEcon/meta#336" or "Part of QuantEcon/meta#336".
@@ -89,8 +99,13 @@ One exception: a `restricted` file the lectures have already served publicly may
 lectures/            # the published tree — flat, served at data.quantecon.org/lectures/
                      #   9 datasets + business_cycle's upstream metadata dumps
                      #   manifests live here as sidecars: <filename>.yml
-scripts/             # builders — NOT published
+scripts/             # builders + generators — NOT published
   business_cycle.py  #   writes business_cycle_data.csv into lectures/
+  build_catalog.py   #   generates CATALOG.md from the manifests
+  build_audit.py     #   the audit dashboard: scan lecture repos → audit.json → site/
+  render_audit.py    #   its render stage
+  audit_annotations.yml  # curated judgment for not-yet-migrated data refs
+migration.yml        # migration lifecycle tracker (status + PR provenance per dataset)
 manifest-schema.yml  # per-dataset manifest schema (strawman)
 requirements.txt
 PLAN.md              # roadmap — start here
