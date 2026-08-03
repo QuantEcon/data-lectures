@@ -18,6 +18,16 @@
 #   toy                   invented in-lecture teaching table
 
 datasets:
+  NEWQDATA.csv:
+    description: Cogley–Sargent quarterly US data (inflation, unemployment, T-bill), 1948Q2–2000Q4
+    provenance: verbatim
+    flags: [new-since-2026-07-15]
+    note: >
+      added by lecture-python.myst#1001; the lecture cites it as
+      CogleySargent2005's dataset and no builder is committed beside it.
+      A migration candidate — it is read from lecture-python.myst main by raw
+      URL, and the lecture documents every transformation and rebuilds the
+      post-2000Q4 continuation from FRED
   SCF_plus_mini.csv:
     description: SCF+ wealth/income survey extract
     provenance: constructed-committed
@@ -187,8 +197,34 @@ api:
   lecture-python-programming:pandas:fredgraph.csv URL:
     series: UNRATE
     pedagogy: lesson
+  lecture-python-programming:polars:yfinance:
+    series: 11-ticker exercise list
+    pedagogy: lesson
+    note: mirror of pandas' yfinance exercise, rewritten with pl.DataFrame
+  lecture-python-programming:polars:fredgraph.csv URL:
+    series: UNRATE
+    pedagogy: lesson
+    note: mirror of pandas' FRED section — the lesson is pl.read_csv from a URL
   lecture-python.myst:kesten_processes:yfinance:
     series: ^IXIC
+    pedagogy: incidental
+  lecture-python.myst:phillips_drifts_volatilities:fredgraph.csv URL:
+    series: CPIAUCSL, UNRATE, TB3MS
+    pedagogy: incidental
+    note: >
+      splices post-2000Q4 observations onto the Cogley-Sargent sample
+      (NEWQDATA.csv) to test whether the extra quarter-century changes the
+      findings. Snapshot-ready, but a snapshot would need periodic refresh —
+      the section's point is the *latest* vintage
+  lecture-python.myst:phillips_lost_conquest:pandas_datareader:
+    series: PCEPI, GDPC1, GDPPOT, FEDFUNDS
+    pedagogy: incidental
+  lecture-python.myst:phillips_two_stories:pandas_datareader:
+    series: CPIAUCNS, LNS14000028
+    pedagogy: incidental
+    note: LNS14000028 is the unemployment rate for white men 20+
+  lecture-python.myst:sargent_surico:pandas_datareader:
+    series: M2SL, GDPDEF, GDPC1, TB3MS
     pedagogy: incidental
   lecture-python.myst:unemployment_linear:pandas_datareader:
     series: UNRATE
