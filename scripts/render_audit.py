@@ -402,18 +402,24 @@ the live-API row counts lectures. Full taxonomy on the <a href="audit.html">audi
 """
 
 
-def what_changed() -> str:
-    # The narrative diff vs the hand-built 2026-07-15 artifact. Static prose:
-    # it describes a fixed historical comparison, not live state.
+def what_changed(audit: dict) -> str:
+    # The narrative diff vs the hand-built 2026-07-15 artifact. The prose is
+    # static -- it describes a fixed historical comparison -- but any count it
+    # quotes is taken from live state, so a landing wave cannot leave a stale
+    # number on the front page.
+    recs = (audit["migration"] or {}).get("datasets") or {}
+    n_re = sum(1 for r in recs.values() if r.get("status") in ("repointed", "final"))
     return f"""
-<h2>What moved since the {PREV_SNAPSHOT} snapshot</h2>
-<p class="lede">The audit was first taken by hand on {PREV_SNAPSHOT}. Regenerating from live
-repo state two days later, the picture has already changed — which is why this dashboard is generated.</p>
-<div class="finding ok"><b>4 datasets migrated.</b>
-<p>The first two migration waves moved <code>lingcod_msy_recovery.csv</code> (was a
+<h2>What has moved since the {PREV_SNAPSHOT} snapshot</h2>
+<p class="lede">The audit was first taken by hand on {PREV_SNAPSHOT}. Everything below is
+regenerated from live repo state, so this section follows the programme rather than freezing
+a moment in it — which is why this dashboard is generated.</p>
+<div class="finding ok"><b>{n_re} datasets migrated.</b>
+<p>The first waves moved <code>lingcod_msy_recovery.csv</code> (was a
 Colab-breaking local path) and the <code>pandas_panel</code> trio <code>realwage.csv</code> /
 <code>countries.csv</code> / <code>employ.csv</code> (5 of their 6 reads pointed at the retired
-legacy repo). Every consuming lecture now reads the central copy. Details on the
+legacy repo). Later waves landed the data behind the probability lectures. Every consuming
+lecture reads the central copy. Details on the
 <a href="migration.html">migration tracker</a>.</p></div>
 <div class="finding ok"><b>Legacy-repo URLs: 8 → 0.</b>
 <p>The pre-MyST <code>QuantEcon/lecture-python</code> repo was renamed to
@@ -428,11 +434,14 @@ high_dim_data — was fixed by lecture-python-intro#793; it now reads <code>main
 intro's copies by URL), and its <code>short_path</code> fetches intro's committed
 <code>graph.txt</code> over the network. That file was "shadowed dead weight" in the prior audit;
 it is now load-bearing.</p></div>
-<div class="finding warn"><b>2 new datasets appeared (lecture-python-intro#790).</b>
+<div class="finding ok"><b>The 2 datasets that arrived under the old conventions have since moved.</b>
 <p><code>us_adult_heights.csv</code> and <code>japan_population_by_age.xlsx</code> entered
-<code>prob_dist</code> as local-path reads — the pattern P1 just migrated away from. New data
-keeps arriving under the old conventions until the styleguide
-({issue_link("QuantEcon/QuantEcon.manual#108")}) lands.</p></div>
+<code>prob_dist</code> (lecture-python-intro#790) as local-path reads — the pattern P1 had just
+migrated away from. Both are now here, and in both cases the missing builder was recovered
+rather than recorded as a gap: the heights extract is reproduced byte for byte from NHANES,
+and the population table was rebuilt from its publisher, the Statistics Bureau, replacing an
+e-Stat export that carried no provenance. New data will keep arriving under the old
+conventions until the styleguide ({issue_link("QuantEcon/QuantEcon.manual#108")}) lands.</p></div>
 """
 
 
@@ -496,7 +505,7 @@ title="Every build re-runs the full audit scan across the {len(audit["repos"])} 
 {migration_meter(audit)}
 {cards}
 {pattern_barlist(audit)}
-{what_changed()}
+{what_changed(audit)}
 """
     return page("QuantEcon lecture data — audit & migration dashboard", "overview", body, audit)
 

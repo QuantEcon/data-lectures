@@ -1,0 +1,89 @@
+# Manifest for japan_population_by_age.csv.
+
+filename: japan_population_by_age.csv
+title: Japan — population by single year of age, 2024
+description: >
+  Population of Japan by single year of age from 0 to "100 and over", as of
+  1 October 2024, for the total population and for Japanese nationals. Counts
+  are in thousands, as published. Used as a first concrete example of a
+  probability mass function.
+
+# Constructed: the upstream workbook is Table 1 of the Population Estimates,
+# laid out for printing -- ages run down a left-hand block and continue in a
+# second block to its right, under two levels of merged headers. Flattening
+# that into one row per age is our processing.
+class: constructed
+
+source:
+  name: >
+    Population Estimates, Statistics Bureau of Japan, Ministry of Internal
+    Affairs and Communications
+  series: >
+    Table 1 — Population by age (single years) and sex, and sex ratio; total
+    population and Japanese population, as of 1 October 2024
+  url: https://www.stat.go.jp/english/data/jinsui/index.html
+  file_url: https://www.stat.go.jp/data/jinsui/2024np/zuhyou/05k2024-1.xlsx
+  citation: >
+    Statistics Bureau, Ministry of Internal Affairs and Communications, Japan.
+    Population Estimates, 1 October 2024.
+
+license:
+  name: Japan Statistics Bureau terms of use
+  url: https://www.stat.go.jp/english/index/copyright.html
+  redistribution: permitted
+  verified: 2026-08-04
+  # The Statistics Bureau permits reproduction of its published statistics with
+  # the source indicated, which the citation above does. Its terms follow the
+  # Japanese government standard open-data licence, compatible with CC BY.
+
+retrieved: 2026-08-04
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity
+# ---------------------------------------------------------------------------
+# Migration check (not a manifest field — a one-time repoint gate): the
+# japanese_population column of this file equals, value for value, the column
+# that lecture-python-intro's prob_dist.md previously read out of an e-Stat
+# export committed at
+# lectures/_static/lecture_specific/prob_dist/japan_population_by_age.xlsx,
+# so the repoint cannot change lecture output.
+#
+# That export was an on-demand e-Stat download with no recorded provenance --
+# the `builder_status: unrecovered` case AGENTS.md describes. Rather than
+# migrate it in that state, the same table was located at its publisher, the
+# Statistics Bureau, where it has a stable URL, and rebuilt from there. The
+# published figures are identical, so the lecture is unaffected and the data
+# gains a source, a citation and a builder.
+
+integrity:
+  sha256: 5bf07638cb75fa99e9dffb7ed2e272982a938384d49c9e1c4065117d696b81d8
+  upstream:
+    status: verified
+    date: 2026-08-04
+    against: 05k2024-1.xlsx
+    note: >
+      Written by re-running the committed builder against the Statistics
+      Bureau workbook on the retrieval date. The 2024 estimates are a closed
+      release, so re-running should reproduce this hash.
+
+schema:
+  format: csv
+  columns:
+    - {name: age, dtype: int64, description: single year of age; 100 means "100 and over"}
+    - {name: total_population, dtype: int64, description: total population at this age, in thousands}
+    - {name: japanese_population, dtype: int64, description: Japanese-national population at this age, in thousands}
+  row_count_floor: 101
+  date_range: {start: 2024, end: 2024}
+  known_nulls: {}
+  # Every figure is rounded to the nearest thousand independently, so the
+  # per-age counts sum to slightly more than the published totals: by 5
+  # thousand for the total population and 3 thousand for the Japanese
+  # population. The builder allows for this and asserts the sums are within 60.
+
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/prob_dist.md
+
+builder: scripts/japan_population_by_age.py
+builder_status: committed

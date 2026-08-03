@@ -155,6 +155,20 @@ datasets:
         date: 2026-08-04
     cutover: null
 
+  japan_population_by_age.csv:
+    pilot: P5
+    status: landed
+    # Migrated out of lecture-python-intro, which held an e-Stat export with no
+    # recorded provenance. Rebuilt from the same table at its publisher, the
+    # Statistics Bureau, whose copy has a stable URL; the figures are identical.
+    # Flip to `repointed` when the lecture PR merges.
+    prior_pattern: local-path
+    landed:
+      pr: QuantEcon/data-lectures#33
+      date: 2026-08-04
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people
