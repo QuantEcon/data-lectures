@@ -35,6 +35,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      warnings: ${{ steps.warnings.outputs.text }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,7 +55,22 @@ jobs:
               "https://github.com/QuantEcon/$repo" "repos/$repo"
           done
       - name: Build the dashboard (strict — fails on unannotated refs or migration drift)
-        run: python scripts/build_audit.py all --strict --repos-dir repos -o site
+        run: |
+          set -o pipefail    # tee must not swallow the strict exit code
+          python scripts/build_audit.py all --strict --repos-dir repos -o site \
+            2>&1 | tee audit.log
+      # The notifier reports what drifted, not just that something did — so the
+      # issue is actionable without opening the run log.
+      - name: Collect the warnings for the notifier
+        id: warnings
+        if: failure()
+        run: |
+          {
+            echo 'text<<AUDIT_WARNINGS'
+            grep '^warning:' audit.log \
+              || echo '(no drift warnings — the build failed for another reason)'
+            echo AUDIT_WARNINGS
+          } >> "$GITHUB_OUTPUT"
       - name: Assemble the Pages tree (dashboard at /, data at /lectures/)
         run: |
           mkdir -p _site
@@ -80,3 +97,55 @@ jobs:
           enablement: true
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # The strict build is this repo's drift alarm for 8 upstream lecture repos,
+  # and the weekly schedule fires when nobody is watching. It worked exactly as
+  # designed on 2026-07-27 and still went unnoticed for a week, because a red
+  # scheduled run has no inbox — it only surfaced when it blocked an unrelated
+  # PR (#27). Give the alarm somewhere to ring: one open issue, assigned, that
+  # says what drifted. PRs are excluded — their failure is already in front of
+  # the author.
+  notify:
+    if: failure() && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open (or update) the drift issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          WARNINGS: ${{ needs.build.outputs.warnings }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ANNOTATIONS_URL: ${{ github.server_url }}/${{ github.repository }}/blob/main/scripts/audit_annotations.yml
+        run: |
+          gh label create audit-drift --force --color d93f0b \
+            --description "The strict audit build is failing"
+
+          # Paragraphs stay unwrapped — GitHub renders a lone newline as <br>.
+          {
+            echo "The strict \`audit-dashboard\` build failed on a **$EVENT** run. \`deploy\` is \`needs: build\`, so the Pages deploy was skipped and the published dashboard is frozen at the last green build."
+            echo
+            echo "What the scan reported:"
+            echo
+            echo '```'
+            printf '%s\n' "$WARNINGS"
+            echo '```'
+            echo
+            echo "A \`missing_annotations\` or \`missing_api_annotations\` line means a lecture repo landed a data reference this repo has never seen — the alarm doing its job, not a bug here. Add the entry to [scripts/audit_annotations.yml]($ANNOTATIONS_URL) and the build goes green. Anything else is a genuine failure in this repo."
+            echo
+            echo "Run: $RUN_URL"
+            echo
+            echo "_Posted automatically. Later failures comment here rather than opening new issues, so close this once the build is green._"
+          } > body.md
+
+          open=$(gh issue list --label audit-drift --state open --limit 1 \
+                   --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body-file body.md
+          else
+            gh issue create --title "audit-dashboard: the strict build is failing" \
+              --label audit-drift --assignee mmcky --body-file body.md
+          fi
