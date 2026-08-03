@@ -71,10 +71,9 @@ schema:
   # for time and magnitude, since ComCat can leave depth unconstrained for a
   # poorly located event and that should not block a refresh.
 
-consumers: []
-# The consuming lecture (a distribution-fitting lecture for
-# lecture-python-intro) is in preparation; this record gets its entry when that
-# lecture lands.
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/fitting_distributions.md
 
 builder: scripts/japan_earthquakes.py
 builder_status: committed

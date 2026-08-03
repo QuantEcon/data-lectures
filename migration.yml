@@ -129,24 +129,30 @@ datasets:
 
   epl_match_goals.csv:
     pilot: P5
-    status: landed
-    # New dataset with no prior life in a lecture repo. Its consuming lecture
-    # is still in preparation, so this stays `landed` until that PR merges.
+    status: repointed
+    # New dataset with no prior life in a lecture repo, landed ahead of the
+    # lecture that reads it.
     prior_pattern: none
     landed:
       pr: QuantEcon/data-lectures#31
       date: 2026-08-03
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#814
+        date: 2026-08-04
     cutover: null
 
   japan_earthquakes.csv:
     pilot: P5
-    status: landed
+    status: repointed
     prior_pattern: none
     landed:
       pr: QuantEcon/data-lectures#31
       date: 2026-08-03
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#814
+        date: 2026-08-04
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the

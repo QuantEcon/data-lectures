@@ -68,6 +68,8 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/observed_distributions.md
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/fitting_distributions.md
 
 builder: scripts/ames_house_prices.py
 builder_status: committed

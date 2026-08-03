@@ -79,6 +79,8 @@ consumers:
     file: lectures/prob_dist.md
   - repo: QuantEcon/lecture-python-intro
     file: lectures/observed_distributions.md
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/fitting_distributions.md
 
 builder: scripts/us_adult_heights.py
 builder_status: committed
