@@ -127,6 +127,28 @@ datasets:
         date: 2026-08-03
     cutover: null
 
+  epl_match_goals.csv:
+    pilot: P5
+    status: landed
+    # New dataset with no prior life in a lecture repo. Its consuming lecture
+    # is still in preparation, so this stays `landed` until that PR merges.
+    prior_pattern: none
+    landed:
+      pr: QuantEcon/data-lectures#XXX
+      date: 2026-08-03
+    repoints: []
+    cutover: null
+
+  japan_earthquakes.csv:
+    pilot: P5
+    status: landed
+    prior_pattern: none
+    landed:
+      pr: QuantEcon/data-lectures#XXX
+      date: 2026-08-03
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people
