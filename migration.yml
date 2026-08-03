@@ -89,7 +89,7 @@ datasets:
     # flip to `repointed` when QuantEcon/lecture-python-intro#XXX merges.
     prior_pattern: none
     landed:
-      pr: QuantEcon/data-lectures#XXX
+      pr: QuantEcon/data-lectures#27
       date: 2026-08-03
     repoints: []
     cutover: null
@@ -99,7 +99,7 @@ datasets:
     status: landed
     prior_pattern: none
     landed:
-      pr: QuantEcon/data-lectures#XXX
+      pr: QuantEcon/data-lectures#27
       date: 2026-08-03
     repoints: []
     cutover: null
@@ -113,7 +113,7 @@ datasets:
     # the `unrecovered` state Phase 9 tracks.
     prior_pattern: local-path
     landed:
-      pr: QuantEcon/data-lectures#XXX
+      pr: QuantEcon/data-lectures#27
       date: 2026-08-03
     repoints: []
     cutover: null
