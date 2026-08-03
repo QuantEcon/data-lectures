@@ -61,10 +61,9 @@ schema:
   # The builder asserts exactly 380 matches in each of the ten seasons, so a
   # partially published season cannot slip in.
 
-consumers: []
-# The consuming lecture (a distribution-fitting lecture for
-# lecture-python-intro) is in preparation; this record gets its entry when that
-# lecture lands.
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/fitting_distributions.md
 
 builder: scripts/epl_match_goals.py
 builder_status: committed

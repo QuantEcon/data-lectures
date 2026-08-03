@@ -179,6 +179,12 @@ api:
     series: SI.POV.GINI, NY.GDP.PCAP.KD
     pedagogy: mixed
     note: demonstrates searching for the Gini series ID with wbgapi
+  lecture-python-intro:fitting_distributions:yfinance:
+    series: AMZN
+    pedagogy: incidental
+    note: >
+      one download, for the section showing that a normal fit to monthly
+      returns fails in the tails
   lecture-python-intro:observed_distributions:yfinance:
     series: AMZN, COST
     pedagogy: incidental
