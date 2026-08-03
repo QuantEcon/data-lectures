@@ -164,7 +164,7 @@ datasets:
     # Flip to `repointed` when the lecture PR merges.
     prior_pattern: local-path
     landed:
-      pr: QuantEcon/data-lectures#XXX
+      pr: QuantEcon/data-lectures#33
       date: 2026-08-04
     repoints: []
     cutover: null
