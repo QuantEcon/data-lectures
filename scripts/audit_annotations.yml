@@ -146,11 +146,6 @@ datasets:
   test_pwt.csv:
     description: Penn World Table 7.0 extract
     provenance: author-assembled
-  us_adult_heights.csv:
-    description: Heights of US adults, from NHANES (prob_dist motivating example)
-    provenance: constructed-lost
-    flags: [new-since-2026-07-15]
-    note: added by lecture-python-intro#790; NHANES-derived, extraction not scripted
   usa-gini-nwealth-tincome-lincome.csv:
     description: US Gini coefficients, wealth & income (long series)
     provenance: constructed-committed
