@@ -1,0 +1,76 @@
+# Manifest for japan_deaths_by_age.csv.
+
+filename: japan_deaths_by_age.csv
+title: Japan — deaths by single year of age, 2023
+description: >
+  The age distribution of deaths in Japan in 2023: counts by single year of age
+  from 0 to "100 and over", split by sex. Estimated deaths from the UN World
+  Population Prospects 2024 revision, medium variant. Used as an example of a
+  strongly left-skewed observed distribution.
+
+# Constructed, not verbatim: the upstream release covers every location and
+# every year from 1950 in a single 45 MB gzipped CSV. Selecting Japan in 2023,
+# scaling the published thousands to persons, and keeping four columns is our
+# processing. The builder is committed -- see `builder` below.
+class: constructed
+
+source:
+  name: >
+    United Nations, Department of Economic and Social Affairs, Population
+    Division — World Population Prospects 2024
+  series: WPP2024_DeathsBySingleAgeSex_Medium_1950-2023
+  url: https://population.un.org/wpp/downloads
+  file_url: >
+    https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_DeathsBySingleAgeSex_Medium_1950-2023.csv.gz
+  version: 2024 revision
+  citation: >
+    United Nations, Department of Economic and Social Affairs, Population
+    Division (2024). World Population Prospects 2024, Online Edition.
+
+license:
+  name: CC BY 3.0 IGO
+  url: https://creativecommons.org/licenses/by/3.0/igo/
+  redistribution: permitted
+  verified: 2026-08-03
+  # Established against the statement carried on the WPP download page:
+  # "Copyright (c) 2024 by United Nations, made available under a Creative
+  # Commons license CC BY 3.0 IGO: http://creativecommons.org/licenses/by/3.0/igo/".
+  # Attribution is the sole condition and the suggested citation above -- the
+  # wording the UN itself supplies -- carries it, so caching this extract and
+  # serving it publicly is permitted.
+
+retrieved: 2026-08-03
+maintainer: QuantEcon
+
+integrity:
+  sha256: 1e03f6d952efc657f64047b6bebab9cd3f79af193e0468b91d525682ce0dbf09
+  upstream:
+    status: verified
+    date: 2026-08-03
+    against: WPP2024_DeathsBySingleAgeSex_Medium_1950-2023.csv.gz
+    note: >
+      Written by re-running the committed builder against the live upstream
+      release on the retrieval date, so the file is the builder's output by
+      construction. Re-running it reproduces this hash while the 2024 revision
+      remains the current WPP vintage.
+
+schema:
+  format: csv
+  columns:
+    - {name: age, dtype: int64, description: single year of age; 100 means "100 and over"}
+    - {name: deaths_male, dtype: int64, description: male deaths at this age in 2023}
+    - {name: deaths_female, dtype: int64, description: female deaths at this age in 2023}
+    - {name: deaths_total, dtype: int64, description: all deaths at this age in 2023}
+  row_count_floor: 101
+  date_range: {start: 2023, end: 2023}
+  known_nulls: {}
+  # Counts are published in thousands to three decimals and are scaled to
+  # persons and rounded here, so deaths_male + deaths_female may differ from
+  # deaths_total by one person at a given age. The builder asserts that bound.
+
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/observed_distributions.md
+
+builder: scripts/japan_deaths_by_age.py
+builder_status: committed

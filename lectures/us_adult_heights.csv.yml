@@ -1,0 +1,84 @@
+# Manifest for us_adult_heights.csv.
+
+filename: us_adult_heights.csv
+title: United States — adult standing height by sex, NHANES 2015-2018
+description: >
+  Standing height in centimetres for 10,478 US adults aged 20 and over,
+  labelled by sex, pooled across the NHANES 2015-2016 and 2017-2018 cycles.
+  Pregnant respondents are excluded. Used as an example of an observed
+  distribution that is closely approximated by a normal distribution.
+
+# Constructed: two survey cycles, each shipping demographics and body measures
+# as separate SAS transport files, joined and filtered down to two columns.
+class: constructed
+
+source:
+  name: >
+    National Health and Nutrition Examination Survey (NHANES), US Centers for
+    Disease Control and Prevention, National Center for Health Statistics
+  series: DEMO_I + BMX_I (2015-2016), DEMO_J + BMX_J (2017-2018)
+  url: https://www.cdc.gov/nchs/nhanes/index.htm
+  file_url: https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2015/DataFiles/DEMO_I.xpt
+  citation: >
+    Centers for Disease Control and Prevention (CDC), National Center for
+    Health Statistics (NCHS). National Health and Nutrition Examination Survey
+    Data, 2015-2016 and 2017-2018. Hyattsville, MD: U.S. Department of Health
+    and Human Services.
+
+license:
+  name: US Government work — public domain
+  url: https://www.cdc.gov/other/agencymaterials.html
+  redistribution: permitted
+  verified: 2026-08-03
+  # NCHS publishes NHANES as public-use data files. CDC states that its
+  # materials are not copyrighted and may be reproduced without permission,
+  # with citation requested. Attribution is carried by the citation above.
+
+retrieved: 2026-08-03
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity
+# ---------------------------------------------------------------------------
+# Migration check (not a manifest field — a one-time repoint gate): the bytes
+# here are identical to lecture-python-intro's copy at
+# lectures/_static/lecture_specific/prob_dist/us_adult_heights.csv, so the
+# repoint cannot change lecture output.
+#
+# The CSV was first assembled for lecture-python-intro#790 with no committed
+# script — the `builder_status: unrecovered` case AGENTS.md describes. The
+# builder was recovered by re-deriving the file from NHANES: the recovered
+# script reproduces this sha256 exactly, which both identifies the original
+# filters (adults 20+, height recorded, pregnant excluded, males then females)
+# and makes the file re-derivable from upstream. Recorded as `committed`
+# rather than `unrecovered` on that basis.
+
+integrity:
+  sha256: 6240535326bc7e23c1da5540dc3005bda491e47820f31c1f2aa052d9bfb1ae0c
+  upstream:
+    status: verified
+    date: 2026-08-03
+    against: DEMO_I.xpt + BMX_I.xpt + DEMO_J.xpt + BMX_J.xpt
+    note: >
+      Re-running the committed builder against the NHANES public files
+      reproduces this file byte for byte. The two cycles are closed releases,
+      so the hash should hold indefinitely.
+
+schema:
+  format: csv
+  columns:
+    - {name: sex, dtype: object, description: "male or female (NHANES RIAGENDR)"}
+    - {name: height_cm, dtype: float64, description: standing height in centimetres (NHANES BMXHT)}
+  row_count_floor: 10478
+  date_range: {start: 2015, end: 2018}
+  known_nulls: {}
+  # Rows are grouped: 5,092 male rows followed by 5,386 female rows.
+
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/prob_dist.md
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/observed_distributions.md
+
+builder: scripts/us_adult_heights.py
+builder_status: committed
