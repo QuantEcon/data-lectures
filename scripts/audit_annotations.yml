@@ -114,11 +114,6 @@ datasets:
     description: FRED-derived snapshot
     provenance: constructed-committed
     note: make_data.py + README beside the data
-  japan_population_by_age.xlsx:
-    description: Japan population by age group (prob_dist bimodality example)
-    provenance: author-assembled
-    flags: [new-since-2026-07-15]
-    note: added by lecture-python-intro#790; upstream source not yet recorded
   life-expectancy-vs-gdp-per-capita.csv:
     description: Our World in Data, life expectancy vs GDP per capita
     provenance: verbatim
