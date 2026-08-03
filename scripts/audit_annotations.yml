@@ -114,6 +114,15 @@ datasets:
     description: FRED-derived snapshot
     provenance: constructed-committed
     note: make_data.py + README beside the data
+  japan_population_by_age.xlsx:
+    description: Japan population by age (prob_dist PMF example)
+    provenance: author-assembled
+    note: >
+      an e-Stat export with no recorded provenance, added by
+      lecture-python-intro#790. Superseded by japan_population_by_age.csv,
+      which is rebuilt from the Statistics Bureau original and manifested
+      here; this entry goes when the lecture repoints and the xlsx leaves the
+      lecture repo
   life-expectancy-vs-gdp-per-capita.csv:
     description: Our World in Data, life expectancy vs GDP per capita
     provenance: verbatim
