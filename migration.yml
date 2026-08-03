@@ -82,31 +82,37 @@ datasets:
 
   ames_house_prices.csv:
     pilot: P5
-    status: landed
+    status: repointed
     # A new dataset, not a migration: these bytes have never lived in a lecture
-    # repo, so there is no prior pattern to move away from. The consuming
-    # lecture is new too and lands with the interim raw URL already in place;
-    # flip to `repointed` when QuantEcon/lecture-python-intro#XXX merges.
+    # repo, so there is no prior pattern to move away from. It landed together
+    # with its consuming lecture, which is new and read the interim raw URL
+    # from its first commit.
     prior_pattern: none
     landed:
       pr: QuantEcon/data-lectures#27
       date: 2026-08-03
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#811
+        date: 2026-08-03
     cutover: null
 
   japan_deaths_by_age.csv:
     pilot: P5
-    status: landed
+    status: repointed
     prior_pattern: none
     landed:
       pr: QuantEcon/data-lectures#27
       date: 2026-08-03
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#811
+        date: 2026-08-03
     cutover: null
 
   us_adult_heights.csv:
     pilot: P5
-    status: landed
+    status: repointed
     # Migrated out of lecture-python-intro, where it was added by #790 with no
     # committed builder. The builder was recovered during this migration and
     # reproduces the file byte for byte, so it lands as `committed` rather than
@@ -115,7 +121,10 @@ datasets:
     landed:
       pr: QuantEcon/data-lectures#27
       date: 2026-08-03
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#811
+        date: 2026-08-03
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the

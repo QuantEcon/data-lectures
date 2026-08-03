@@ -179,9 +179,13 @@ api:
     series: SI.POV.GINI, NY.GDP.PCAP.KD
     pedagogy: mixed
     note: demonstrates searching for the Gini series ID with wbgapi
-  lecture-python-intro:prob_dist:yfinance:
+  lecture-python-intro:observed_distributions:yfinance:
     series: AMZN, COST
     pedagogy: incidental
+    note: >
+      moved here from prob_dist by lecture-python-intro#811, which split the
+      observed-data half of that lecture into observed_distributions; prob_dist
+      no longer calls yfinance
   lecture-python-programming:pandas:wbgapi:
     series: GC.DOD.TOTL.GD.ZS
     pedagogy: lesson
