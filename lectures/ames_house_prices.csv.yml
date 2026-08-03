@@ -1,0 +1,73 @@
+# Manifest for ames_house_prices.csv.
+
+filename: ames_house_prices.csv
+title: Ames, Iowa — residential house sales, 2006-2010
+description: >
+  Sale price and four characteristics (bedrooms, above-grade floor area, year
+  built, neighborhood) for 2,930 residential properties sold in Ames, Iowa
+  between 2006 and 2010. Used as an example of a strongly right-skewed,
+  roughly lognormal observed distribution.
+
+# Constructed, not verbatim: the upstream workbook carries 82 columns assembled
+# for an end-of-semester regression project. Selecting five columns and giving
+# them lowercase names is our processing. The builder is committed -- see
+# `builder` below.
+class: constructed
+
+source:
+  name: Ames Housing data (De Cock 2011), Journal of Statistics Education
+  url: http://jse.amstat.org/v19n3/decock.pdf
+  file_url: http://jse.amstat.org/v19n3/decock/AmesHousing.xls
+  doi: 10.1080/10691898.2011.11889627
+  citation: >
+    De Cock, D. (2011). Ames, Iowa: Alternative to the Boston Housing Data as
+    an End of Semester Regression Project. Journal of Statistics Education,
+    19(3).
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-03
+  # The article states no formal licence. It presents the data as a teaching
+  # set published for reuse -- an open replacement for the Boston housing data
+  # -- and distributes the workbook from the journal's own server alongside a
+  # data-documentation file. Redistribution is long established in practice:
+  # CRAN ships it in the AmesHousing package and OpenML serves it as dataset
+  # 42165. Recorded as `permitted` on that basis, with `name: null` because
+  # there is a genuine licence statement to point at, not because one was not
+  # looked for. Attribution is carried by the citation above.
+
+retrieved: 2026-08-03
+maintainer: QuantEcon
+
+integrity:
+  sha256: 9878434620e2f295a1e00662197f97ecf87681361a3628802d11697f80aaa4f4
+  upstream:
+    status: verified
+    date: 2026-08-03
+    against: AmesHousing.xls
+    note: >
+      Written by re-running the committed builder against the workbook on the
+      journal's server on the retrieval date, so the file is the builder's
+      output by construction. The upstream workbook is a fixed 2011 release,
+      so re-running the builder should reproduce this hash indefinitely.
+
+schema:
+  format: csv
+  columns:
+    - {name: price, dtype: int64, description: sale price in US dollars}
+    - {name: bedrooms, dtype: int64, description: bedrooms above grade}
+    - {name: living_area_sqft, dtype: int64, description: above-grade living area in square feet}
+    - {name: year_built, dtype: int64, description: year of original construction}
+    - {name: neighborhood, dtype: object, description: neighborhood within Ames city limits}
+  row_count_floor: 2930
+  date_range: {start: 2006, end: 2010}
+  known_nulls: {}
+
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/observed_distributions.md
+
+builder: scripts/ames_house_prices.py
+builder_status: committed
