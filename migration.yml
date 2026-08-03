@@ -157,16 +157,19 @@ datasets:
 
   japan_population_by_age.csv:
     pilot: P5
-    status: landed
+    status: repointed
     # Migrated out of lecture-python-intro, which held an e-Stat export with no
     # recorded provenance. Rebuilt from the same table at its publisher, the
-    # Statistics Bureau, whose copy has a stable URL; the figures are identical.
-    # Flip to `repointed` when the lecture PR merges.
+    # Statistics Bureau, whose copy has a stable URL; the figures are identical,
+    # so the repoint left lecture output unchanged.
     prior_pattern: local-path
     landed:
       pr: QuantEcon/data-lectures#33
       date: 2026-08-04
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#821
+        date: 2026-08-04
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
