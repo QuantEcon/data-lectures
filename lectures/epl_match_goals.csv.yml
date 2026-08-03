@@ -1,0 +1,70 @@
+# Manifest for epl_match_goals.csv.
+
+filename: epl_match_goals.csv
+title: English Premier League — full-time scores, 2015-16 to 2024-25
+description: >
+  Date, teams and full-time score for all 3,800 matches of ten completed
+  English Premier League seasons. Used as an example of count data that is
+  well described by a Poisson distribution: goals per match average 2.83 with
+  a variance of 2.78.
+
+# Constructed: upstream publishes one JSON file per league-season. Selecting
+# ten seasons of one league, flattening the nested score records and keeping
+# six fields is our processing.
+class: constructed
+
+source:
+  name: openfootball / football.json
+  url: https://github.com/openfootball/football.json
+  file_url: >
+    https://raw.githubusercontent.com/openfootball/football.json/master/2023-24/en.1.json
+  series: en.1 (English Premier League), seasons 2015-16 through 2024-25
+  citation: >
+    openfootball, football.json — free open public domain football match
+    fixtures and results.
+
+license:
+  name: Public domain
+  url: https://github.com/openfootball/football.json#license
+  redistribution: permitted
+  verified: 2026-08-03
+  # The upstream README states: "The football.json schema, data and scripts are
+  # dedicated to the public domain. Use as you please with no restrictions
+  # whatsoever." No attribution is required; the citation above is courtesy.
+
+retrieved: 2026-08-03
+maintainer: QuantEcon
+
+integrity:
+  sha256: 9afc81ff468f923bf4221dc547db7e7d744d6e3a0eaafc61265ef4c4d5265712
+  upstream:
+    status: verified
+    date: 2026-08-03
+    against: openfootball/football.json en.1, ten season files
+    note: >
+      Written by re-running the committed builder against upstream on the
+      retrieval date. All ten seasons are complete and closed, so re-running
+      should reproduce this hash unless upstream corrects a historical score.
+
+schema:
+  format: csv
+  columns:
+    - {name: season, dtype: object, description: "season label, e.g. 2023-24"}
+    - {name: date, dtype: object, description: match date, ISO 8601}
+    - {name: home_team, dtype: object, description: home team name}
+    - {name: away_team, dtype: object, description: away team name}
+    - {name: home_goals, dtype: int64, description: full-time goals scored by the home team}
+    - {name: away_goals, dtype: int64, description: full-time goals scored by the away team}
+  row_count_floor: 3800
+  date_range: {start: 2015, end: 2025}
+  known_nulls: {}
+  # The builder asserts exactly 380 matches in each of the ten seasons, so a
+  # partially published season cannot slip in.
+
+consumers: []
+# The consuming lecture (a distribution-fitting lecture for
+# lecture-python-intro) is in preparation; this record gets its entry when that
+# lecture lands.
+
+builder: scripts/epl_match_goals.py
+builder_status: committed

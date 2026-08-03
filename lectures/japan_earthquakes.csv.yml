@@ -1,0 +1,80 @@
+# Manifest for japan_earthquakes.csv.
+
+filename: japan_earthquakes.csv
+title: Japan region — earthquakes of magnitude 5 and above, 2000-2024
+description: >
+  Time, magnitude, location and depth of 3,557 earthquakes of magnitude 5.0
+  and above in a box around the Japanese archipelago (24-46N, 122-150E),
+  from 2000 to the end of 2024. Used as a counterexample when fitting Poisson
+  and exponential distributions: aftershocks cluster, so counts per period are
+  heavily overdispersed and the times between events are not exponential.
+
+# Constructed: a single closed query against the USGS event service, keeping
+# five of its twenty-two columns. The query window is fixed rather than
+# rolling, so this is not a dynamic snapshot and has no refresh cadence.
+class: constructed
+
+source:
+  name: >
+    Advanced National Seismic System (ANSS) Comprehensive Earthquake Catalog
+    (ComCat), US Geological Survey
+  url: https://earthquake.usgs.gov/earthquakes/search/
+  file_url: https://earthquake.usgs.gov/fdsnws/event/1/query
+  series: >
+    FDSN event query — format=csv, starttime=2000-01-01, endtime=2024-12-31,
+    minmagnitude=5, minlatitude=24, maxlatitude=46, minlongitude=122,
+    maxlongitude=150
+  citation: >
+    U.S. Geological Survey, Earthquake Hazards Program (2026). Advanced
+    National Seismic System (ANSS) Comprehensive Catalog of Earthquake Events
+    and Products. https://doi.org/10.5066/F7MS3QZH
+  doi: 10.5066/F7MS3QZH
+
+license:
+  name: US Government work — public domain
+  url: https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
+  redistribution: permitted
+  verified: 2026-08-03
+  # USGS states that information produced by the agency is in the public domain
+  # and may be used without permission, with credit requested. Attribution is
+  # carried by the citation above.
+
+retrieved: 2026-08-03
+maintainer: QuantEcon
+
+integrity:
+  sha256: ceb80a2aafb322a5d0f2a28d62aa73dd66fa8d6ef353f957bc34cb2bb118048f
+  upstream:
+    status: verified
+    date: 2026-08-03
+    against: USGS FDSN event service, query recorded under source.series
+    note: >
+      Written by re-running the committed builder against the live service on
+      the retrieval date. The query window is closed, but ComCat is a revised
+      catalog -- magnitudes are refined and events are occasionally added or
+      removed retrospectively -- so a later re-run may differ slightly from
+      this hash without either version being wrong. That is the reason for
+      snapshotting it here rather than querying the service from a lecture.
+
+schema:
+  format: csv
+  columns:
+    - {name: time, dtype: object, description: event origin time, ISO 8601 UTC}
+    - {name: magnitude, dtype: float64, description: reported magnitude (mixed scales, as ComCat supplies)}
+    - {name: latitude, dtype: float64, description: epicentre latitude, degrees north}
+    - {name: longitude, dtype: float64, description: epicentre longitude, degrees east}
+    - {name: depth_km, dtype: float64, description: hypocentre depth in kilometres}
+  row_count_floor: 3557
+  date_range: {start: 2000, end: 2024}
+  known_nulls: {}
+  # This snapshot has no nulls in any column. The builder asserts non-null only
+  # for time and magnitude, since ComCat can leave depth unconstrained for a
+  # poorly located event and that should not block a refresh.
+
+consumers: []
+# The consuming lecture (a distribution-fitting lecture for
+# lecture-python-intro) is in preparation; this record gets its entry when that
+# lecture lands.
+
+builder: scripts/japan_earthquakes.py
+builder_status: committed
