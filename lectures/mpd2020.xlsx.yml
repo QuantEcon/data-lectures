@@ -19,7 +19,7 @@ class: constructed
 source:
   name: Maddison Project Database, version 2020
   url: https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2020
-  data_url: https://www.rug.nl/ggdc/historicaldevelopment/maddison/data/mpd2020.xlsx
+  file_url: https://www.rug.nl/ggdc/historicaldevelopment/maddison/data/mpd2020.xlsx
   version: "2020"
   citation: >
     Bolt, Jutta and Jan Luiten van Zanden (2020). Maddison style estimates of
@@ -70,7 +70,7 @@ integrity:
     against: https://www.rug.nl/ggdc/historicaldevelopment/maddison/data/mpd2020.xlsx
     note: >
       Re-fetched from the Maddison release and compared cell by cell across all
-      six sheets. Every data value matches, including all 21,683 rows of `Full
+      six sheets. Every data value matches, including all 21,682 data rows of `Full
       data`. THREE header labels on `Regional data` differ: row0 col1 "GDP pc
       2011 prices" -> "gdppc_2011", row0 col9 "Population" -> "pop", and row0
       col18 "gdppc_2011" added where upstream is empty. The lecture reads that
@@ -111,8 +111,8 @@ schema:
         - {name: countrycode, dtype: str, description: ISO3 country code}
         - {name: country, dtype: str, description: country name}
         - {name: year, dtype: int64, description: calendar year}
-        - {name: gdppc, dtype: float64, description: real GDP per capita, 2011 US$}
-        - {name: pop, dtype: float64, description: mid-year population, thousands}
+        - {name: gdppc, dtype: float64, description: "real GDP per capita, 2011 US$"}
+        - {name: pop, dtype: float64, description: "mid-year population, thousands"}
       known_nulls: {gdppc: 1976, pop: 4483}
       date_range: {start: 1, end: 2018}
     - name: Regional data

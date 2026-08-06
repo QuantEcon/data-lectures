@@ -72,8 +72,13 @@ schema:
   sheets_pattern: 'Table3\.\d+'
   sheet_count: 27
   read_as: {header: 1}
+  # Column lists are complete for the sheets shown, not truncated -- the count
+  # must equal the second element of `shape`, or the sample is not a contract.
   sheets_sample:
-    - {name: Table3.1, shape: [6, 6], columns: [Budget Beginning, Budget Ending, Receipts, Expenditures, Deficit]}
+    - name: Table3.1
+      shape: [6, 6]
+      columns: [Budget Beginning, Budget Ending, Receipts, Expenditures, Deficit,
+                "Percentage of expenditures covered by new issues of paper money"]
     - {name: Table3.2, shape: [78, 3], columns: [Year, Month, Total Note Circulation]}
     - {name: Table3.3, shape: [44, 3], columns: [Year, Month, "Retail price index, 52 commodities"]}
     - {name: Table3.4, shape: [74, 3], columns: [Year, Month, Exchange Rate]}

@@ -50,7 +50,7 @@ schema:
   format: csv
   columns:
     - {name: season, dtype: object, description: "season label, e.g. 2023-24"}
-    - {name: date, dtype: object, description: match date, ISO 8601}
+    - {name: date, dtype: object, description: "match date, ISO 8601"}
     - {name: home_team, dtype: object, description: home team name}
     - {name: away_team, dtype: object, description: away team name}
     - {name: home_goals, dtype: int64, description: full-time goals scored by the home team}

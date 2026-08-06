@@ -59,10 +59,10 @@ integrity:
 schema:
   format: csv
   columns:
-    - {name: time, dtype: object, description: event origin time, ISO 8601 UTC}
-    - {name: magnitude, dtype: float64, description: reported magnitude (mixed scales, as ComCat supplies)}
-    - {name: latitude, dtype: float64, description: epicentre latitude, degrees north}
-    - {name: longitude, dtype: float64, description: epicentre longitude, degrees east}
+    - {name: time, dtype: object, description: "event origin time, ISO 8601 UTC"}
+    - {name: magnitude, dtype: float64, description: "reported magnitude (mixed scales, as ComCat supplies)"}
+    - {name: latitude, dtype: float64, description: "epicentre latitude, degrees north"}
+    - {name: longitude, dtype: float64, description: "epicentre longitude, degrees east"}
     - {name: depth_km, dtype: float64, description: hypocentre depth in kilometres}
   row_count_floor: 3557
   date_range: {start: 2000, end: 2024}

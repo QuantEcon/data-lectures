@@ -48,7 +48,7 @@ integrity:
 schema:
   format: csv
   columns:
-    - {name: "", dtype: int64, description: pandas row index (0-based), not used by the lecture}
+    - {name: "", dtype: int64, description: "pandas row index (0-based), not used by the lecture"}
     - {name: GEO, dtype: string, description: geography (country or EU aggregate)}
     - {name: AGE, dtype: string, description: age band (e.g. "From 15 to 24 years")}
     - {name: UNIT, dtype: string, description: unit of measure (e.g. "Thousand persons")}

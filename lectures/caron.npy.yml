@@ -80,8 +80,8 @@ schema:
   dtype: float64
   shape: [63, 2]
   columns:
-    - {index: 0, name: date, dtype: float64, description: decimal year, monthly steps of 1/12}
-    - {index: 1, name: specie_value, dtype: float64, description: assignat value against specie, index units}
+    - {index: 0, name: date, dtype: float64, description: "decimal year, monthly steps of 1/12"}
+    - {index: 1, name: specie_value, dtype: float64, description: "assignat value against specie, index units"}
   row_count_floor: 63             # frozen historical extract: exact by design
   date_range: {start: 1791.0, end: 1796.25}
   known_nulls: {}                 # no NaNs present

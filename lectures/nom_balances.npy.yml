@@ -74,8 +74,8 @@ schema:
   dtype: float64
   shape: [81, 2]
   columns:
-    - {index: 0, name: date, dtype: float64, description: decimal year, monthly steps of 1/12}
-    - {index: 1, name: nominal_balances, dtype: float64, description: assignats in circulation, millions of livres}
+    - {index: 0, name: date, dtype: float64, description: "decimal year, monthly steps of 1/12"}
+    - {index: 1, name: nominal_balances, dtype: float64, description: "assignats in circulation, millions of livres"}
   row_count_floor: 81             # frozen historical extract: exact by design
   date_range: {start: 1789.833, end: 1796.5}
   known_nulls: {}                 # no NaNs present
