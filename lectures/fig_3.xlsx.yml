@@ -1,0 +1,89 @@
+# Manifest for fig_3.xlsx — one of three research spreadsheets assembled by
+# Sargent and Velde for "Macroeconomic Features of the French Revolution".
+#
+# Note for anyone reading git history: a source-format twin, fig_3.ods, was
+# dropped in #10 after being verified a pure format duplicate (identical single
+# sheet, identical 34x6 frame, DataFrame.equals true). It remains recoverable
+# from history. The full-filename sidecar convention exists because of exactly
+# this pair -- see manifest-schema.yml.
+
+filename: fig_3.xlsx
+title: French Revolution — figure 3 series (Sargent-Velde)
+description: >
+  Small working sheet holding the series behind one figure of the French
+  Revolution analysis. Four numeric columns over thirty rows, read as a block.
+
+class: verbatim
+
+source:
+  name: Sargent and Velde, "Macroeconomic Features of the French Revolution" — supporting spreadsheets
+  url: https://www.journals.uchicago.edu/doi/10.1086/261992
+  doi: 10.1086/261992
+  citation: >
+    Sargent, Thomas J. and François R. Velde (1995). Macroeconomic Features of
+    the French Revolution. Journal of Political Economy, 103(3), 474-518.
+  note: >
+    One of the three spreadsheets the consuming lecture attributes to the
+    authors of the 1995 article. Working files, not journal-distributed.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-06
+  # No formal licence stated; the authors' own research data, served publicly
+  # from lecture-python-intro for years. Republished with attribution under the
+  # record-and-track policy (#35).
+
+retrieved: null                 # unrecorded -- inherited bytes
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-06 by git blob hash against
+# lecture-python-intro's lectures/datasets/fig_3.xlsx -- identical.
+
+integrity:
+  sha256: bf66aa332439c8a5146d96a71dc4b4b0201bb2ed381480c79e8ed7ce055e3ecf
+  upstream:
+    status: unverifiable
+    date: 2026-08-06
+    against: null
+    note: >
+      Author-assembled research sheet with prose-only provenance and no
+      internal labelling -- the columns are unheaded, so even their meaning
+      comes from how the lecture plots them rather than from the file. Values
+      can be spot-checked against the published figure but not re-derived.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# READ POSITIONALLY -- see the warning in assignat.xlsx.yml. The single sheet
+# is 35x6; the lecture takes a 30x4 block out of the middle of it, so the five
+# rows and two columns outside that block are load-bearing padding: deleting
+# them shifts the read.
+
+schema:
+  format: xlsx
+  sheet_count: 1
+  positional_reads: true
+  sheets:
+    - name: Sheet1
+      full_shape: [35, 6]
+      read_as: {usecols: 'C:F', skiprows: 5, nrows: 30, header: null}
+      shape: [30, 4]
+      dtypes: [float64, float64, float64, float64]
+      known_nulls_per_column: [8, 8, 4, 9]
+      description: >
+        Four unheaded series read as a block. Nulls are ragged series ends
+        within the block, not damage -- the lecture plots each column over its
+        own valid span.
+  date_range: {start: 1789, end: 1796}
+  row_count_floor: 30             # exact by design -- a frozen 30-row block
+  known_nulls: {}                 # declared per column above
+
+consumers: []                     # empty until the Track A repoint lands
+
+builder: null
+builder_status: not-applicable    # verbatim republication -- nothing to build

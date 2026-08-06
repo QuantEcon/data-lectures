@@ -1,0 +1,97 @@
+# Manifest for nom_balances.npy — nominal assignat balances, French Revolution.
+#
+# Twin of caron.npy, and the second of the two files in this migration with NO
+# recorded provenance. The consuming lecture's "Data Sources" section names
+# three spreadsheets and does not mention either .npy file.
+
+filename: nom_balances.npy
+title: French Revolution — monthly nominal assignat balances, 1789-1796
+description: >
+  81 monthly observations of assignats in circulation, rising from 90 in late
+  1789 to a peak of 37,540.9 and standing at 33,555.59 in mid-1796. The
+  consuming lecture multiplies a 63-row slice of this series by the assignat's
+  specie value to obtain real balances.
+
+class: constructed
+
+source:
+  name: unrecorded
+  url: null
+  citation: >
+    Consumed by analysis reproducing Sargent, Thomas J. and François R. Velde
+    (1995). Macroeconomic Features of the French Revolution. Journal of
+    Political Economy, 103(3), 474-518.
+  note: >
+    No source recorded anywhere. Unlike its twin, the filename offers no lead
+    beyond the quantity it holds. The natural candidate is the assignat
+    circulation series in the authors' own workbooks -- see integrity.upstream
+    for why that was tested and rejected.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-06
+  # Source unestablished, so no licence can be established either. Served
+  # publicly from lecture-python-intro for years; migrated under the
+  # record-and-track policy (#35) and logged there. Needs its source settled
+  # before its licence can be.
+
+retrieved: null                 # unrecorded -- inherited bytes
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-06 by git blob hash against
+# lecture-python-intro's lectures/datasets/nom_balances.npy -- identical.
+#
+# The second of the two LOCAL-PATH reads in lecture-python-intro
+# (`np.load('datasets/nom_balances.npy')`) that break downloaded and Colab
+# notebooks. Repointing it is the point of the migration.
+
+integrity:
+  sha256: 8790a75e023f552dd9b444ffe4b490a0abbccf4ffc745bc34c76facf847b972a
+  upstream:
+    status: unverifiable
+    date: 2026-08-06
+    against: null
+    note: >
+      No source, no builder, no internal metadata. Actively checked 2026-08-06
+      against the committed Sargent-Velde workbooks: the terminal value
+      33,555.59 does occur in several assignat.xlsx sheets (Fig6, Data, Data2,
+      Ramel, Ramel2, seignor), but no column in any of them contains this
+      81-value series contiguously, and the series maximum 37,540.9 appears
+      nowhere. So the array overlaps the workbooks without being extractable
+      from them -- a partial lead, not a recovery.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: npy
+  dtype: float64
+  shape: [81, 2]
+  columns:
+    - {index: 0, name: date, dtype: float64, description: decimal year, monthly steps of 1/12}
+    - {index: 1, name: nominal_balances, dtype: float64, description: assignats in circulation, millions of livres}
+  row_count_floor: 81             # frozen historical extract: exact by design
+  date_range: {start: 1789.833, end: 1796.5}
+  known_nulls: {}                 # no NaNs present
+  note: >
+    Row alignment is load-bearing across files: the lecture takes rows 14:77
+    of this array to pair with all 63 rows of caron.npy. The leading 14 rows
+    (late 1789 through 1790) exist to extend the circulation series before the
+    price series begins, and must not be trimmed.
+
+consumers: []                     # empty until the Track A repoint lands
+
+# ---------------------------------------------------------------------------
+# Builder
+# ---------------------------------------------------------------------------
+# Inherited constructed-without-builder, tracked for recovery in PLAN Phase 9.
+# Recovery starts with identifying the source, as for caron.npy.
+
+builder: null
+builder_status: unrecovered

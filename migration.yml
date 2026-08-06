@@ -172,6 +172,97 @@ datasets:
         date: 2026-08-04
     cutover: null
 
+  # ---------------------------------------------------------------------------
+  # Track A, the intro static batch -- landed in the Feb 2025 migration
+  # (data#5-#7) but never repointed, which is the gap #4 recorded. Manifests
+  # written 2026-08-06; each flips to `repointed` when its intro + wasm PR set
+  # merges. Every one of these has TWO consuming repos, so all consumers move
+  # together (PLAN, "Repoint rules").
+  # ---------------------------------------------------------------------------
+
+  mpd2020.xlsx:
+    pilot: A1
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
+  longprices.xls:
+    pilot: A2
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
+  chapter_3.xlsx:
+    pilot: A2
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
+  assignat.xlsx:
+    pilot: A3
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
+  dette.xlsx:
+    pilot: A3
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
+  fig_3.xlsx:
+    pilot: A3
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
+  caron.npy:
+    pilot: A3
+    status: landed
+    # Local-path read in intro (np.load('datasets/caron.npy')) -- one of the
+    # two Colab-breaking reads this batch retires, the same failure mode P1
+    # fixed for msy_fishery.
+    prior_pattern: local-path
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
+  nom_balances.npy:
+    pilot: A3
+    status: landed
+    prior_pattern: local-path
+    landed:
+      pr: QuantEcon/data-lectures#5
+      date: 2025-02-14
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people

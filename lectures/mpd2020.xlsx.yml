@@ -1,0 +1,123 @@
+# Manifest for mpd2020.xlsx — Maddison Project Database 2020.
+#
+# Landed in the Feb 2025 migration (data#5-#7) and byte-identical to the copy
+# lecture-python-intro consumes today; the repoint is Track A, PR set 1.
+
+filename: mpd2020.xlsx
+title: Maddison Project Database 2020 — GDP per capita and population, 1 CE to 2018
+description: >
+  Historical estimates of real GDP per capita (2011 US$) and mid-year
+  population for 169 countries, some series reaching back to the first
+  century. The reference dataset for long-run comparative growth.
+
+# NOT verbatim, despite being an upstream release. Three header labels on the
+# `Regional data` sheet were edited locally -- see integrity.upstream below.
+# A file we have modified is not "republished as distributed", so it is
+# classified `constructed` rather than misreporting it as untouched.
+class: constructed
+
+source:
+  name: Maddison Project Database, version 2020
+  url: https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2020
+  data_url: https://www.rug.nl/ggdc/historicaldevelopment/maddison/data/mpd2020.xlsx
+  version: "2020"
+  citation: >
+    Bolt, Jutta and Jan Luiten van Zanden (2020). Maddison style estimates of
+    the evolution of the world economy. A new 2020 update. Maddison Project
+    Database, version 2020.
+  # The workbook's own `Notes` sheet states a citation policy beyond the
+  # licence: the ORIGINAL papers (listed on the `Sources` sheet) must be cited
+  # when the data is shown in any graphical form, or when a subset of fewer
+  # than twelve countries is used. The consuming lecture does both, so this is
+  # a live obligation rather than a formality.
+  citation_policy: >
+    Original source papers must be cited when data is shown graphically or
+    when fewer than 12 countries are used; see the `Sources` sheet.
+
+license:
+  name: CC BY 4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+  redistribution: permitted
+  verified: 2026-08-06
+  # Established against the release page itself, which states the database
+  # "is licensed under a Creative Commons Attribution 4.0 International
+  # License". Attribution is the sole condition; the citation above and the
+  # citation_policy note carry it.
+
+retrieved: null                 # unrecorded -- inherited bytes, see AGENTS.md
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (a repoint gate, not a manifest field): verified 2026-08-06
+# by git blob hash against lecture-python-intro's copy at
+# lectures/datasets/mpd2020.xlsx -- identical, so the repoint cannot change
+# lecture output.
+
+integrity:
+  sha256: f67af0fd599fcebd9b92a0ad65472998f4548ea006e6b7c0018d4ade76e3bceb
+  upstream:
+    status: verified
+    date: 2026-08-06
+    against: https://www.rug.nl/ggdc/historicaldevelopment/maddison/data/mpd2020.xlsx
+    note: >
+      Re-fetched from the Maddison release and compared cell by cell across all
+      six sheets. Every data value matches, including all 21,683 rows of `Full
+      data`. THREE header labels on `Regional data` differ and are local edits:
+      row0 col1 "GDP pc 2011 prices" -> "gdppc_2011", row0 col9 "Population" ->
+      "pop", and row0 col18 "gdppc_2011" added where upstream is empty. The
+      lecture reads that sheet with header=(0,1,2), so these renames are
+      load-bearing -- replacing this file with a pristine upstream copy would
+      silently break long_run_growth. Byte hashes differ (1,765,204 vs
+      1,764,793) consistent with a re-save plus these edits.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Multi-sheet workbook: the contract is the sheets the lectures actually read,
+# not a single flat table. Sheets not listed here are shipped as part of the
+# upstream release and carry provenance (`Notes`, `Sources`) but are not read.
+
+schema:
+  format: xlsx
+  sheets:
+    - name: Full data
+      read_as: {header: 0}
+      shape: [21682, 5]
+      columns:
+        - {name: countrycode, dtype: str, description: ISO3 country code}
+        - {name: country, dtype: str, description: country name}
+        - {name: year, dtype: int64, description: calendar year}
+        - {name: gdppc, dtype: float64, description: real GDP per capita, 2011 US$}
+        - {name: pop, dtype: float64, description: mid-year population, thousands}
+      known_nulls: {gdppc: 1976, pop: 4483}
+      date_range: {start: 1, end: 2018}
+    - name: Regional data
+      read_as: {header: [0, 1, 2], index_col: 0}
+      shape: [23, 18]
+      date_range: {start: 1820, end: 2018}
+      note: column labels are locally edited -- see integrity.upstream
+  # Not read by any lecture, but shipped with the release and kept:
+  #   Notes, Sources (provenance), GDP pc, Population (wide reshapes of Full data)
+  row_count_floor: 21682          # frozen release: exact by design
+  known_nulls: {}                 # declared per sheet above
+
+# ---------------------------------------------------------------------------
+# Consumers
+# ---------------------------------------------------------------------------
+# Empty until the Track A repoint lands. lecture-python-intro and lecture-wasm
+# both read this file today, but from intro's own copy, not from here.
+
+consumers: []
+
+# ---------------------------------------------------------------------------
+# Builder
+# ---------------------------------------------------------------------------
+# The transformation is exactly three header renames, enumerated in
+# integrity.upstream. No script was committed for them, so the status is
+# `unrecovered` -- but unusually for that state, recovery here is cheap and
+# fully specified rather than lost.
+
+builder: null
+builder_status: unrecovered
