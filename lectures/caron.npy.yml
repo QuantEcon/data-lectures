@@ -90,7 +90,11 @@ schema:
     of this array with rows 14:77 of nom_balances.npy. Changing the length of
     either silently misaligns the other.
 
-consumers: []                     # empty until the Track A repoint lands
+# Every lecture that reads this file FROM THIS REPO. Empty does not mean the
+# file is unused -- it may still be consumed from a lecture repo's own copy,
+# which is exactly what a repoint moves. Populated in the repoint PR, at the
+# same time migration.yml flips to `repointed` (PLAN, "Repoint rules").
+consumers: []
 
 # ---------------------------------------------------------------------------
 # Builder
