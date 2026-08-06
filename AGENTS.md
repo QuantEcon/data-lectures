@@ -65,11 +65,21 @@ When writing or reviewing URLs that fetch from this repo (in docs, tests, or lec
 - Final form once Pages is live: `https://data.quantecon.org/lectures/<filename>`
 - Never reference a non-default branch in a published URL.
 
-### LFS
+### LFS, and `sources/` vs `lectures/`
 
-- LFS is **per-path**, opt-in, large binaries only. Never add a blanket rule like `*.csv filter=lfs`.
-- Do not LFS-track an **existing** file until you've confirmed no consumer fetches it via `raw.githubusercontent.com` — converting silently turns their download into a pointer file.
-- The Pages deploy workflow must checkout with `lfs: true` or it publishes pointer files.
+**The published tree is plain git. Do not put an LFS object in `lectures/`** (settled 2026-08-06, PLAN Phase 3). Every published dataset fits comfortably in plain git — the largest, `SCF_plus_mini_no_weights.csv`, is 72.4 MiB against GitHub's 100 MiB limit. Keeping it that way means **no consumer can ever hit the raw-vs-media trap above**; the hazard is removed rather than managed.
+
+LFS exists here for one purpose: **upstream inputs that builders consume and no lecture reads**, which live in `sources/` and are never served.
+
+- `lectures/<file>` — a published dataset. Plain git, sidecar manifest required, its filename is an API.
+- `sources/<file>` — a builder input. Per-path LFS, **no** manifest, not served, recorded instead in `sources/README.md` — the audit trail: origin, retrieval date, licence, upstream identifier (DOI where one exists), `sha256`, and the builder that consumes it.
+
+Rules that still apply:
+
+- LFS is **per-path**, opt-in, large binaries only. Never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta`.
+- Do not LFS-track an **existing** file until you've confirmed no consumer fetches it via `raw.githubusercontent.com` — converting silently turns their download into pointer text.
+- A builder must read its input from `sources/`, never over the network from another QuantEcon repo. That is how a retired repo becomes load-bearing again.
+- The Pages deploy checks out with `lfs: false` while nothing published is an LFS object. If that ever changes, it must become `lfs: true` or Pages publishes pointer files.
 
 ### Dynamic builders
 

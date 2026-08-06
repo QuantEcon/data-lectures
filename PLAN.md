@@ -109,10 +109,22 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 
 ### Phase 3 — Storage
 
-- [ ] Per-path LFS via `.gitattributes` — large binaries only, small teaching files plain git (data#1; avoid `high_dim_data`'s blanket `*.csv` rule)
-- [ ] Fold in `high_dim_data` content (data#2; coordinate with meta#337 for consuming-lecture repoints and the branch-only SCF file)
+**Settled 2026-08-06 — the published tree stays 100% plain git.** The two files that drove the LFS requirement do not actually need it: `SCF_plus_mini.csv` is 31.3 MiB and `SCF_plus_mini_no_weights.csv` is 72.4 MiB, both comfortably under GitHub's 100 MiB limit. Keeping `lectures/` free of LFS entirely means **no consumer can ever meet the raw-vs-media URL trap** — it removes the hazard rather than managing it, and the sequencing constraint below stops applying to anything served.
 
-**Sequencing constraint:** enabling LFS breaks every `raw.githubusercontent.com` URL for the paths it covers (pointer files). Do not LFS-track existing files until consumers use a URL form that survives it (`github.com/{org}/{repo}/raw/{ref}/…` interim, or Pages final).
+Only one file genuinely forces LFS, and it is not a dataset:
+
+| Path | Contents | Storage | Served? |
+| --- | --- | --- | --- |
+| `lectures/` | every published dataset, including both SCF minis and the 4 `cross_section` CSVs | **plain git** | yes |
+| `sources/` | upstream inputs that builders consume but no lecture reads — `SCF_plus.dta` (99.1 MiB) | **per-path LFS** | **no** |
+
+- [ ] Add `sources/` for builder inputs, with `sources/README.md` as the **audit trail**: one row per committed file recording where it came from, when, its licence, the upstream identifier (DOI where one exists), its `sha256`, and which builder consumes it. A file in `sources/` is not a published dataset and gets no sidecar manifest — this README is its provenance record
+- [ ] Per-path LFS via `.gitattributes`, scoped to `sources/` only — never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta` (data#1)
+- [ ] Fold in `high_dim_data` content (data#2; coordinate with meta#337 for consuming-lecture repoints)
+- [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving
+- [ ] Set the Pages job's checkout to `lfs: false` once the above holds — nothing under `lectures/` is an LFS object, so the 99 MiB `.dta` never needs downloading on a dashboard build (it runs on every push to `main` plus weekly)
+
+**Sequencing constraint** (still applies to anything that *does* enter LFS): enabling LFS breaks every `raw.githubusercontent.com` URL for the paths it covers — those URLs return pointer text, not data, so consumers fail with a confusing parse error rather than a 404. Do not LFS-track an existing file until its consumers use a form that survives it. Keeping the published tree plain-git means no consumer-facing path is ever affected.
 
 ### Phase 4 — Publishing
 
