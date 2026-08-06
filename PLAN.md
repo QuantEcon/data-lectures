@@ -42,7 +42,7 @@ This repository is being shaped into the **single canonical repository for data 
 
 ## Repoint rules
 
-Four rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*.
+Five rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*, and rule 5 about *URL form*.
 
 ### 1. Repoint a sibling reader before deleting the file it reads
 
@@ -101,6 +101,21 @@ So when a migration finds that the committed file differs from what upstream pub
 Two deltas look alike and need opposite responses. *Upstream moved* — a newer vintage exists; adopting it means a **new filename**, per "Corrections vs vintages" in `AGENTS.md`, so consumers opt in. *Our copy diverges* — upstream is unchanged but our file was modified; resolving means reconciling the edit. `mpd2020.xlsx` is the first recorded instance of the second kind, and it is instructive: the local edits are load-bearing for the consuming lecture, so the file and the lecture have to move together.
 
 Detecting these automatically rather than by accident is proposed in [#40](https://github.com/QuantEcon/data-lectures/issues/40).
+
+### 5. In `lecture-wasm`, the URL *form* is part of the contract — use a CORS-clean host
+
+`lecture-wasm` executes its code cells in the reader's browser (JupyterLite/Pyodide via `pyodide_http`), so every pandas URL read is a cross-origin browser fetch, CORS-checked on **every redirect hop**. The `github.com/<org>/<repo>/raw/…` form is a 302 whose response carries an empty `access-control-allow-origin` header — the browser rejects it before the redirect is ever followed. The direct hosts serve `access-control-allow-origin: *` and work.
+
+Learned from the independent validation ([#45](https://github.com/QuantEcon/data-lectures/issues/45) → [#46](https://github.com/QuantEcon/data-lectures/issues/46)): the set 1/2 wasm repoints normalised wasm's URLs to intro's `github.com/…/raw/` form — the one form wasm's runtime cannot fetch. The `raw.githubusercontent.com` URLs they replaced were a deliberate wasm adaptation that looked like an inconsistency. Nothing in CI can catch the break: it exists only inside a browser, and the static pages still return 200 because the wasm build bakes no outputs — figures appear only after in-browser execution, which dies at the first data cell.
+
+| Consumer runtime | Form to use |
+| --- | --- |
+| CPython — intro site notebooks, Colab, every other series | any resolving form; `github.com/…/raw/` is fine |
+| Browser — `lecture-wasm` code-cell reads | `raw.githubusercontent.com/QuantEcon/data-lectures/main/lectures/<file>`, or `media.githubusercontent.com/media/…` for LFS-tracked files |
+
+`{download}` targets and prose links are plain navigations — CORS does not apply, and the `github.com` form is fine there. The audit classifies references by org/repo across all URL forms, so both spellings count as the same pattern: the strict check **cannot enforce this rule**; the repoint PR has to. Quick test from any `quantecon.github.io` page console: `fetch('<url>')` — the bad form rejects, the good form resolves.
+
+Phase 4 inherits the requirement: `data.quantecon.org` must serve `access-control-allow-origin: *` before `lecture-wasm` can cut over to it — recorded as an acceptance criterion on [#37](https://github.com/QuantEcon/data-lectures/issues/37).
 
 ## Migration tracks
 
