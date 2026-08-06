@@ -43,6 +43,8 @@ Both are cheap to follow and expensive to discover. `PLAN.md` carries the reason
 - **Never delete a file a sibling repo reads.** `lecture-wasm` fetches `lecture-python-intro`'s *committed blobs* by URL, so deleting intro's copy in a repoint PR 404s the wasm build immediately. "Delete the lecture repo's own copy in the same repoint PR" applies only where no sibling reads it; where one does, the sibling's repoint lands first or in the same set.
 - **Repoint every consumer of a dataset together.** The strict audit has no green state for a partially-repointed dataset — `pending`/`landed` fails once any consumer reads data-lectures, and `repointed`/`final` fails while any consumer still does not. Land the lecture repoints first, then flip `migration.yml`; that flip is the push that re-runs the audit, so reality and the tracker agree by the time it runs.
 
+- **A migration moves bytes; it does not update them.** Land the copy the lectures already consume, validated byte-identical — that is what makes a repoint provably unable to change a figure. If the committed file differs from what upstream publishes today, migrate it unchanged anyway, record the delta in `integrity.upstream` **and** in the register at [#39](https://github.com/QuantEcon/data-lectures/issues/39), and leave the decision for after the migration. Adopting a newer vintage changes lecture output and is an author's call, not an infrastructure one — and per "Corrections vs vintages" below it gets a **new filename**, never a silent replacement.
+
 Cross-repo repoints are worked from [`QuantEcon/workspace-lectures`](https://github.com/QuantEcon/workspace-lectures) — same branch name in each repo, one PR per repo, no aggregate PR.
 
 ### Corrections vs vintages
