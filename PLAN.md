@@ -42,7 +42,7 @@ This repository is being shaped into the **single canonical repository for data 
 
 ## Repoint rules
 
-Two rules learned the hard way. Both are about *ordering*, both are cheap to follow and expensive to discover, and neither is enforced by CI — the strict audit catches the second only after the fact.
+Three rules learned the hard way. The first two are about *ordering*, both cheap to follow and expensive to discover, and neither is enforced by CI — the strict audit catches the second only after the fact. The third is about *scope*.
 
 ### 1. Repoint a sibling reader before deleting the file it reads
 
@@ -59,6 +59,22 @@ The strict audit has **no green state for a partially-repointed dataset**. `scri
 **16 of the 31 remaining datasets have two consuming repos, and every one of them is `lecture-python-intro` + `lecture-wasm`.** There is no other cross-series coupling left; the last one was the P2 `pandas_panel` trio, already done.
 
 Practically: one branch name across data-lectures + every consuming repo, PRs opened together, lecture repoints merged first, then the `migration.yml` flip to `repointed` — that last push is what re-runs the audit, and by then reality and the tracker agree.
+
+### 3. A migration moves bytes; it does not update them
+
+The copy that lands here is the copy the lectures **already consume**, validated byte-identical in the repoint PR. That is what makes a repoint safe to merge: it provably cannot change a single figure.
+
+Adopting a newer upstream vintage is a *different change* with a different risk profile — it does change lecture output, it needs figures re-reviewed, and it is an author-facing decision rather than an infrastructure one. Conflating the two turns every repoint into a content review and stalls the programme.
+
+So when a migration finds that the committed file differs from what upstream publishes today:
+
+1. **Migrate what the lectures use**, unchanged, with the byte-compare gate as normal.
+2. **Record the delta** in the dataset's manifest (`integrity.upstream`) *and* in the register at [#39](https://github.com/QuantEcon/data-lectures/issues/39) — the manifest makes it visible in the catalog from day one, the register is where it gets reasoned about.
+3. **Review the register once the migration completes**, and decide each case on its merits.
+
+Two deltas look alike and need opposite responses. *Upstream moved* — a newer vintage exists; adopting it means a **new filename**, per "Corrections vs vintages" in `AGENTS.md`, so consumers opt in. *Our copy diverges* — upstream is unchanged but our file was modified; resolving means reconciling the edit. `mpd2020.xlsx` is the first recorded instance of the second kind, and it is instructive: the local edits are load-bearing for the consuming lecture, so the file and the lecture have to move together.
+
+Detecting these automatically rather than by accident is proposed in [#40](https://github.com/QuantEcon/data-lectures/issues/40).
 
 ## Migration tracks
 

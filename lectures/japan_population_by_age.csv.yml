@@ -71,8 +71,8 @@ schema:
   format: csv
   columns:
     - {name: age, dtype: int64, description: single year of age; 100 means "100 and over"}
-    - {name: total_population, dtype: int64, description: total population at this age, in thousands}
-    - {name: japanese_population, dtype: int64, description: Japanese-national population at this age, in thousands}
+    - {name: total_population, dtype: int64, description: "total population at this age, in thousands"}
+    - {name: japanese_population, dtype: int64, description: "Japanese-national population at this age, in thousands"}
   row_count_floor: 101
   date_range: {start: 2024, end: 2024}
   known_nulls: {}

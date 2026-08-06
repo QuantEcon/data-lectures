@@ -1,0 +1,103 @@
+# Manifest for chapter_3.xlsx — QuantEcon's transcription of the appendix
+# tables to chapter 3 of Sargent's "Rational Expectations and Inflation".
+
+filename: chapter_3.xlsx
+title: The Ends of Four Big Inflations — appendix tables, transcribed
+description: >
+  Twenty-seven tables underlying the four post-World-War-I hyperinflation
+  figures for Austria, Hungary, Poland and Germany: budget receipts and
+  expenditures, note circulation, retail and wholesale price indices, and
+  exchange rates against the US dollar, 1919-1925.
+
+# Constructed, and unambiguously so: the numbers were transcribed by hand from
+# printed appendix tables into this workbook. That transcription is our
+# processing, and it is the step a builder would have to reproduce.
+class: constructed
+
+source:
+  name: Sargent, "Rational Expectations and Inflation", chapter 3 appendix tables
+  url: https://press.princeton.edu/books/paperback/9780691158709/rational-expectations-and-inflation
+  citation: >
+    Sargent, Thomas J. (2013). Rational Expectations and Inflation, third
+    edition. Princeton, New Jersey: Princeton University Press. Chapter 3,
+    "The Ends of Four Big Inflations", and its appendix tables.
+  note: >
+    The consuming lecture is explicit about the provenance: "Data underlying
+    our graphs appear in tables in an appendix to chapter 3 ... We have
+    transcribed all of these data into a spreadsheet." The transcription is
+    QuantEcon's own work; the underlying figures are the book's.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-06
+  # The transcription is QuantEcon's own work. The underlying figures are
+  # historical macroeconomic statistics reproduced in a published book -- data,
+  # not expression. Served publicly from lecture-python-intro for years and
+  # republished here with attribution under the record-and-track policy (#35).
+
+retrieved: null                 # unrecorded -- inherited bytes
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-06 by git blob hash against
+# lecture-python-intro's lectures/datasets/chapter_3.xlsx -- identical.
+
+integrity:
+  sha256: ee17d0031f17c663c4b96765dad85dc4d873b2c6cd00636a728b093da1d30923
+  upstream:
+    status: unverifiable
+    date: 2026-08-06
+    against: null
+    note: >
+      A hand transcription from a printed source. Verification means checking
+      cells against the book's appendix, which is possible for spot-checks but
+      cannot be automated or re-derived, and no record exists of who
+      transcribed it or when. Recorded honestly rather than being labelled
+      verbatim, which would imply an upstream file that does not exist.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# 27 sheets named Table3.1 .. Table3.27. The lecture loops over a subset,
+# reading each with header=1 and truncating to a per-table row count held in
+# the lecture rather than here. Table shapes vary by design -- these are
+# distinct historical tables, not one series split up.
+
+schema:
+  format: xlsx
+  sheets_pattern: 'Table3\.\d+'
+  sheet_count: 27
+  read_as: {header: 1}
+  # Column lists are complete for the sheets shown, not truncated -- the count
+  # must equal the second element of `shape`, or the sample is not a contract.
+  sheets_sample:
+    - name: Table3.1
+      shape: [6, 6]
+      columns: [Budget Beginning, Budget Ending, Receipts, Expenditures, Deficit,
+                "Percentage of expenditures covered by new issues of paper money"]
+    - {name: Table3.2, shape: [78, 3], columns: [Year, Month, Total Note Circulation]}
+    - {name: Table3.3, shape: [44, 3], columns: [Year, Month, "Retail price index, 52 commodities"]}
+    - {name: Table3.4, shape: [74, 3], columns: [Year, Month, Exchange Rate]}
+  date_range: {start: 1919, end: 1925}
+  row_count_floor: null           # varies per sheet; the invariant is sheet_count
+  known_nulls: {}
+  note: >
+    Entries are strings needing cleanup (the lecture applies a `process_entry`
+    map to strip whitespace and handle footnote markers), so dtypes are not
+    stable across sheets and are deliberately not asserted here.
+
+consumers: []                     # empty until the Track A repoint lands
+
+# ---------------------------------------------------------------------------
+# Builder
+# ---------------------------------------------------------------------------
+# A constructed dataset should ship its builder. This one cannot: the
+# construction was manual transcription from print. Recorded as `unrecovered`
+# per AGENTS.md rather than misclassified as verbatim (PLAN Phase 9).
+
+builder: null
+builder_status: unrecovered

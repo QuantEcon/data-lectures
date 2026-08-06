@@ -1,0 +1,109 @@
+# Manifest for assignat.xlsx — one of three research spreadsheets assembled by
+# Sargent and Velde for "Macroeconomic Features of the French Revolution".
+
+filename: assignat.xlsx
+title: French Revolution — assignat issues, budgets and seigniorage (Sargent-Velde)
+description: >
+  Working spreadsheet behind the monetary side of the French Revolution
+  analysis: assignat circulation and denominations, revolutionary budgets,
+  seigniorage, exchange rates and price indices, roughly 1789-1796.
+
+# The authors' own research workbook, republished as they assembled it. We
+# apply no processing to the file itself -- the lecture slices ranges out of it
+# at read time.
+class: verbatim
+
+source:
+  name: Sargent and Velde, "Macroeconomic Features of the French Revolution" — supporting spreadsheets
+  url: https://www.journals.uchicago.edu/doi/10.1086/261992
+  doi: 10.1086/261992
+  citation: >
+    Sargent, Thomas J. and François R. Velde (1995). Macroeconomic Features of
+    the French Revolution. Journal of Political Economy, 103(3), 474-518.
+  note: >
+    The consuming lecture names the provenance directly: "This lecture uses
+    data from three spreadsheets assembled by [Sargent and Velde 1995]" --
+    this file, dette.xlsx and fig_3.xlsx. The spreadsheets are the authors'
+    working files and are not published alongside the article.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-06
+  # No formal licence stated; the authors' own research data, served publicly
+  # from lecture-python-intro for years. Republished here with attribution
+  # under the record-and-track policy (#35).
+
+retrieved: null                 # unrecorded -- inherited bytes
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-06 by git blob hash against
+# lecture-python-intro's lectures/datasets/assignat.xlsx -- identical.
+
+integrity:
+  sha256: 72213ff18a994f63520e9fc79d0c2117c451697cb29419da07c4d0c554503bc9
+  upstream:
+    status: unverifiable
+    date: 2026-08-06
+    against: null
+    note: >
+      Author-assembled research workbook with prose-only provenance. Not
+      distributed by the journal, no internal source list, no builder. Values
+      can be spot-checked against the figures in the published article but not
+      re-derived.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# READ POSITIONALLY. Every consuming read uses header=None with explicit
+# usecols/skiprows/nrows, so the contract is a set of CELL RANGES, not named
+# columns. Inserting or deleting a row or column anywhere above or left of a
+# range silently shifts what the lecture plots, with no error. Treat the
+# ranges below as the file's public interface.
+
+schema:
+  format: xlsx
+  sheet_count: 18
+  positional_reads: true
+  sheets:
+    - name: Budgets
+      read_as: {usecols: 'J:K', skiprows: 22, nrows: 52, header: null}
+      shape: [52, 2]
+      dtypes: [float64, float64]
+      known_nulls_total: 2
+      description: revolutionary government receipts and expenditures
+    - name: seignor
+      read_as: {usecols: 'F', skiprows: 6, nrows: 75, header: null}
+      shape: [75, 1]
+      dtypes: [float64]
+      known_nulls_total: 0
+      description: monthly seigniorage from assignat issues
+    - name: Data
+      read_as: {usecols: 'P:Q', skiprows: 4, nrows: 80, header: null}
+      shape: [80, 2]
+      dtypes: [float64, float64]
+      known_nulls_total: 17
+      description: assignat circulation and price level
+    - name: Data
+      read_as: {usecols: 'L', skiprows: 4, nrows: 80, header: null}
+      shape: [80, 1]
+      dtypes: [float64]
+      known_nulls_total: 0
+      description: monthly index aligned with the P:Q block above
+  # 14 further sheets ship with the workbook and are not read by any lecture:
+  #   Intro, Fig6, Data2, Denomina, Dom-nat, Exchge, Exchge2, Exchge3,
+  #   Inflatio, Metal, Mint, Ramel, Ramel2, Revoluti, Post-95.
+  # Kept as the authors assembled them -- they are the working provenance for
+  # the ranges above.
+  date_range: {start: 1789, end: 1796}
+  row_count_floor: null           # per-range, declared above
+  known_nulls: {}
+
+consumers: []                     # empty until the Track A repoint lands
+
+builder: null
+builder_status: not-applicable    # verbatim republication -- nothing to build

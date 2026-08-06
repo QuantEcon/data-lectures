@@ -1,0 +1,114 @@
+# Manifest for dette.xlsx — one of three research spreadsheets assembled by
+# Sargent and Velde for "Macroeconomic Features of the French Revolution".
+
+filename: dette.xlsx
+title: French Revolution — public debt, military spending and revenues (Sargent-Velde)
+description: >
+  Working spreadsheet behind the fiscal side of the French Revolution
+  analysis: French and British military expenditure through the eighteenth
+  century wars, the structure and servicing of the French royal debt, tax
+  revenues, annuities and interest rates, roughly 1685-1800.
+
+class: verbatim
+
+source:
+  name: Sargent and Velde, "Macroeconomic Features of the French Revolution" — supporting spreadsheets
+  url: https://www.journals.uchicago.edu/doi/10.1086/261992
+  doi: 10.1086/261992
+  citation: >
+    Sargent, Thomas J. and François R. Velde (1995). Macroeconomic Features of
+    the French Revolution. Journal of Political Economy, 103(3), 474-518.
+  note: >
+    One of the three spreadsheets the consuming lecture attributes to the
+    authors of the 1995 article. Working files, not journal-distributed.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-06
+  # No formal licence stated; the authors' own research data, served publicly
+  # from lecture-python-intro for years. Republished with attribution under the
+  # record-and-track policy (#35).
+
+retrieved: null                 # unrecorded -- inherited bytes
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-06 by git blob hash against
+# lecture-python-intro's lectures/datasets/dette.xlsx -- identical.
+
+integrity:
+  sha256: 94f766090a000d25509baea2cae8a8adc6f89b22dda068ec041cec2d88a827ae
+  upstream:
+    status: unverifiable
+    date: 2026-08-06
+    against: null
+    note: >
+      Author-assembled research workbook with prose-only provenance. Not
+      distributed by the journal, no internal source list, no builder. Values
+      can be spot-checked against the figures in the published article but not
+      re-derived.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# READ POSITIONALLY -- see the warning in assignat.xlsx.yml, which applies
+# identically here. Every read is header=None with explicit usecols/skiprows/
+# nrows, so a row or column inserted above or left of a range silently changes
+# what the lecture plots. These ranges are the file's public interface.
+
+schema:
+  format: xlsx
+  sheet_count: 27
+  positional_reads: true
+  sheets:
+    - name: Militspe
+      read_as: {usecols: 'M:X', skiprows: 7, nrows: 102, header: null}
+      shape: [102, 12]
+      dtypes: [float64]
+      known_nulls_total: 0
+      description: British military spending, 1689-1790; column index 4 is plotted
+    - name: Militspe
+      read_as: {usecols: 'D', skiprows: 3, nrows: 105, header: null}
+      shape: [105, 1]
+      dtypes: [float64]
+      known_nulls_total: 32
+      description: French military spending 1685-1789, in 1726 livres
+    - name: Debt
+      read_as: {usecols: 'R:S', skiprows: 5, nrows: 99, header: null}
+      shape: [99, 2]
+      dtypes: [float64, float64]
+      known_nulls_total: 78
+      description: French debt service and revenue series
+    - name: Debt
+      read_as: {usecols: 'P', skiprows: 89, nrows: 15, header: null}
+      shape: [15, 1]
+      dtypes: [float64]
+      known_nulls_total: 0
+      description: terminal-period continuation of the block above
+    - name: Debt
+      read_as: {usecols: 'K', skiprows: 41, nrows: 120, header: null}
+      shape: [120, 1]
+      dtypes: [float64]
+      known_nulls_total: 8
+      description: debt stock series
+  # 25 further sheets ship with the workbook and are not read by any lecture:
+  #   Amortiss, Britain, Cambon, Divers, Experim, Indes, Interest, Irr-matr,
+  #   Macro, Mortalit, P-Etat, Path2, Policy, Popul, Rate-mon, Rentier1,
+  #   Return, Revenues, Studies, Studies2, Units, Viager, White, Viagere,
+  #   Yearly. Kept as the authors assembled them.
+  date_range: {start: 1685, end: 1800}
+  row_count_floor: null           # per-range, declared above
+  known_nulls: {}
+  note: >
+    High null counts in the Debt ranges are structural -- the blocks are
+    sparse layouts in a working spreadsheet, and the lecture indexes specific
+    columns out of them rather than consuming the block whole.
+
+consumers: []                     # empty until the Track A repoint lands
+
+builder: null
+builder_status: not-applicable    # verbatim republication -- nothing to build

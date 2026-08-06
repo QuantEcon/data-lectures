@@ -51,7 +51,7 @@ integrity:
 schema:
   format: csv
   columns:
-    - {name: "", dtype: int64, description: pandas row index (0-based), not used by the lecture}
+    - {name: "", dtype: int64, description: "pandas row index (0-based), not used by the lecture"}
     - {name: Time, dtype: string, description: observation year as ISO date (YYYY-01-01)}
     - {name: Country, dtype: string, description: OECD country name}
     - {name: Series, dtype: string, description: price basis (e.g. "In 2015 constant prices at 2015 USD PPPs")}

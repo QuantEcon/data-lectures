@@ -97,8 +97,11 @@ def fmt_integrity(integrity) -> str:
         return "?"
     up = integrity.get("upstream") or {}
     status = up.get("status", "?")
-    mark = {"verified": "✅", "spot-checked": "◑", "unverifiable": "⚠️",
-            "unverified": "…", "failing": "❌"}.get(status, "")
+    # `diverged` is checked-and-differs: not a clean pass, but not a defect
+    # either — a known, accepted delta tracked in the register (#39). It needs
+    # its own mark so it cannot be misread as either ✅ or ❌.
+    mark = {"verified": "✅", "spot-checked": "◑", "diverged": "⇄",
+            "unverifiable": "⚠️", "unverified": "…", "failing": "❌"}.get(status, "")
     return f"{mark} {status}".strip()
 
 
@@ -124,15 +127,24 @@ def build(manifests) -> str:
     lines.append("# Dataset catalog — `QuantEcon/data-lectures`")
     lines.append("")
     lines.append(
-        "The migrated-dataset registry, **auto-generated** from the sidecar "
-        "manifests (`lectures/*.yml`). Do not edit by hand — run "
+        "The dataset registry, **auto-generated** from the sidecar manifests "
+        "(`lectures/*.yml`). Do not edit by hand — run "
         "`python scripts/build_catalog.py`. A dataset appears here once it has a "
-        "manifest; files not yet migrated are tracked in "
-        "[PLAN.md](PLAN.md) Phase 9."
+        "manifest, which may be before its consuming lectures are repointed — "
+        "an empty **Used by** column means the file is here and documented but "
+        "no lecture reads it from this repo yet. Files still to migrate are "
+        "tracked in [PLAN.md](PLAN.md)."
     )
     lines.append("")
+    # `consumers` is the honest test of "in use": a manifest can land ahead of
+    # its repoint, so counting manifests would overstate what lectures read.
+    in_use = sum(1 for m in manifests if m.get("consumers"))
+    awaiting = len(manifests) - in_use
+    headline = f"**{len(manifests)} datasets** · {in_use} read by lectures today"
+    if awaiting:
+        headline += f", {awaiting} awaiting repoint"
     lines.append(
-        f"**{len(manifests)} datasets migrated** · {human_size(total)} total · "
+        f"{headline} · {human_size(total)} total · "
         f"{permitted} permitted / {restricted} restricted redistribution"
     )
     lines.append("")
@@ -162,7 +174,8 @@ def build(manifests) -> str:
     lines.append("")
     lines.append(
         "**Legend** — *Integrity* is the `integrity.upstream.status` (is this "
-        "what the source says?): ✅ verified · ◑ spot-checked · ⚠️ unverifiable · "
+        "what the source says?): ✅ verified · ◑ spot-checked · ⇄ diverged "
+        "(checked, differs, delta known and tracked) · ⚠️ unverifiable · "
         "… unverified · ❌ failing. *Redist.* ⚠️ restricted files are cached as "
         "inherited exposures and tracked for licence review "
         "([workspace-lectures#20](https://github.com/QuantEcon/workspace-lectures/issues/20)). "

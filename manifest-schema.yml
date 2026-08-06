@@ -86,7 +86,8 @@ maintainer: QuantEcon                   # who fixes this when it breaks
 integrity:
   sha256: null                          # of the committed file
   upstream:
-    status: unverified                  # verified | spot-checked | unverifiable | unverified | failing
+    status: unverified                  # verified | spot-checked | diverged |
+                                        #   unverifiable | unverified | failing
     date: null                          # ISO date of the last check
     against: null                       # what a verified check compared to (URL,
                                         # DOI, or repo path) — makes "verified"
@@ -96,6 +97,37 @@ integrity:
                                         # unverifiable. An honest `unverifiable`
                                         # with a note is a known status the
                                         # catalog can show; silence is not.
+
+    # --- `diverged` only ------------------------------------------------
+    # `verified` means "checked, and it matches". A file that was checked and
+    # found to DIFFER has no honest home in the rest of this vocabulary:
+    # `failing` implies something is broken, and `verified` is a lie a reader
+    # would act on. `diverged` is the third outcome — checked, differs, and the
+    # difference is known and accepted (PLAN "Repoint rules" 3, register #39).
+    #
+    # It is not a defect state. A migration deliberately moves the copy the
+    # lectures already consume, so a known delta against today's upstream is an
+    # expected result, recorded rather than resolved mid-migration.
+    delta_kind: null                    # local-edit | upstream-moved
+                                        #   local-edit    our copy was modified;
+                                        #                 upstream is unchanged
+                                        #   upstream-moved a newer vintage exists;
+                                        #                 adopting it means a NEW
+                                        #                 filename (see AGENTS.md
+                                        #                 "Corrections vs vintages")
+                                        # The two look alike and need opposite
+                                        # responses, so the register needs them
+                                        # distinguished machine-readably.
+    delta: null                         # what differs, precisely enough that
+                                        # resolving it later needs no
+                                        # re-investigation
+    delta_evidence: null                # how delta_kind was ESTABLISHED rather
+                                        # than assumed — ruling out the other
+                                        # kind is the whole work, and an
+                                        # unevidenced claim here misclassifies
+                                        # the file's class as well as its status
+    register: null                      # the issue tracking the resolution,
+                                        # e.g. QuantEcon/data-lectures#39
 
 # ---------------------------------------------------------------------------
 # Shape — what a consumer can rely on; also the basis for PR validation tests

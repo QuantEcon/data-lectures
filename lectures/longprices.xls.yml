@@ -1,0 +1,94 @@
+# Manifest for longprices.xls — four centuries of price levels, assembled by
+# Sargent and Velde for "The Big Problem of Small Change".
+
+filename: longprices.xls
+title: Price levels in four hard-currency countries, 1600-2000
+description: >
+  Annual price-level index for the United Kingdom, United States, France and
+  Castile (Spain). The consuming lecture plots 1600-1914, the period in which
+  all four were on commodity-money standards, to contrast with twentieth
+  century paper-money inflation.
+
+# The authors' own assembly of historical price series, republished here as
+# they distributed it. We apply no processing, so this is not `constructed` --
+# but it also cannot be re-fetched from a publisher, which is what makes the
+# integrity status below `unverifiable` rather than a clean re-download.
+class: verbatim
+
+source:
+  name: Sargent and Velde, "The Big Problem of Small Change" — supporting data
+  url: https://press.princeton.edu/books/hardcover/9780691116358/the-big-problem-of-small-change
+  citation: >
+    Sargent, Thomas J. and François R. Velde (2002). The Big Problem of Small
+    Change. Princeton, New Jersey: Princeton University Press.
+  note: >
+    The consuming lecture states these data "originally appeared on page 35" of
+    the book. The spreadsheet is the authors' working assembly and is not
+    published at a citable location of its own; it reached QuantEcon directly.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-06
+  # No formal licence is stated. These bytes have been served publicly from
+  # lecture-python-intro for years and are republished here with attribution
+  # under the record-and-track policy (#35): a migration is not held up for a
+  # licence question on data we already serve. Logged there for review before
+  # data.quantecon.org is promoted as a public open-data host.
+
+retrieved: null                 # unrecorded -- inherited bytes
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): verified 2026-08-06 by
+# git blob hash against lecture-python-intro's lectures/datasets/longprices.xls
+# -- identical.
+
+integrity:
+  sha256: 1160f9d3ac42cc225731a5446912acbb948e07753981e0cdc1b1da5dc2b344f7
+  upstream:
+    status: unverifiable
+    date: 2026-08-06
+    against: null
+    note: >
+      Author-assembled with prose-only provenance: no publisher distribution
+      point, no per-series source list inside the workbook, and no builder.
+      The figures can be spot-checked against page 35 of the cited book but
+      not re-derived. Trust rests on the authors' provenance.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: xls
+  sheets:
+    - name: all
+      read_as: {header: 2, index_col: 0, then: "iloc[1:]"}
+      shape: [401, 4]
+      columns:
+        - {name: UK, dtype: float64, description: United Kingdom price index}
+        - {name: US, dtype: float64, description: United States price index}
+        - {name: France, dtype: float64, description: France price index}
+        - {name: Castile, dtype: float64, description: Castile (Spain) price index}
+      known_nulls: {UK: 0, US: 152, France: 126, Castile: 0}
+      date_range: {start: 1600, end: 2000}
+      note: >
+        Nulls are series that do not span the full 1600-2000 index -- the US
+        series begins in the eighteenth century and France has gaps. Expected,
+        not damage.
+  # Nine further per-country sheets ship with the workbook and are not read:
+  #   England 1264-1800, UK 1661-1913, UK 1947-2000, UK 1750-1998,
+  #   US 1750-1932, US 1860-1939, US 1913-2000, Castile, France 1726-2000.
+  # They are the sources the `all` sheet is compiled from -- useful provenance,
+  # so they are kept rather than stripped.
+  row_count_floor: 401            # frozen historical extract: exact by design
+  known_nulls: {}                 # declared per sheet above
+
+consumers: []                     # empty until the Track A repoint lands
+
+builder: null
+builder_status: not-applicable    # verbatim republication -- nothing to build

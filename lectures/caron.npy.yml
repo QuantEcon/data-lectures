@@ -1,0 +1,104 @@
+# Manifest for caron.npy — assignat specie value, French Revolution.
+#
+# One of two files in this migration with NO recorded provenance anywhere. The
+# consuming lecture's "Data Sources" section names three spreadsheets and does
+# not mention this file or its twin, nom_balances.npy. Recorded honestly rather
+# than given a plausible-sounding source.
+
+filename: caron.npy
+title: French Revolution — monthly specie value of the assignat, 1791-1796
+description: >
+  63 monthly observations of the assignat's value against specie, falling from
+  96.7 at the start of 1791 to 0.431 in early 1796. The consuming lecture
+  differences its logarithm to obtain the monthly inflation rate used in its
+  real-balances regressions.
+
+# Constructed: a two-column numeric array is not a third-party file
+# republished as distributed -- somebody produced it. What that process was is
+# not recorded, which is precisely what builder_status captures.
+class: constructed
+
+source:
+  name: unrecorded
+  url: null
+  citation: >
+    Consumed by analysis reproducing Sargent, Thomas J. and François R. Velde
+    (1995). Macroeconomic Features of the French Revolution. Journal of
+    Political Economy, 103(3), 474-518.
+  note: >
+    The filename is the only provenance signal. It most likely points to Pierre
+    Caron's published depreciation tables for the assignat, the standard source
+    for this series -- but that is an INFERENCE FROM THE NAME, stated nowhere in
+    the lecture or the file, and it should not be promoted to a source claim
+    without evidence. Recorded as a lead for whoever recovers this, not as fact.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-06
+  # Source unestablished, so no licence can be established either. These bytes
+  # have been served publicly from lecture-python-intro for years; migrated
+  # under the record-and-track policy (#35) and logged there, since a licence
+  # question does not hold up data we already serve. This one needs its source
+  # settled before its licence can be.
+
+retrieved: null                 # unrecorded -- inherited bytes
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-06 by git blob hash against
+# lecture-python-intro's lectures/datasets/caron.npy -- identical.
+#
+# This file is one of the two LOCAL-PATH reads in lecture-python-intro
+# (`np.load('datasets/caron.npy')`), which is what breaks downloaded and Colab
+# notebooks. Repointing it at a public URL is the whole point of the migration
+# -- the same failure mode pilot P1 fixed for msy_fishery.
+
+integrity:
+  sha256: 7e0bcc9a42fd05bb4a062041df029ca986ba70ddbc2611a7cbaf4d8d5d820885
+  upstream:
+    status: unverifiable
+    date: 2026-08-06
+    against: null
+    note: >
+      No source, no builder, no internal metadata -- a bare .npy carries no
+      provenance at all. Actively checked 2026-08-06 whether the series is a
+      dump of a column in the committed Sargent-Velde workbooks: it is not.
+      Neither terminal value (96.696, 0.431) appears anywhere in assignat.xlsx,
+      dette.xlsx or fig_3.xlsx, and no contiguous column matches. So it was not
+      derived from the data we hold, and cannot be re-derived from it.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: npy
+  dtype: float64
+  shape: [63, 2]
+  columns:
+    - {index: 0, name: date, dtype: float64, description: "decimal year, monthly steps of 1/12"}
+    - {index: 1, name: specie_value, dtype: float64, description: "assignat value against specie, index units"}
+  row_count_floor: 63             # frozen historical extract: exact by design
+  date_range: {start: 1791.0, end: 1796.25}
+  known_nulls: {}                 # no NaNs present
+  note: >
+    Row alignment is load-bearing across files: the lecture pairs all 63 rows
+    of this array with rows 14:77 of nom_balances.npy. Changing the length of
+    either silently misaligns the other.
+
+consumers: []                     # empty until the Track A repoint lands
+
+# ---------------------------------------------------------------------------
+# Builder
+# ---------------------------------------------------------------------------
+# AGENTS.md: a constructed dataset without its builder is a bug -- inherited
+# here rather than introduced. PLAN Phase 9 tracks recovery. Unlike the other
+# unrecovered files in this migration, this one lacks even a named source, so
+# recovery starts with identifying where the series came from.
+
+builder: null
+builder_status: unrecovered
