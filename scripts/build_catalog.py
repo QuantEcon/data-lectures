@@ -97,8 +97,11 @@ def fmt_integrity(integrity) -> str:
         return "?"
     up = integrity.get("upstream") or {}
     status = up.get("status", "?")
-    mark = {"verified": "✅", "spot-checked": "◑", "unverifiable": "⚠️",
-            "unverified": "…", "failing": "❌"}.get(status, "")
+    # `diverged` is checked-and-differs: not a clean pass, but not a defect
+    # either — a known, accepted delta tracked in the register (#39). It needs
+    # its own mark so it cannot be misread as either ✅ or ❌.
+    mark = {"verified": "✅", "spot-checked": "◑", "diverged": "⇄",
+            "unverifiable": "⚠️", "unverified": "…", "failing": "❌"}.get(status, "")
     return f"{mark} {status}".strip()
 
 
@@ -171,7 +174,8 @@ def build(manifests) -> str:
     lines.append("")
     lines.append(
         "**Legend** — *Integrity* is the `integrity.upstream.status` (is this "
-        "what the source says?): ✅ verified · ◑ spot-checked · ⚠️ unverifiable · "
+        "what the source says?): ✅ verified · ◑ spot-checked · ⇄ diverged "
+        "(checked, differs, delta known and tracked) · ⚠️ unverifiable · "
         "… unverified · ❌ failing. *Redist.* ⚠️ restricted files are cached as "
         "inherited exposures and tracked for licence review "
         "([workspace-lectures#20](https://github.com/QuantEcon/workspace-lectures/issues/20)). "
