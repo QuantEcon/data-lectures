@@ -1,6 +1,8 @@
 # PLAN — `data-lectures` (formerly `QuantEcon/data`)
 
-**Status:** active roadmap (last updated 2026-07-17) — **the repo is LIVE**: the first repoint merged 2026-07-17 (P1, `lingcod_msy_recovery.csv` → `msy_fishery`), so published filenames are an API from here on
+**Status:** active roadmap (last updated 2026-08-06) — **the repo is LIVE**: the first repoint merged 2026-07-17 (P1, `lingcod_msy_recovery.csv` → `msy_fishery`), so published filenames are an API from here on
+
+**Where the numbers stand (audit dashboard, 2026-08-06):** 10 of 41 static datasets migrated and repointed, 31 to go; 22 lectures still fetch live API data; 35 committed orphans; 0 legacy-repo references; 5 URL forms in use.
 
 This repository is being shaped into the **single canonical repository for data consumed by the QuantEcon lecture series**, referenced by stable URLs and documented in the manual.
 
@@ -38,6 +40,50 @@ This repository is being shaped into the **single canonical repository for data 
 - Constructed and dynamic datasets ship their **builder**; dynamic datasets get **scheduled refresh-as-PR** plus a weekly **sources-alive canary**
 - Per-path LFS for large binaries only; storage choice invisible to consumers because URLs decouple from hosting
 
+## Repoint rules
+
+Two rules learned the hard way. Both are about *ordering*, both are cheap to follow and expensive to discover, and neither is enforced by CI — the strict audit catches the second only after the fact.
+
+### 1. Repoint a sibling reader before deleting the file it reads
+
+`lecture-wasm` mirrors `lecture-python-intro`'s sources and fetches intro's **committed blobs** by URL — e.g. `long_run_growth.md` reads `raw.githubusercontent.com/QuantEcon/lecture-python-intro/main/lectures/datasets/mpd2020.xlsx`. Deleting intro's copy in the repoint PR therefore 404s the wasm build immediately.
+
+So the general rule "delete the lecture repo's own copy in the same repoint PR" holds **only** when no sibling reads that copy. Where one does, the sibling's repoint must land **first or together**, and the deletion goes in the same set — never in an earlier PR with the sibling's fix scheduled later.
+
+This affects every `intro` + `wasm` dataset, which is all 16 of the multi-consumer files below.
+
+### 2. Repoint every consumer of a dataset together
+
+The strict audit has **no green state for a partially-repointed dataset**. `scripts/build_audit.py` fails a record marked `pending`/`landed` while any consumer already reads data-lectures, *and* fails one marked `repointed`/`final` while any consumer still does not. That is deliberate — it is what makes the tracker trustworthy — but it means a dataset with two consuming repos cannot be moved one repo at a time without the drift alarm firing in the gap.
+
+**16 of the 31 remaining datasets have two consuming repos, and every one of them is `lecture-python-intro` + `lecture-wasm`.** There is no other cross-series coupling left; the last one was the P2 `pandas_panel` trio, already done.
+
+Practically: one branch name across data-lectures + every consuming repo, PRs opened together, lecture repoints merged first, then the `migration.yml` flip to `repointed` — that last push is what re-runs the audit, and by then reality and the tracker agree.
+
+## Migration tracks
+
+The remaining work decomposes by **consuming series** rather than by hosting pattern, because — apart from the `intro`/`wasm` pairing — each series now owns its own data. This is the execution view; the phases below remain the machinery each track passes through.
+
+| Track | Datasets | Coupling | Blocked on |
+| --- | --- | --- | --- |
+| **A — `intro` + `wasm`** | 17: the 8 landed intro statics, the 6 `high_dim_data` files, `life-expectancy…`, `usa-gini…`, `graph.txt` | **paired — repoint together, always** | nothing to start; `usa-gini` needs the SCF files first |
+| **B — `python.myst`** | 7: `maketable1/2/4.dta`, `fp.dta`, `hansen_singleton_1982/1983_data.csv`, `NEWQDATA.csv` | none | nothing |
+| **C — `advanced.myst`** | 6: `dataBHS.mat`, `acs_data_summary.csv`, `bbh` ×2, `fred_data.csv`, `hansen_jagannathan_1991_data.json` | none | nothing (builder recovery is in-wave work, not a gate) |
+| **D — `programming`** | 1: `test_pwt.csv` | none | nothing — a single-PR track |
+| **E — dynamic / live-API** | the UNRATE twin, then the 15 incidental API lectures | wasm is the forcing customer | [#14](https://github.com/QuantEcon/data-lectures/issues/14) schema decisions, [#26](https://github.com/QuantEcon/data-lectures/issues/26) fetch layer |
+| **X — orphan sweep** | 35 committed orphans across 6 repos | per repo | that repo's repoints landing first |
+| **Y — infra / cutover** | DNS → custom domain → interim-to-final URL sweep → QEP | — | an external infra answer on `52.64.86.66` |
+
+`lecture-dp`, `lecture-jax` and `continuous_time_mcs` are **not data consumers** — dp's 10 committed files are inherited orphans, jax embeds `graph.txt` via `%%file`, and continuous_time_mcs has one orphan scratch file. They appear only in Track X.
+
+**Tracks A–D are independent of each other and can run in any order or in parallel.** The only hard dependencies in the whole programme are: `usa-gini-nwealth-tincome-lincome.csv` is built from `SCF_plus_mini.csv` (so it follows the SCF migration inside Track A); Track E's rollout needs its own template proven first; Track X follows its repo's repoints; and Track Y's cutover is last.
+
+Track Y is the one item with **external lead time** — it waits on whether `52.64.86.66` can be decommissioned, which is an infrastructure answer rather than a migration one. Worth starting that enquiry in parallel with the data work rather than at the end.
+
+### Where this work happens
+
+Repoints span data-lectures plus one or two lecture repos and must land together, which is exactly what [`QuantEcon/workspace-lectures`](https://github.com/QuantEcon/workspace-lectures) exists for: all the repos cloned side by side, `bin/foreach` for cross-repo greps and branch creation, and its stated pattern of *same branch in each repo → edit → commit per repo → one PR per repo*. `data-lectures` is already in its manifest. The artifacts still live here — this PLAN, the manifests, `migration.yml` — and every PR still lands in its own repo; the workspace is the bench, not the destination.
+
 ## Phases
 
 Ordering note: phases 1–3 and 6 can proceed now; phase 4 needs the DNS question resolved; phase 5 follows layout, **except its go-live guardrails, which must precede the first repoint**; phase 7 needs the sources recorded in phase 6; phase 8 (the pilot) is the first end-to-end pass through phases 2–7's machinery and requires phase 7's byte-compare for the files it touches **plus phase 5's go-live guardrails** — the first repoint turns `raw/main` into a production URL, so the repo must not go live unprotected; phase 9 follows the pilot (interim URL form makes repoints churn-tolerant to start earlier).
@@ -72,7 +118,7 @@ The sidecar naming uses the **full filename** (`mpd2020.xlsx.yml`, not `mpd2020.
 
 - [x] GitHub Pages deploy of the published tree, **`lfs: true` at checkout** (else pointer files publish) — landed 2026-07-17 with the audit dashboard (`.github/workflows/audit-dashboard.yml`, [#20](https://github.com/QuantEcon/data-lectures/issues/20)): the default `quantecon.github.io/data-lectures/` site serves the dashboard at `/` and the published tree at `/lectures/`. The custom domain below stays open
 - [ ] `data.quantecon.org` DNS + custom domain (an old NestJS box on AWS Sydney currently answers this name — investigate before repointing)
-- [ ] Verify `access-control-allow-origin: *` on served files (pyodide/JupyterLite, meta#143)
+- [x] Verify `access-control-allow-origin: *` on served files (pyodide/JupyterLite, meta#143) — **verified 2026-08-06**: `quantecon.github.io/data-lectures/lectures/lingcod_msy_recovery.csv` returns `access-control-allow-origin: *`. The requirement is met on the default Pages domain today and does **not** wait on the custom domain; re-verify once DNS moves
 - [ ] Monitor Pages soft limits (~1 GB site, 100 GB/month)
 
 ### Phase 5 — Automation (`.github/`)
@@ -97,6 +143,8 @@ Full automation:
 - [ ] Manifest per dataset for the **9** files now in `lectures/`: source, license, retrieval date, schema, consumers, provenance class. Schema sketched in `manifest-schema.yml` (Phase 2); backfill is per-file work gated on the license check below
 - [ ] Classify: the 8 static intro files are author-assembled or verbatim; `business_cycle_data.csv` is the one dynamic snapshot and needs its cadence declared
 - [ ] Licence check **per source**, not per file: the question is *"may this source be cached and served publicly, with attribution?"* — a cheap binary gate (`redistribution: permitted | restricted`, see AGENTS.md "Licensing and attribution"), a fast yes for public data sources. Two sources already answered: World Bank is **CC BY-4.0** (`business_cycle_metadata.md`, the model for what a manifest should capture) and RAM Legacy is **CC BY 4.0** (established against its Zenodo DOI record, P1). The remaining sources need the equivalent established by hand
+
+  **Licensing does not gate migration** (settled 2026-08-06, [#35](https://github.com/QuantEcon/data-lectures/issues/35)). Inherited data — anything the lecture repos already serve publicly — migrates with its licence recorded **as found**, including `redistribution: restricted` and `name: null` where that is the honest answer. Moving the same bytes to a canonical host with better provenance and an explicit licence field improves on the status quo, so the migration does not wait on review; what needs further thought is tracked in [#35](https://github.com/QuantEcon/data-lectures/issues/35) with alternatives, and resolved before `data.quantecon.org` is promoted as a public open-data host. That promotion is the gate, not each file's move. This generalises the exception AGENTS.md already carried for `countries.csv`, and applies to **inherited** data only — a genuinely new dataset still establishes its licence before it lands
 - [x] Keep-or-drop decision for the files with no consumer anywhere — **dropped 2026-07-16** in the Phase 2 restructure, rather than promoting them into the published namespace:
   - `GDP_per_capita_world_bank.csv` and `Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv` — an org-wide code search returns **zero** references to either, they are freely re-downloadable from the World Bank, and their licence was never established. Rehosting a stale snapshot nobody reads is the opposite of this repo's purpose
   - `fig_3.ods` — confirmed to carry no provenance the published `.xlsx` lacks: both parse to a single `Sheet1` of identical shape (34×6) and `DataFrame.equals` returns true, so it is a pure format twin
@@ -125,8 +173,8 @@ The first end-to-end deployment: one dataset per hosting pattern, each the harde
 
 ### Phase 9 — Adoption (broad sweep — the step that stalled in Feb 2025)
 
-- [ ] Repoint the remaining consuming lectures as datasets land here (data#4) — mechanical once the pilot proves the convention (~25 files beyond the pilot set)
-- [ ] Remove lecture repos' duplicate copies as each repoint merges (tracked with the orphan sweep in meta#337)
+- [ ] Repoint the remaining consuming lectures as datasets land here (data#4) — **31 datasets**, organised as tracks A–D above. Mechanical, but see "Repoint rules": repoint all consumers of a dataset together, and never delete a copy a sibling repo reads
+- [ ] Remove lecture repos' duplicate copies as each repoint merges (tracked with the orphan sweep in meta#337) — 35 orphans today, Track X. Note the wasm mirror copies are only safe to delete **after** wasm reads data-lectures directly, not before
 - [ ] Intake rule for migrations: constructed datasets arrive **with their builders**; the 5 known constructed-but-unscripted files (`hansen_jagannathan_1991_data.json`, `fred_data.csv`, the two `bbh` extracts, `acs_data_summary.csv`) need their pipelines recovered or rewritten — recorded as QEP follow-ups per meta#338
 - [ ] Graduate the convention to a QEP and merge manual#108, with the remaining sweep as its rollout checklist
 
