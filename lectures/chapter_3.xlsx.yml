@@ -94,7 +94,11 @@ schema:
 # file is unused -- it may still be consumed from a lecture repo's own copy,
 # which is exactly what a repoint moves. Populated in the repoint PR, at the
 # same time migration.yml flips to `repointed` (PLAN, "Repoint rules").
-consumers: []
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/inflation_history.md
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/inflation_history.md
 
 # ---------------------------------------------------------------------------
 # Builder
