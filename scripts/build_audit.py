@@ -468,8 +468,9 @@ def scan(repos_dir: Path):
             if (r["repo"] == "lecture-wasm"
                     and (r.get("url_form") or "").startswith("github.com/")):
                 mig_problems.append(
-                    f"{d['file']}: lecture-wasm reads via {r['url_form']} — "
-                    f"fails CORS in the browser (repoint rule 5)")
+                    f"{d['file']}: lecture-wasm {r['lecture']} reads via "
+                    f"{r['url_form']} — fails CORS in the browser "
+                    f"(repoint rule 5)")
 
     audit = {
         "generated": date.today().isoformat(),
