@@ -137,7 +137,11 @@ schema:
 # Empty until the Track A repoint lands. lecture-python-intro and lecture-wasm
 # both read this file today, but from intro's own copy, not from here.
 
-consumers: []
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/long_run_growth.md
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/long_run_growth.md
 
 # ---------------------------------------------------------------------------
 # Builder

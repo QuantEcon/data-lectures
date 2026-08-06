@@ -182,12 +182,20 @@ datasets:
 
   mpd2020.xlsx:
     pilot: A1
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#5
       date: 2025-02-14
-    repoints: []
+    # Two consuming repos, moved together: intro's copy could not be deleted
+    # while wasm fetched that exact blob by URL (PLAN, "Repoint rules" 1).
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#823
+        date: 2026-08-06
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#52
+        date: 2026-08-06
     cutover: null
 
   longprices.xls:
