@@ -357,33 +357,6 @@ committed_unreferenced:
   lecture-wasm:lectures/datasets/Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv:
     kind: mirror-orphan
     note: orphan in intro, mirrored into wasm
-  lecture-wasm:lectures/datasets/assignat.xlsx:
-    kind: mirror-orphan
-    note: wasm's french_rev reads intro's copy by URL
-  lecture-wasm:lectures/datasets/caron.npy:
-    kind: mirror-orphan
-    note: wasm's french_rev reads intro's copy by URL
-  lecture-wasm:lectures/datasets/chapter_3.xlsx:
-    kind: mirror-orphan
-    note: wasm's inflation_history reads intro's copy by URL
-  lecture-wasm:lectures/datasets/dette.xlsx:
-    kind: mirror-orphan
-    note: wasm's french_rev reads intro's copy by URL
-  lecture-wasm:lectures/datasets/fig_3.ods:
-    kind: mirror-orphan
-    note: orphan in intro, mirrored into wasm
-  lecture-wasm:lectures/datasets/fig_3.xlsx:
-    kind: mirror-orphan
-    note: wasm's french_rev reads intro's copy by URL
-  lecture-wasm:lectures/datasets/longprices.xls:
-    kind: mirror-orphan
-    note: wasm's inflation_history reads intro's copy by URL
-  lecture-wasm:lectures/datasets/mpd2020.xlsx:
-    kind: mirror-orphan
-    note: wasm's long_run_growth reads intro's copy by URL
-  lecture-wasm:lectures/datasets/nom_balances.npy:
-    kind: mirror-orphan
-    note: wasm's french_rev reads intro's copy by URL
   continuous_time_mcs:lectures/old_stuff.txt:
     kind: orphan
     note: scratch file at lectures/ root; referenced by nothing

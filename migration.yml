@@ -232,37 +232,55 @@ datasets:
 
   assignat.xlsx:
     pilot: A3
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#5
       date: 2025-02-14
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#826
+        date: 2026-08-07
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#55
+        date: 2026-08-07
     cutover: null
 
   dette.xlsx:
     pilot: A3
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#5
       date: 2025-02-14
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#826
+        date: 2026-08-07
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#55
+        date: 2026-08-07
     cutover: null
 
   fig_3.xlsx:
     pilot: A3
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#5
       date: 2025-02-14
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#826
+        date: 2026-08-07
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#55
+        date: 2026-08-07
     cutover: null
 
   caron.npy:
     pilot: A3
-    status: landed
+    status: repointed
     # Local-path read in intro (np.load('datasets/caron.npy')) -- one of the
     # two Colab-breaking reads this batch retires, the same failure mode P1
     # fixed for msy_fishery.
@@ -270,17 +288,29 @@ datasets:
     landed:
       pr: QuantEcon/data-lectures#5
       date: 2025-02-14
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#826
+        date: 2026-08-07
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#55
+        date: 2026-08-07
     cutover: null
 
   nom_balances.npy:
     pilot: A3
-    status: landed
+    status: repointed
     prior_pattern: local-path
     landed:
       pr: QuantEcon/data-lectures#5
       date: 2025-02-14
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#826
+        date: 2026-08-07
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#55
+        date: 2026-08-07
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
