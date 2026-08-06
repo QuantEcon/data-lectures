@@ -84,7 +84,7 @@ Cost is one extra PR per set and a slower orphan cleanup; the benefit is that no
 | `lecture-python-intro` | `publish*` tag (manual) | **yes** |
 | `lecture-wasm` | push to `main` | no — self-heals on merge |
 
-A repo that publishes on push needs no split, and neither does the deletion of a *mirror-orphan* nothing reads in either repo.
+A repo that publishes on push needs no split. Neither does deleting a copy that **no lecture reads in either repo** — typically one a repo committed alongside its mirrored sources while the lecture itself fetches the *other* repo's copy by URL (a *mirror-orphan*); `lecture-wasm` holds a dozen of these.
 
 ### 4. A migration moves bytes; it does not update them
 
