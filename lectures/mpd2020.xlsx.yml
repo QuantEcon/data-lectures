@@ -132,12 +132,18 @@ schema:
   known_nulls: {}                 # declared per sheet above
 
 # ---------------------------------------------------------------------------
-# Consumers
+# Consumers -- how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# Empty until the Track A repoint lands. lecture-python-intro and lecture-wasm
-# both read this file today, but from intro's own copy, not from here.
+# Every lecture that reads this file FROM THIS REPO. Empty does not mean the
+# file is unused -- it may still be consumed from a lecture repo's own copy,
+# which is exactly what a repoint moves. Populated in the repoint PR, at the
+# same time migration.yml flips to `repointed` (PLAN, "Repoint rules").
 
-consumers: []
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/long_run_growth.md
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/long_run_growth.md
 
 # ---------------------------------------------------------------------------
 # Builder
