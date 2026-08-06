@@ -4,13 +4,13 @@ Guidance for coding agents (and humans) making changes in this repository. Read 
 
 ## What this repo is
 
-The canonical home for **data consumed by the QuantEcon lecture series** (renamed from `QuantEcon/data` on 2026-07-16, per [meta#336](https://github.com/QuantEcon/meta/issues/336)). Its purpose is **stability**: it snapshots upstream sources — with attribution to each source carried in the manifest — so a lecture build never depends on a live API or a third-party host staying up. It is a **cache, not a content-distribution host**. It is **mid-transition**: the current tree is a legacy consumer-keyed layout (`lecture-python-intro/…`) that will become a flat published tree served at `https://data.quantecon.org/lectures/`. The full convention lives in the draft manual page ([QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108)).
+The canonical home for **data consumed by the QuantEcon lecture series** (renamed from `QuantEcon/data` on 2026-07-16, per [meta#336](https://github.com/QuantEcon/meta/issues/336)). Its purpose is **stability**: it snapshots upstream sources — with attribution to each source carried in the manifest — so a lecture build never depends on a live API or a third-party host staying up. It is a **cache, not a content-distribution host**. The published tree is **flat** (`lectures/`, since 2026-07-16) and live on GitHub Pages; the remaining transition is the custom domain — files are served at `quantecon.github.io/data-lectures/lectures/` today and will move to `https://data.quantecon.org/lectures/` once DNS is resolved (PLAN Phase 4, [#15](https://github.com/QuantEcon/data-lectures/issues/15)). The full convention lives in the draft manual page ([QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108)).
 
 ## Rules
 
 ### Layout
 
-- Do **not** add new consumer-keyed directories (no `lecture-xyz/` folders). New datasets go in the flat published tree; if the restructure (PLAN Phase 2) hasn't landed yet, put new files where the pilot ([meta#338](https://github.com/QuantEcon/meta/issues/338)) is landing them and note it in the PR.
+- Do **not** add new consumer-keyed directories (no `lecture-xyz/` folders). New datasets go directly in the flat published tree, `lectures/<filename>`, with their sidecar manifest beside them.
 - No folder may imply ownership by a lecture series — any lecture can consume any file.
 
 ### Every dataset needs a class and a manifest
@@ -36,6 +36,15 @@ The Feb 2025 migration left files that cannot fully satisfy the rules above. The
 - **`retrieved: null` — inherited-undated bytes.** `retrieved` is required, but may be `null` when the bytes were inherited (e.g. from a lecture repo) with **no recorded upstream-retrieval date**. Do **not** reconstruct one from git history — that records when QuantEcon acquired the file, not when it was retrieved from the source, and the false precision is worse than an honest null. A null `retrieved` must be paired with an `integrity.upstream` entry that says why (`status: unverifiable` with a `note`).
 - **`builder_status: unrecovered` — constructed without a recoverable builder.** A constructed dataset ships its builder, and one that omits it *silently* is the bug. Several inherited files are constructed with no recoverable extraction steps (PLAN Phase 9 tracks them). Keep `class: constructed` — reclassifying to `verbatim` to dodge the rule is misclassification — set `builder: null` and `builder_status: unrecovered`, and the gap stays visible for Phase 9 to recover. `unrecovered` is for **inherited files only**; never introduce a *new* constructed file without its builder.
 
+### Repointing a lecture — two ordering traps
+
+Both are cheap to follow and expensive to discover. `PLAN.md` carries the reasoning and the current counts.
+
+- **Never delete a file a sibling repo reads.** `lecture-wasm` fetches `lecture-python-intro`'s *committed blobs* by URL, so deleting intro's copy in a repoint PR 404s the wasm build immediately. "Delete the lecture repo's own copy in the same repoint PR" applies only where no sibling reads it; where one does, the sibling's repoint lands first or in the same set.
+- **Repoint every consumer of a dataset together.** The strict audit has no green state for a partially-repointed dataset — `pending`/`landed` fails once any consumer reads data-lectures, and `repointed`/`final` fails while any consumer still does not. Land the lecture repoints first, then flip `migration.yml`; that flip is the push that re-runs the audit, so reality and the tracker agree by the time it runs.
+
+Cross-repo repoints are worked from [`QuantEcon/workspace-lectures`](https://github.com/QuantEcon/workspace-lectures) — same branch name in each repo, one PR per repo, no aggregate PR.
+
 ### Corrections vs vintages
 
 - **Corrections** (bad parse, wrong units, corrupt rows): fix **in place**, same filename — every consumer should get the fix. Use the manifest's `consumers` list to know which lectures to rebuild/review.
@@ -56,11 +65,21 @@ When writing or reviewing URLs that fetch from this repo (in docs, tests, or lec
 - Final form once Pages is live: `https://data.quantecon.org/lectures/<filename>`
 - Never reference a non-default branch in a published URL.
 
-### LFS
+### LFS, and `sources/` vs `lectures/`
 
-- LFS is **per-path**, opt-in, large binaries only. Never add a blanket rule like `*.csv filter=lfs`.
-- Do not LFS-track an **existing** file until you've confirmed no consumer fetches it via `raw.githubusercontent.com` — converting silently turns their download into a pointer file.
-- The Pages deploy workflow must checkout with `lfs: true` or it publishes pointer files.
+**The published tree is plain git. Do not put an LFS object in `lectures/`** (settled 2026-08-06, PLAN Phase 3). Every published dataset fits comfortably in plain git — the largest, `SCF_plus_mini_no_weights.csv`, is 72.4 MiB against GitHub's 100 MiB limit. Keeping it that way means **no consumer can ever hit the raw-vs-media trap above**; the hazard is removed rather than managed.
+
+LFS exists here for one purpose: **upstream inputs that builders consume and no lecture reads**, which live in `sources/` and are never served.
+
+- `lectures/<file>` — a published dataset. Plain git, sidecar manifest required, its filename is an API.
+- `sources/<file>` — a builder input. Per-path LFS, **no** manifest, not served, recorded instead in `sources/README.md` — the audit trail: origin, retrieval date, licence, upstream identifier (DOI where one exists), `sha256`, and the builder that consumes it.
+
+Rules that still apply:
+
+- LFS is **per-path**, opt-in, large binaries only. Never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta`.
+- Do not LFS-track an **existing** file until you've confirmed no consumer fetches it via `raw.githubusercontent.com` — converting silently turns their download into pointer text.
+- A builder must read its input from `sources/`, never over the network from another QuantEcon repo. That is how a retired repo becomes load-bearing again.
+- The Pages deploy checks out with `lfs: false` while nothing published is an LFS object. If that ever changes, it must become `lfs: true` or Pages publishes pointer files.
 
 ### Dynamic builders
 
@@ -76,7 +95,9 @@ Because this repo is a **stability cache, not a content-distribution host** (see
 
 For the public data sources most snapshots come from (World Bank, FRED, Eurostat, …) the answer is a **known yes, recorded once per source** — permissive terms plus attribution. Record what the source states and move on; don't re-litigate it per snapshot. Treat the manifest's `redistribution` field as a **cheap binary gate** (`permitted` / `restricted`): a fast `permitted` for public statistics agencies, `restricted` blocking only the genuinely restricted source before it goes public — e.g. FRED re-serves third-party series that may not be redistributed, and anything under non-commercial or no-redistribution terms must not be cached here, since attribution alone does not cure those. Capture licence detail richly when the source provides it; where it is genuinely unavailable, record the gap rather than blocking the file.
 
-One exception: a `restricted` file the lectures have already served publicly may be cached here if it is marked `redistribution: restricted` with a `note` and logged for licence review in the migration-licensing tracker ([workspace-lectures#20](https://github.com/QuantEcon/workspace-lectures/issues/20)) — resolve it (permission, an open replacement, or removal) before `data.quantecon.org` is promoted as a public open-data host.
+**Licensing does not gate migration** (settled 2026-08-06, [#35](https://github.com/QuantEcon/data-lectures/issues/35)). A file the lectures have **already served publicly** migrates here with its licence recorded *as found* — including `redistribution: restricted` and a null licence name where that is the honest answer — and is logged in the inventory ([#35](https://github.com/QuantEcon/data-lectures/issues/35), feeding [workspace-lectures#20](https://github.com/QuantEcon/workspace-lectures/issues/20)) with a `note`. Resolve it (permission, an open replacement, or removal) before `data.quantecon.org` is promoted as a public open-data host: **that promotion is the gate, not the file's move.** Rehosting the same bytes with better provenance and an explicit licence field improves on the status quo, so a licence question is never a reason to stall a migration.
+
+This covers **inherited** data only. A genuinely new dataset — one with no prior life in a lecture repo — still has its licence established *before* it lands, as the P5 additions all did.
 
 ### The audit dashboard stays truthful
 
@@ -96,8 +117,10 @@ The generated dashboard (`scripts/build_audit.py`, [#20](https://github.com/Quan
 ## Repo map
 
 ```
-lectures/            # the published tree — flat, served at data.quantecon.org/lectures/
-                     #   9 datasets + business_cycle's upstream metadata dumps
+lectures/            # the published tree — flat, live on Pages; data.quantecon.org pending
+                     #   19 datasets (10 with manifests; the 8 static intro files
+                     #   and business_cycle_data.csv still need theirs) plus
+                     #   business_cycle's two upstream metadata dumps (see #13)
                      #   manifests live here as sidecars: <filename>.yml
 scripts/             # builders + generators — NOT published
   business_cycle.py  #   writes business_cycle_data.csv into lectures/
