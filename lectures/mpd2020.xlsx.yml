@@ -33,6 +33,13 @@ source:
   citation_policy: >
     Original source papers must be cited when data is shown graphically or
     when fewer than 12 countries are used; see the `Sources` sheet.
+  # Provenance chain of THESE bytes: they did not come here from Maddison
+  # directly. The file was downloaded, locally edited (see integrity.upstream)
+  # and committed to lecture-python-intro on 2023-03-23 in
+  # QuantEcon/lecture-python-intro#120, where the blob has never changed. It
+  # was copied into this repo by #5 in Feb 2025 and is byte-identical to
+  # intro's copy. So the immediate source is the lecture series; Maddison is
+  # the ultimate source.
 
 license:
   name: CC BY 4.0
@@ -64,13 +71,28 @@ integrity:
     note: >
       Re-fetched from the Maddison release and compared cell by cell across all
       six sheets. Every data value matches, including all 21,683 rows of `Full
-      data`. THREE header labels on `Regional data` differ and are local edits:
-      row0 col1 "GDP pc 2011 prices" -> "gdppc_2011", row0 col9 "Population" ->
-      "pop", and row0 col18 "gdppc_2011" added where upstream is empty. The
-      lecture reads that sheet with header=(0,1,2), so these renames are
-      load-bearing -- replacing this file with a pristine upstream copy would
-      silently break long_run_growth. Byte hashes differ (1,765,204 vs
-      1,764,793) consistent with a re-save plus these edits.
+      data`. THREE header labels on `Regional data` differ: row0 col1 "GDP pc
+      2011 prices" -> "gdppc_2011", row0 col9 "Population" -> "pop", and row0
+      col18 "gdppc_2011" added where upstream is empty. The lecture reads that
+      sheet with header=(0,1,2), so these renames are load-bearing -- replacing
+      this file with a pristine upstream copy would silently break
+      long_run_growth. Byte sizes differ (1,765,204 vs 1,764,793), consistent
+      with a re-save plus these edits.
+    edits_are_local: true
+    edits_evidence: >
+      Established, not assumed. The alternative -- that Maddison renamed its
+      own headers after we took the file, which would make our copy a faithful
+      older vintage -- is ruled out: the Internet Archive holds the upstream
+      file with one unchanging content digest
+      (4OWZWHTE5HXBBF4XLCCQTGDXY4HXOGOK) across every snapshot from 2021-01-10
+      to 2026-01-02, and the copy fetched on 2026-08-06 matches that digest
+      exactly. Upstream was already byte-stable two years before this file was
+      committed to lecture-python-intro on 2023-03-23. The three edits are
+      therefore ours.
+    upstream_vintage_note: >
+      Because upstream has been byte-stable throughout, the data held here
+      corresponds to the CURRENT Maddison release -- there is no vintage
+      ambiguity, and the three header labels are the only delta.
 
 # ---------------------------------------------------------------------------
 # Shape
