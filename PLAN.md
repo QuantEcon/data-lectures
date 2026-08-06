@@ -42,7 +42,7 @@ This repository is being shaped into the **single canonical repository for data 
 
 ## Repoint rules
 
-Three rules learned the hard way. The first two are about *ordering*, both cheap to follow and expensive to discover, and neither is enforced by CI — the strict audit catches the second only after the fact. The third is about *scope*.
+Four rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*.
 
 ### 1. Repoint a sibling reader before deleting the file it reads
 
@@ -60,7 +60,33 @@ The strict audit has **no green state for a partially-repointed dataset**. `scri
 
 Practically: one branch name across data-lectures + every consuming repo, PRs opened together, lecture repoints merged first, then the `migration.yml` flip to `repointed` — that last push is what re-runs the audit, and by then reality and the tracker agree.
 
-### 3. A migration moves bytes; it does not update them
+This constrains the **lecture PRs**, not only the tracker flip. Merging one half of a set while the other sits open partially repoints the dataset and opens the same window — observed on 2026-08-06, when `lecture-wasm#53` merged ahead of `lecture-python-intro#824` and left `main` failing on both files until the second landed.
+
+### 3. Repoint, publish, *then* delete — the published site lags `main`
+
+Rules 1 and 2 protect the **repositories**. Neither protects the **published site**, and that gap is where the first real breakage happened.
+
+`lecture-python-intro` publishes on a **`publish*` tag**, not on push to `main`. So merging a repoint does not refresh the live site: the already-published notebooks keep the *old* URL, and if the same PR deleted the file, that URL now 404s. Set 1 proved it — after [lecture-python-intro#823](https://github.com/QuantEcon/lecture-python-intro/pull/823) merged, the notebook served at `intro.quantecon.org` still carried `…/lecture-python-intro/raw/main/lectures/datasets/mpd2020.xlsx`, which had just been deleted. The window stayed open until a publish was tagged.
+
+**The rendered HTML is fine** — figures are baked at build time, so a reader browsing the site sees nothing wrong. The breakage is confined to the downloadable notebook, the Colab link, and `{download}` targets: i.e. every reader who actually *runs* the lecture.
+
+So a repoint set is **two phases**:
+
+1. **Repoint the URLs, keep the files.** Merge, then publish. Now the published notebooks fetch from data-lectures while the old paths still resolve — neither the old site nor the new one can break.
+2. **Delete the old copies.** Nothing references them in the repo *or* on the live site.
+
+Cost is one extra PR per set and a slower orphan cleanup; the benefit is that no reader-facing window exists at any point.
+
+**Per-repo publish triggers matter**, so check before assuming:
+
+| Repo | Trigger | Needs two phases? |
+| --- | --- | --- |
+| `lecture-python-intro` | `publish*` tag (manual) | **yes** |
+| `lecture-wasm` | push to `main` | no — self-heals on merge |
+
+A repo that publishes on push needs no split, and neither does the deletion of a *mirror-orphan* nothing reads in either repo.
+
+### 4. A migration moves bytes; it does not update them
 
 The copy that lands here is the copy the lectures **already consume**, validated byte-identical in the repoint PR. That is what makes a repoint safe to merge: it provably cannot change a single figure.
 
