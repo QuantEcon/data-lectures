@@ -457,6 +457,21 @@ def scan(repos_dir: Path):
                     f"{fname}: in pending wave {wave.get('pilot')} but already "
                     f"read from data-lectures")
 
+    # Repoint rule 5 (PLAN): lecture-wasm executes code cells in the reader's
+    # browser, where the github.com/*/raw/ redirect fails CORS before it is
+    # followed — wasm reads must use raw.githubusercontent.com, or
+    # media.githubusercontent.com for LFS files. Only code-cell reads are
+    # scanned, so {download} and prose links (navigations, CORS-exempt) can
+    # never trip this.
+    for d in datasets:
+        for r in d["refs"]:
+            if (r["repo"] == "lecture-wasm"
+                    and (r.get("url_form") or "").startswith("github.com/")):
+                mig_problems.append(
+                    f"{d['file']}: lecture-wasm {r['lecture']} reads via "
+                    f"{r['url_form']} — fails CORS in the browser "
+                    f"(repoint rule 5)")
+
     audit = {
         "generated": date.today().isoformat(),
         "repos": {n: {"sha": repos[n]["sha"],
