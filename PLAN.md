@@ -42,7 +42,7 @@ This repository is being shaped into the **single canonical repository for data 
 
 ## Repoint rules
 
-Six rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*; rules 5 and 6 about *URL form and host*, and neither is fully enforced either.
+Six rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*; rules 5 and 6 about *URL form and host*, and CI covers only a corner of them — the strict audit checks the `github.com/*/raw/` form in `lecture-wasm` and nothing else.
 
 ### 1. Repoint a sibling reader before deleting the file it reads
 
@@ -211,7 +211,7 @@ Only one file genuinely forces LFS, and it is not a dataset:
 - [ ] Per-path LFS via `.gitattributes`, scoped to `sources/` only — never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta` (data#1)
 - [ ] Fold in `high_dim_data` content (data#2; coordinate with meta#337 for consuming-lecture repoints)
 - [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving
-- [ ] **Move all 14 consuming reads off `media.githubusercontent.com`** in the same set as the fold — see repoint rule 6. The six datasets are LFS-tracked in `high_dim_data` and land here as plain git, so the media host will 404 for them; changing only org and repo breaks every read. Acceptance: `grep -rn 'media.githubusercontent.com/media/QuantEcon/data-lectures' repos/` returns nothing. Not covered by CI, and two of the 14 are builder notebooks the audit never scans
+- [ ] **Move all 14 consuming reads off `media.githubusercontent.com`** in the same set as the fold — they are LFS-tracked in `high_dim_data` and land here as plain git, so the media host 404s for them and changing only org and repo breaks every read. See **repoint rule 6** for the enumerated reads, the acceptance check, and why CI does not cover it
 - [ ] Set the Pages job's checkout to `lfs: false` once the above holds — nothing under `lectures/` is an LFS object, so the 99 MiB `.dta` never needs downloading on a dashboard build (it runs on every push to `main` plus weekly)
 
 **Sequencing constraint** (still applies to anything that *does* enter LFS): enabling LFS breaks every `raw.githubusercontent.com` URL for the paths it covers — those URLs return pointer text, not data, so consumers fail with a confusing parse error rather than a 404. Do not LFS-track an existing file until its consumers use a form that survives it. Keeping the published tree plain-git means no consumer-facing path is ever affected.
