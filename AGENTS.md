@@ -84,7 +84,7 @@ Rules that still apply:
 - LFS is **per-path**, opt-in, large binaries only. Never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta`.
 - Do not LFS-track an **existing** file until you've confirmed no consumer fetches it via `raw.githubusercontent.com` — converting silently turns their download into pointer text.
 - A builder must read its input from `sources/`, never over the network from another QuantEcon repo. That is how a retired repo becomes load-bearing again.
-- The Pages deploy checks out with `lfs: false` while nothing published is an LFS object. If that ever changes, it must become `lfs: true` or Pages publishes pointer files.
+- **Two** workflows check this repo out, and both say `lfs: true` today — `.github/workflows/audit-dashboard.yml:43` (the Pages deploy) and `.github/workflows/consumed-file-check.yml:22` (every pull request). Both must become `lfs: false` while nothing published is an LFS object, and both must go back to `lfs: true` the moment anything under `lectures/` does, or Pages publishes pointer files. LFS bandwidth is an org-wide quota, so leaving them `true` once `sources/` holds a 99 MiB object spends it on every PR.
 
 ### Dynamic builders
 

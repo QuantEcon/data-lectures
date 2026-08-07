@@ -320,7 +320,9 @@ datasets:
 pending:
   - pilot: P3
     title: Large data files, and the external data repository
-    scope: the LFS case — heavy_tails Forbes/cities set + SCF extracts (fold in high_dim_data)
+    scope: the host-migration case — heavy_tails Forbes/cities set + SCF extracts (fold in
+      high_dim_data). LFS-tracked there, plain git here, so all consuming reads must move off
+      media.githubusercontent.com as well as changing org and repo (repoint rule 6)
     datasets:
       - forbes-global2000.csv
       - forbes-billionaires.csv

@@ -1,8 +1,10 @@
 # PLAN — `data-lectures` (formerly `QuantEcon/data`)
 
-**Status:** active roadmap (last updated 2026-08-06) — **the repo is LIVE**: the first repoint merged 2026-07-17 (P1, `lingcod_msy_recovery.csv` → `msy_fishery`), so published filenames are an API from here on
+**Status:** active roadmap (last updated 2026-08-07) — **the repo is LIVE**: the first repoint merged 2026-07-17 (P1, `lingcod_msy_recovery.csv` → `msy_fishery`), so published filenames are an API from here on
 
-**Where the numbers stand (audit dashboard, 2026-08-06):** 10 of 41 static datasets migrated and repointed, 31 to go; 22 lectures still fetch live API data; 35 committed orphans; 0 legacy-repo references; 5 URL forms in use.
+**Where the numbers stand (`audit.json`, 2026-08-07):** 18 of 41 static datasets migrated and repointed, 23 to go; 22 lectures still fetch live API data; 26 committed orphans; 0 legacy-repo references; 5 URL forms in use.
+
+Every figure on that line comes from `stats` in the generated `audit.json`, and every figure below that restates one is a copy that can drift — as all seven of them had by 2026-08-07, each understating progress by three repoint sets. Re-read them from `audit.json` before quoting them, and prefer citing the generated file over this document.
 
 This repository is being shaped into the **single canonical repository for data consumed by the QuantEcon lecture series**, referenced by stable URLs and documented in the manual.
 
@@ -50,13 +52,23 @@ Six rules learned the hard way, three of them the hard way twice. Rules 1-3 are 
 
 So the general rule "delete the lecture repo's own copy in the same repoint PR" holds **only** when no sibling reads that copy. Where one does, the sibling's repoint must land **first or together**, and the deletion goes in the same set — never in an earlier PR with the sibling's fix scheduled later.
 
-This affects every `intro` + `wasm` dataset, which is all 16 of the multi-consumer files below.
+This affects every `intro` + `wasm` dataset, which is all 8 of the multi-consumer files remaining below.
+
+**The consumer set is the org, not `manifest.yml` and not `SCAN_REPOS`.** A repo that fetches another repo's committed blobs by URL is a rule-1 consumer regardless of how its content is produced, so the sweep before a deletion must enumerate the organisation. Three classes sit outside this repo's eight scanned repos and have each already been missed once:
+
+| Class | Repos | Why it is missed |
+| --- | --- | --- |
+| **Translations** | five of the six live editions read another repo's blobs — everything except `lecture-python-programming.ml` | excluded from `SCAN_REPOS` by decision (`scripts/build_audit.py:45-46`), so no audit run can ever see them. `lecture-intro.zh-cn` alone holds 7 reads of the `high_dim_data` six |
+| **Generated mirrors** | `lecture-python-intro.notebooks` | auto-published, so it self-heals on the next publish — but only *after* one |
+| **Course forks and canaries** | `tom-econ370-2025`, `test-actions-lecture-intro` | not in any manifest, publish their own Pages sites, and no CI in the family covers them |
+
+Sweep by cloning and grepping, not with `gh search code` on a URL — code search does not index bare URLs and returns a confident zero. It **does** index repo-name tokens and quoted path fragments, so `gh search code 'high_dim_data org:QuantEcon'` finds every consumer of that repo including the translations; use that form where a distinctive token exists, and a Trees-API sweep over `gh repo list QuantEcon --limit 400` otherwise (~2 minutes for 277 repos).
 
 ### 2. Repoint every consumer of a dataset together
 
 The strict audit has **no green state for a partially-repointed dataset**. `scripts/build_audit.py` fails a record marked `pending`/`landed` while any consumer already reads data-lectures, *and* fails one marked `repointed`/`final` while any consumer still does not. That is deliberate — it is what makes the tracker trustworthy — but it means a dataset with two consuming repos cannot be moved one repo at a time without the drift alarm firing in the gap.
 
-**16 of the 31 remaining datasets have two consuming repos, and every one of them is `lecture-python-intro` + `lecture-wasm`.** There is no other cross-series coupling left; the last one was the P2 `pandas_panel` trio, already done.
+**8 of the 23 remaining datasets have two consuming repos, and every one of them is `lecture-python-intro` + `lecture-wasm`** — the six `high_dim_data` files plus `life-expectancy-vs-gdp-per-capita.csv` and `usa-gini-nwealth-tincome-lincome.csv`. There is no other cross-series coupling left; the last one was the P2 `pandas_panel` trio, already done. (`graph.txt` is Track A but single-consumer: only `lecture-wasm` reads intro's committed copy.)
 
 Practically: one branch name across data-lectures + every consuming repo, PRs opened together, lecture repoints merged first, then the `migration.yml` flip to `repointed` — that last push is what re-runs the audit, and by then reality and the tracker agree.
 
@@ -119,7 +131,7 @@ Phase 4 inherits the requirement: `data.quantecon.org` must serve `access-contro
 
 ### 6. `media.githubusercontent.com` is LFS-only — a fold changes the *host*, not just the org
 
-`media.githubusercontent.com/media/<org>/<repo>/<ref>/<path>` is the **LFS media endpoint**. It resolves only for paths that are LFS-tracked *in that repo*, and returns **404** for a plain-git file. Measured 2026-08-07:
+`media.githubusercontent.com/media/<org>/<repo>/<ref>/<path>` is the **LFS media endpoint**. It routes **per path, not per repo** — it resolves only for paths that are LFS-tracked in that repo, and returns **404** for a plain-git file even inside a repo that has LFS enabled (measured on `high_dim_data`'s own un-tracked `README.md` and `cross_section/webscrape_forbes.ipynb`). Measured 2026-08-07:
 
 | URL | Status |
 | --- | --- |
@@ -130,7 +142,7 @@ Both hosts send `access-control-allow-origin: *`, so this is **host routing, not
 
 This matters for exactly one piece of remaining work, and it matters a lot. `high_dim_data` tracks `*.csv` **and** `*.dta` under a blanket LFS rule, so **every** consuming lecture reads its datasets through the media host today. The storage decision lands those six datasets here as **plain git** (both SCF minis fit under the 100 MiB blob limit). After the fold the media host will 404 for them, so **every consuming read must change host as well as org and repo** — a mechanical org/repo swap that preserves the host breaks all of them.
 
-**14 reads are affected**, all in Track A — 12 on the media host, 2 on the `github.com/*/raw/` redirect form:
+**21 source reads are affected across three repos, and 12 of them need the host changed.** The `github.com/<org>/<repo>/raw/…` form is a *smart* redirect that routes per path by LFS status, so the two reads already on it survive an org/repo/path swap with no host decision; only the media-host reads must move. `lecture-intro.zh-cn` is the third consumer and is invisible to every audit run (`scripts/build_audit.py:45-57`) — see rule 1.
 
 | Repo | File | Lines | Current host |
 | --- | --- | --- | --- |
@@ -142,12 +154,25 @@ This matters for exactly one piece of remaining work, and it matters a lot. `hig
 | `lecture-wasm` | `lectures/mle.md` | 95 | media |
 | `lecture-wasm` | `lectures/inequality.md` | 250 | media |
 | `lecture-wasm` | `lectures/_static/lecture_specific/inequality/data.ipynb` | 37 | media |
+| `lecture-intro.zh-cn` | `lectures/heavy_tails.md` | 810, 837, 838, 862 | media |
+| `lecture-intro.zh-cn` | `lectures/_static/lecture_specific/inequality/data.ipynb` | 37 | media |
+| `lecture-intro.zh-cn` | `lectures/mle.md` | 105 | `github.com/*/raw/` |
+| `lecture-intro.zh-cn` | `lectures/inequality.md` | 256 | `github.com/*/raw/` |
 
 The plain-git decision does not *dissolve* the raw-vs-media trap for the repoint — it **inverts** it. The trap stops being "consumers must know to use the media host" and becomes "consumers already on the media host must be moved off it, in the same PR as the fold."
 
-**Acceptance check for the fold:** `grep -rn 'media.githubusercontent.com/media/QuantEcon/data-lectures' repos/` must return nothing. This is **not** covered by CI — the strict audit's URL-form check catches only the `github.com/*/raw/` form, and only in `lecture-wasm` ([#48](https://github.com/QuantEcon/data-lectures/pull/48)). A media-host reference to a data-lectures path is invisible to every build and fails at read time, in the reader's notebook or browser.
+**Acceptance check for the fold** — scope it to the consuming *lecture trees*, and clone `lecture-intro.zh-cn` for it, since that repo is never under `repos/`:
 
-Note the two `_static/…/inequality/data.ipynb` reads are builder notebooks, which the audit does not scan as data reads at all — they must be changed and checked by hand.
+    grep -rn 'media.githubusercontent.com/media/QuantEcon/data-lectures' \
+      repos/lecture-python-intro/lectures \
+      repos/lecture-wasm/lectures \
+      <path-to>/lecture-intro.zh-cn/lectures
+
+That must return nothing. The scoping is not cosmetic: the form quoted here before was `… repos/`, which could never pass, because it matched this document's own occurrences of the string. Any restatement of this check must exclude the rules that describe it.
+
+This is **not** covered by CI. The strict audit's URL-form check catches only the `github.com/*/raw/` form, and only in `lecture-wasm` ([#48](https://github.com/QuantEcon/data-lectures/pull/48)). A media-host reference to a data-lectures path classifies as `pattern: data-lectures`, so it **passes the audit while 404ing at read time** — verified end to end: a tree with all 12 `.md` reads left on the media host and `migration.yml` flipped to `repointed` exits `--strict` with code 0. `scripts/build_audit.py:196` already computes `lfs_media` per reference and nothing asserts on it; closing that is the first gate on the fold.
+
+Note the three `_static/…/inequality/data.ipynb` reads are builder notebooks, which the audit does not scan as data reads at all *and* which the translation sync never carries (it is `.md`-only). They must be changed by hand in all three repos and checked by hand.
 
 ## Migration tracks
 
@@ -155,12 +180,12 @@ The remaining work decomposes by **consuming series** rather than by hosting pat
 
 | Track | Datasets | Coupling | Blocked on |
 | --- | --- | --- | --- |
-| **A — `intro` + `wasm`** | 17: the 8 landed intro statics, the 6 `high_dim_data` files, `life-expectancy…`, `usa-gini…`, `graph.txt` | **paired — repoint together, always** | nothing to start; `usa-gini` needs the SCF files first |
+| **A — `intro` + `wasm`** | 17, of which **9 remain**: the 6 `high_dim_data` files, `life-expectancy…`, `usa-gini…`, `graph.txt` (the 8 intro statics are done) | **paired — repoint together, always**, and `lecture-intro.zh-cn` is a third consumer of 8 of the 9 | nothing to start; `usa-gini` needs the SCF files first |
 | **B — `python.myst`** | 7: `maketable1/2/4.dta`, `fp.dta`, `hansen_singleton_1982/1983_data.csv`, `NEWQDATA.csv` | none | nothing |
 | **C — `advanced.myst`** | 6: `dataBHS.mat`, `acs_data_summary.csv`, `bbh` ×2, `fred_data.csv`, `hansen_jagannathan_1991_data.json` | none | nothing (builder recovery is in-wave work, not a gate) |
 | **D — `programming`** | 1: `test_pwt.csv` | none | nothing — a single-PR track |
 | **E — dynamic / live-API** | the UNRATE twin, then the 15 incidental API lectures | wasm is the forcing customer | [#14](https://github.com/QuantEcon/data-lectures/issues/14) schema decisions, [#26](https://github.com/QuantEcon/data-lectures/issues/26) fetch layer |
-| **X — orphan sweep** | 35 committed orphans across 6 repos | per repo | that repo's repoints landing first |
+| **X — orphan sweep** | 26 committed orphans across 6 repos — dp 10, programming 5, wasm 5, intro 3, python.myst 2, `continuous_time_mcs` 1 | per repo | that repo's repoints landing first |
 | **Y — infra / cutover** | DNS → custom domain → interim-to-final URL sweep → QEP | — | an external infra answer on `52.64.86.66` |
 
 `lecture-dp`, `lecture-jax` and `continuous_time_mcs` are **not data consumers** — dp's 10 committed files are inherited orphans, jax embeds `graph.txt` via `%%file`, and continuous_time_mcs has one orphan scratch file. They appear only in Track X.
@@ -210,11 +235,12 @@ Only one file genuinely forces LFS, and it is not a dataset:
 - [ ] Add `sources/` for builder inputs, with `sources/README.md` as the **audit trail**: one row per committed file recording where it came from, when, its licence, the upstream identifier (DOI where one exists), its `sha256`, and which builder consumes it. A file in `sources/` is not a published dataset and gets no sidecar manifest — this README is its provenance record
 - [ ] Per-path LFS via `.gitattributes`, scoped to `sources/` only — never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta` (data#1)
 - [ ] Fold in `high_dim_data` content (data#2; coordinate with meta#337 for consuming-lecture repoints)
-- [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving
-- [ ] **Move all 14 consuming reads off `media.githubusercontent.com`** in the same set as the fold — they are LFS-tracked in `high_dim_data` and land here as plain git, so the media host 404s for them and changing only org and repo breaks every read. See **repoint rule 6** for the enumerated reads, the acceptance check, and why CI does not cover it
-- [ ] Set the Pages job's checkout to `lfs: false` once the above holds — nothing under `lectures/` is an LFS object, so the 99 MiB `.dta` never needs downloading on a dashboard build (it runs on every push to `main` plus weekly)
+- [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving. **Also uncomment its two `to_csv` writes** — both are commented out upstream, so the builder as committed produces both frames in memory and writes nothing. Its fetch and transform stages are complete; the validate stage is a Phase 5 retrofit alongside `scripts/business_cycle.py`
+- [ ] **Repoint all 21 consuming reads, moving the 12 media-host ones off `media.githubusercontent.com`**, in the same set as the fold — they are LFS-tracked in `high_dim_data` and land here as plain git, so the media host 404s for them and changing only org and repo breaks every read. The reads span **three** repos: `lecture-python-intro` (7), `lecture-wasm` (7) and `lecture-intro.zh-cn` (7), the last by hand rather than by sync. See **repoint rule 6** for the enumerated reads, the acceptance check, and why CI does not cover it
+- [ ] Set `lfs: false` on **both** workflows that check this repo out, not only the Pages job — `.github/workflows/audit-dashboard.yml:43` (push to `main` plus weekly, and its paths filter includes `migration.yml` and `lectures/*.yml`, so the fold PR's own files trigger it) and `.github/workflows/consumed-file-check.yml:22` (**every** pull request). Nothing under `lectures/` is an LFS object, so the 99 MiB `.dta` need never download. Land this **before** the object does: LFS bandwidth is an org-wide quota shared with `high_dim_data`, and a 403 on LFS downloads takes out the live media-host reads in `lecture-python-intro`, `lecture-wasm` and `lecture-intro.zh-cn` simultaneously — a lecture outage, not a CI failure
+- [ ] Record in `sources/README.md` that `SCF_plus.dta` is 103,934,093 B — **923,507 B, or 0.88%, under GitHub's hard 104,857,600 B blob limit**. It must stay LFS-tracked permanently; an upstream vintage 1% larger could not be pushed as plain git at all
 
-**Sequencing constraint** (still applies to anything that *does* enter LFS): enabling LFS breaks every `raw.githubusercontent.com` URL for the paths it covers — those URLs return pointer text, not data, so consumers fail with a confusing parse error rather than a 404. Do not LFS-track an existing file until its consumers use a form that survives it. Keeping the published tree plain-git means no consumer-facing path is ever affected.
+**Sequencing constraint** (still applies to anything that *does* enter LFS): enabling LFS breaks every `raw.githubusercontent.com` URL for the paths it covers — those URLs return the pointer text with HTTP **200**, so a status-code check is a false green. `pd.read_csv` then raises **nothing at all**: it returns a 2×1 frame whose single column name is `version https://git-lfs.github.com/spec/v1`. (`pd.read_stata` does raise, misleadingly, on the Stata version byte.) Silence is the case that matters, since every affected lecture read is a `read_csv`. Verify with `curl -s <url> | head -1` rather than a status code. Do not LFS-track an existing file until its consumers use a form that survives it; keeping the published tree plain-git means no consumer-facing path is ever affected.
 
 ### Phase 4 — Publishing
 
@@ -242,7 +268,7 @@ Full automation:
 
 ### Phase 6 — Metadata backfill for existing holdings
 
-- [ ] Manifest per dataset for the **9** files now in `lectures/`: source, license, retrieval date, schema, consumers, provenance class. Schema sketched in `manifest-schema.yml` (Phase 2); backfill is per-file work gated on the license check below
+- [ ] Manifest per dataset for the files now in `lectures/`: source, license, retrieval date, schema, consumers, provenance class. Schema sketched in `manifest-schema.yml` (Phase 2); backfill is per-file work gated on the license check below. **Largely done** — 21 non-`.yml` files, 18 manifests; the only dataset still lacking one is `business_cycle_data.csv` (`business_cycle_info.md` and `business_cycle_metadata.md` are prose, not datasets)
 - [ ] Classify: the 8 static intro files are author-assembled or verbatim; `business_cycle_data.csv` is the one dynamic snapshot and needs its cadence declared
 - [ ] Licence check **per source**, not per file: the question is *"may this source be cached and served publicly, with attribution?"* — a cheap binary gate (`redistribution: permitted | restricted`, see AGENTS.md "Licensing and attribution"), a fast yes for public data sources. Two sources already answered: World Bank is **CC BY-4.0** (`business_cycle_metadata.md`, the model for what a manifest should capture) and RAM Legacy is **CC BY 4.0** (established against its Zenodo DOI record, P1). The remaining sources need the equivalent established by hand
 
@@ -268,15 +294,15 @@ The first end-to-end deployment: one dataset per hosting pattern, each the harde
 
 - [x] **P1 — local-path static**: `lingcod_msy_recovery.csv` (`msy_fishery`, intro). Tests: single-PR green build under `-nW`, Colab-unchanged download, catalog metadata for an author-assembled file. **Complete 2026-07-17** — data half #12, repoint QuantEcon/lecture-python-intro#792 (lecture build green in the single repoint PR); served URL verified byte-identical to the manifest `sha256`; Colab holds by construction (the lecture now reads a public URL, where the old relative path was exactly what broke downloaded notebooks); metadata findings recorded in meta#338. **The repo is live from this merge** — the pyodide/CORS check below remains open
 - [x] **P2 — cross-series shared static**: the `pandas_panel` trio (`realwage.csv`, `countries.csv`, `employ.csv`), consumed by programming **and** python.myst. Tests: flat namespace with two consuming series, one data PR updating two lecture repos; retires 5 of the 8 legacy-repo references as a side effect. **Complete 2026-07-17** — data half #17, repoints QuantEcon/lecture-python-programming#578 and QuantEcon/lecture-python.myst#973; both lecture repos' own stale copies deleted in the repoint PRs. Lifecycle recorded in `migration.yml`
-- [ ] **P3 — external-repo static with LFS**: the `heavy_tails` set (Forbes ×2, cities ×2) plus the SCF pair from `high_dim_data`. Tests: served URL makes the raw-vs-media LFS trap invisible, Pages handles LFS objects (`lfs: true`), builders (`webscrape_forbes.ipynb`, `generating_mini.md`) migrate alongside their data
+- [ ] **P3 — external-repo static, LFS → plain git**: the `heavy_tails` set (Forbes ×2, cities ×2) plus the SCF pair from `high_dim_data`. **Reframed 2026-08-07** — the Phase 3 storage decision made the published tree 100% plain git, so P3's original tests ("served URL makes the raw-vs-media trap invisible", "Pages handles LFS objects with `lfs: true`") are unrunnable by construction. What P3 now tests: the **host migration** off `media.githubusercontent.com` (repoint rule 6) across three consuming repos including an unscanned translation; per-path LFS confined to `sources/`; and builders (`webscrape_forbes.ipynb`, `generating_mini.md`) migrating alongside their data. Note P3 **deletes nothing** — neither `intro` nor `wasm` holds a copy of the six files, and archiving `high_dim_data` preserves serving on both hosts, so rule 3's phase 2 does not apply and the set is fully reversible
 - [ ] **P4 — dynamic snapshot twin**: `UNRATE`, consumed today by 4 lectures across 3 repos via 2 access methods. Tests: the full dynamic template — manifest, four-stage builder, refresh-as-PR, canary catching an induced failure — plus the documented live-call ↔ snapshot switch mechanism
 - [ ] Verify each migrated URL with a pyodide/JupyterLite fetch (CORS, meta#143)
 - [ ] Fold every validated decision into the draft `styleguide/datasets.md` (manual#108) as it is proven
 
 ### Phase 9 — Adoption (broad sweep — the step that stalled in Feb 2025)
 
-- [ ] Repoint the remaining consuming lectures as datasets land here (data#4) — **31 datasets**, organised as tracks A–D above. Mechanical, but see "Repoint rules": repoint all consumers of a dataset together, and never delete a copy a sibling repo reads
-- [ ] Remove lecture repos' duplicate copies as each repoint merges (tracked with the orphan sweep in meta#337) — 35 orphans today, Track X. Note the wasm mirror copies are only safe to delete **after** wasm reads data-lectures directly, not before
+- [ ] Repoint the remaining consuming lectures as datasets land here (data#4) — **23 datasets**, organised as tracks A–D above. Mechanical, but see "Repoint rules": repoint all consumers of a dataset together, and never delete a copy a sibling repo reads
+- [ ] Remove lecture repos' duplicate copies as each repoint merges (tracked with the orphan sweep in meta#337) — 26 orphans today, Track X. Note the wasm mirror copies are only safe to delete **after** wasm reads data-lectures directly, not before
 - [ ] Intake rule for migrations: constructed datasets arrive **with their builders**; the 5 known constructed-but-unscripted files (`hansen_jagannathan_1991_data.json`, `fred_data.csv`, the two `bbh` extracts, `acs_data_summary.csv`) need their pipelines recovered or rewritten — recorded as QEP follow-ups per meta#338
 - [ ] Graduate the convention to a QEP and merge manual#108, with the remaining sweep as its rollout checklist
 
