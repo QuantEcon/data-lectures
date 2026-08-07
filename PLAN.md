@@ -42,7 +42,7 @@ This repository is being shaped into the **single canonical repository for data 
 
 ## Repoint rules
 
-Five rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*, and rule 5 about *URL form*.
+Six rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*; rules 5 and 6 about *URL form and host*, and neither is fully enforced either.
 
 ### 1. Repoint a sibling reader before deleting the file it reads
 
@@ -117,6 +117,38 @@ Learned from the independent validation ([#45](https://github.com/QuantEcon/data
 
 Phase 4 inherits the requirement: `data.quantecon.org` must serve `access-control-allow-origin: *` before `lecture-wasm` can cut over to it — recorded as an acceptance criterion on [#37](https://github.com/QuantEcon/data-lectures/issues/37).
 
+### 6. `media.githubusercontent.com` is LFS-only — a fold changes the *host*, not just the org
+
+`media.githubusercontent.com/media/<org>/<repo>/<ref>/<path>` is the **LFS media endpoint**. It resolves only for paths that are LFS-tracked *in that repo*, and returns **404** for a plain-git file. Measured 2026-08-07:
+
+| URL | Status |
+| --- | --- |
+| `raw.githubusercontent.com/QuantEcon/data-lectures/main/lectures/mpd2020.xlsx` | **200** |
+| `media.githubusercontent.com/media/QuantEcon/data-lectures/main/lectures/mpd2020.xlsx` | **404** |
+
+Both hosts send `access-control-allow-origin: *`, so this is **host routing, not CORS** — a distinct failure from rule 5, and it bites CPython consumers too, not only the browser.
+
+This matters for exactly one piece of remaining work, and it matters a lot. `high_dim_data` tracks `*.csv` **and** `*.dta` under a blanket LFS rule, so **every** consuming lecture reads its datasets through the media host today. The storage decision lands those six datasets here as **plain git** (both SCF minis fit under the 100 MiB blob limit). After the fold the media host will 404 for them, so **every consuming read must change host as well as org and repo** — a mechanical org/repo swap that preserves the host breaks all of them.
+
+**14 reads are affected**, all in Track A — 12 on the media host, 2 on the `github.com/*/raw/` redirect form:
+
+| Repo | File | Lines | Current host |
+| --- | --- | --- | --- |
+| `lecture-python-intro` | `lectures/heavy_tails.md` | 827, 854, 855, 879 | media |
+| `lecture-python-intro` | `lectures/_static/lecture_specific/inequality/data.ipynb` | 37 | media |
+| `lecture-python-intro` | `lectures/mle.md` | 93 | `github.com/*/raw/` |
+| `lecture-python-intro` | `lectures/inequality.md` | 249 | `github.com/*/raw/` |
+| `lecture-wasm` | `lectures/heavy_tails.md` | 827, 854, 855, 879 | media |
+| `lecture-wasm` | `lectures/mle.md` | 95 | media |
+| `lecture-wasm` | `lectures/inequality.md` | 250 | media |
+| `lecture-wasm` | `lectures/_static/lecture_specific/inequality/data.ipynb` | 37 | media |
+
+The plain-git decision does not *dissolve* the raw-vs-media trap for the repoint — it **inverts** it. The trap stops being "consumers must know to use the media host" and becomes "consumers already on the media host must be moved off it, in the same PR as the fold."
+
+**Acceptance check for the fold:** `grep -rn 'media.githubusercontent.com/media/QuantEcon/data-lectures' repos/` must return nothing. This is **not** covered by CI — the strict audit's URL-form check catches only the `github.com/*/raw/` form, and only in `lecture-wasm` ([#48](https://github.com/QuantEcon/data-lectures/pull/48)). A media-host reference to a data-lectures path is invisible to every build and fails at read time, in the reader's notebook or browser.
+
+Note the two `_static/…/inequality/data.ipynb` reads are builder notebooks, which the audit does not scan as data reads at all — they must be changed and checked by hand.
+
 ## Migration tracks
 
 The remaining work decomposes by **consuming series** rather than by hosting pattern, because — apart from the `intro`/`wasm` pairing — each series now owns its own data. This is the execution view; the phases below remain the machinery each track passes through.
@@ -179,6 +211,7 @@ Only one file genuinely forces LFS, and it is not a dataset:
 - [ ] Per-path LFS via `.gitattributes`, scoped to `sources/` only — never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta` (data#1)
 - [ ] Fold in `high_dim_data` content (data#2; coordinate with meta#337 for consuming-lecture repoints)
 - [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving
+- [ ] **Move all 14 consuming reads off `media.githubusercontent.com`** in the same set as the fold — see repoint rule 6. The six datasets are LFS-tracked in `high_dim_data` and land here as plain git, so the media host will 404 for them; changing only org and repo breaks every read. Acceptance: `grep -rn 'media.githubusercontent.com/media/QuantEcon/data-lectures' repos/` returns nothing. Not covered by CI, and two of the 14 are builder notebooks the audit never scans
 - [ ] Set the Pages job's checkout to `lfs: false` once the above holds — nothing under `lectures/` is an LFS object, so the 99 MiB `.dta` never needs downloading on a dashboard build (it runs on every push to `main` plus weekly)
 
 **Sequencing constraint** (still applies to anything that *does* enter LFS): enabling LFS breaks every `raw.githubusercontent.com` URL for the paths it covers — those URLs return pointer text, not data, so consumers fail with a confusing parse error rather than a 404. Do not LFS-track an existing file until its consumers use a form that survives it. Keeping the published tree plain-git means no consumer-facing path is ever affected.
