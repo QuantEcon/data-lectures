@@ -142,7 +142,16 @@ Both hosts send `access-control-allow-origin: *`, so this is **host routing, not
 
 This matters for exactly one piece of remaining work, and it matters a lot. `high_dim_data` tracks `*.csv` **and** `*.dta` under a blanket LFS rule, so **every** consuming lecture reads its datasets through the media host today. The storage decision lands those six datasets here as **plain git** (both SCF minis fit under the 100 MiB blob limit). After the fold the media host will 404 for them, so **every consuming read must change host as well as org and repo** — a mechanical org/repo swap that preserves the host breaks all of them.
 
-**21 source reads are affected across three repos, and 12 of them need the host changed.** The `github.com/<org>/<repo>/raw/…` form is a *smart* redirect that routes per path by LFS status, so the two reads already on it survive an org/repo/path swap with no host decision; only the media-host reads must move. `lecture-intro.zh-cn` is the third consumer and is invisible to every audit run (`scripts/build_audit.py:45-57`) — see rule 1.
+**21 source reads are affected across three repos: 17 on the media host, 4 on the `github.com/*/raw/` redirect form.** The `github.com/<org>/<repo>/raw/…` form is a *smart* redirect that routes per path by LFS status, so those 4 survive an org/repo/path swap with no host decision; **the other 17 must change host as well.** `lecture-intro.zh-cn` is the third consumer and is invisible to every audit run (`scripts/build_audit.py:45-57`) — see rule 1.
+
+Counting by repo, since the intro + wasm subset alone is 12 media reads and that number has already been mistaken for the total once:
+
+| Repo | media | `github.com/*/raw/` | total |
+| --- | --- | --- | --- |
+| `lecture-python-intro` | 5 | 2 | 7 |
+| `lecture-wasm` | 7 | 0 | 7 |
+| `lecture-intro.zh-cn` | 5 | 2 | 7 |
+| **all** | **17** | **4** | **21** |
 
 | Repo | File | Lines | Current host |
 | --- | --- | --- | --- |
@@ -236,7 +245,7 @@ Only one file genuinely forces LFS, and it is not a dataset:
 - [ ] Per-path LFS via `.gitattributes`, scoped to `sources/` only — never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta` (data#1)
 - [ ] Fold in `high_dim_data` content (data#2; coordinate with meta#337 for consuming-lecture repoints)
 - [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving. **Also uncomment its two `to_csv` writes** — both are commented out upstream, so the builder as committed produces both frames in memory and writes nothing. Its fetch and transform stages are complete; the validate stage is a Phase 5 retrofit alongside `scripts/business_cycle.py`
-- [ ] **Repoint all 21 consuming reads, moving the 12 media-host ones off `media.githubusercontent.com`**, in the same set as the fold — they are LFS-tracked in `high_dim_data` and land here as plain git, so the media host 404s for them and changing only org and repo breaks every read. The reads span **three** repos: `lecture-python-intro` (7), `lecture-wasm` (7) and `lecture-intro.zh-cn` (7), the last by hand rather than by sync. See **repoint rule 6** for the enumerated reads, the acceptance check, and why CI does not cover it
+- [ ] **Repoint all 21 consuming reads, moving the 17 media-host ones off `media.githubusercontent.com`**, in the same set as the fold — they are LFS-tracked in `high_dim_data` and land here as plain git, so the media host 404s for them and changing only org and repo breaks every read. The reads span **three** repos: `lecture-python-intro` (7), `lecture-wasm` (7) and `lecture-intro.zh-cn` (7), the last by hand rather than by sync. See **repoint rule 6** for the enumerated reads, the acceptance check, and why CI does not cover it
 - [ ] Set `lfs: false` on **both** workflows that check this repo out, not only the Pages job — `.github/workflows/audit-dashboard.yml:43` (push to `main` plus weekly, and its paths filter includes `migration.yml` and `lectures/*.yml`, so the fold PR's own files trigger it) and `.github/workflows/consumed-file-check.yml:22` (**every** pull request). Nothing under `lectures/` is an LFS object, so the 99 MiB `.dta` need never download. Land this **before** the object does: LFS bandwidth is an org-wide quota shared with `high_dim_data`, and a 403 on LFS downloads takes out the live media-host reads in `lecture-python-intro`, `lecture-wasm` and `lecture-intro.zh-cn` simultaneously — a lecture outage, not a CI failure
 - [ ] Record in `sources/README.md` that `SCF_plus.dta` is 103,934,093 B — **923,507 B, or 0.88%, under GitHub's hard 104,857,600 B blob limit**. It must stay LFS-tracked permanently; an upstream vintage 1% larger could not be pushed as plain git at all
 
