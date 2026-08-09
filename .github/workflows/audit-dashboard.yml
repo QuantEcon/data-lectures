@@ -40,7 +40,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: true    # published files must be bytes, never LFS pointers
+          # Nothing under `lectures/` may be an LFS object (.gitattributes
+          # scopes LFS to `sources/**`), and this job publishes `lectures/` to
+          # Pages. `lfs: false` is what makes a mistake visible: an
+          # accidentally-tracked file is deployed as its pointer, which is the
+          # same bytes raw.githubusercontent.com would serve. Fetching the real
+          # bytes here would publish a file that reads correctly from Pages and
+          # as pointer text everywhere else. It also keeps `sources/` — a 99 MiB
+          # LFS object — off every run of this workflow.
+          lfs: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

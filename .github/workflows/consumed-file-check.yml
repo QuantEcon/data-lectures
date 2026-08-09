@@ -15,11 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # No LFS-tracked files today (PLAN Phase 3). Set proactively: if a
-          # consumed file is ever LFS-tracked, this job must hash the bytes,
-          # not the pointer — a pointer hash would fail loudly here, which is
-          # the correct behaviour, but only with lfs available to fetch.
-          lfs: true
+          # `lfs: false` is the assertion, not a saving. A manifest records the
+          # sha256 of the real bytes, so if a `lectures/` file is ever
+          # LFS-tracked by mistake this job hashes the pointer, mismatches, and
+          # goes red — which is exactly what a reader would get from
+          # raw.githubusercontent.com. Fetching the real bytes would hash them
+          # correctly and pass green while every consumer downloads ~130 bytes
+          # of pointer text. LFS belongs to `sources/**` only (.gitattributes),
+          # and nothing here reads `sources/`.
+          lfs: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
