@@ -1,0 +1,15 @@
+# LFS here is per-path, opt-in, and scoped to builder inputs — never a blanket
+# rule like `high_dim_data`'s `*.csv` + `*.dta`, which is what puts every one of
+# its consumers on the media host.
+#
+# `lectures/` is the published tree and stays 100% plain git. An LFS-tracked
+# path returns HTTP 200 from raw.githubusercontent.com with ~130 bytes of
+# pointer text, so a reader gets a parse error rather than a 404 and a
+# status-code check reads as green — the failure is silent at both ends.
+#
+# `sources/` holds builder inputs, is never served, and is the only place an
+# LFS object belongs here. Its README is the audit trail for what lives there,
+# so it stays plain text.
+
+sources/**              filter=lfs diff=lfs merge=lfs -text
+sources/README.md       !filter !diff !merge text
