@@ -40,7 +40,7 @@ This repository is being shaped into the **single canonical repository for data 
 - **Flat published tree** served at `https://data.quantecon.org/lectures/<filename>` via GitHub Pages (custom domain), CORS-open for pyodide/JupyterLite
 - Every dataset classified **verbatim / constructed / dynamic snapshot**, each with a manifest — authoritative field reference in `manifest-schema.yml`, as revised by the P1 pilot (`integrity`, `builder_status`, `known_nulls` and `license.verified` joined the original sketch of `source` / `license` / `retrieved` / `schema` / `consumers` / `maintainer` / `cadence`)
 - Constructed and dynamic datasets ship their **builder**; dynamic datasets get **scheduled refresh-as-PR** plus a weekly **sources-alive canary**
-- Per-path LFS for large binaries only; storage choice invisible to consumers because URLs decouple from hosting
+- The published tree is **100% plain git**; per-path LFS is confined to `sources/`, which is never served. Storage does **not** decouple from hosting — the URL a consumer must write is a function of how the file is stored, and there is no browser-safe form invariant under a storage flip (repoint rule 6, and [#58](https://github.com/QuantEcon/data-lectures/issues/58) for the ladder above 100 MiB)
 
 ## Repoint rules
 
