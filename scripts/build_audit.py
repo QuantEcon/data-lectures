@@ -459,8 +459,9 @@ def scan(repos_dir: Path):
 
     # Repoint rule 5 (PLAN): lecture-wasm executes code cells in the reader's
     # browser, where the github.com/*/raw/ redirect fails CORS before it is
-    # followed — wasm reads must use raw.githubusercontent.com, or
-    # media.githubusercontent.com for LFS files. Only code-cell reads are
+    # followed — wasm reads must use raw.githubusercontent.com. (The media
+    # host is CORS-clean too, but it is never a valid target for a
+    # data-lectures path — see repoint rule 6 below.) Only code-cell reads are
     # scanned, so {download} and prose links (navigations, CORS-exempt) can
     # never trip this.
     for d in datasets:
@@ -471,6 +472,49 @@ def scan(repos_dir: Path):
                     f"{d['file']}: lecture-wasm {r['lecture']} reads via "
                     f"{r['url_form']} — fails CORS in the browser "
                     f"(repoint rule 5)")
+
+    # Repoint rule 6 (PLAN): media.githubusercontent.com is the LFS *media*
+    # endpoint. It routes per path, not per repo — it serves a file only where
+    # that path is LFS-tracked in the repo the URL names, and 404s otherwise.
+    # Everything this repo publishes is plain git, so the media host is never
+    # a valid way to read a data-lectures path, from any runtime. This has to
+    # be its own assertion: a media URL parses to exactly the same (ref, path)
+    # as the raw URL beside it, so the resolvability check below cannot see
+    # it, and rule 5 above only looks at url_form prefixes in lecture-wasm.
+    for d in datasets:
+        for r in d["refs"]:
+            if r["pattern"] == "data-lectures" and r.get("lfs_media"):
+                mig_problems.append(
+                    f"{d['file']}: {r['repo']} {r['lecture']} reads it via "
+                    f"media.githubusercontent.com — the LFS media host 404s "
+                    f"plain-git files, and everything published here is plain "
+                    f"git (repoint rule 6)")
+
+    # Does the URL resolve to a file this repo actually publishes? `pattern`
+    # is derived from org and repo alone (classify_url), so a repoint to a ref
+    # that does not exist, to a directory this repo does not use, or ahead of
+    # the bytes landing here, all classify as data-lectures and count as
+    # migrated. Each 404s for every reader while the audit stays green, so
+    # assert the two halves `pattern` does not carry: how the URL is spelled,
+    # and whether the file is in the published tree.
+    for d in datasets:
+        for r in d["refs"]:
+            if r["pattern"] != "data-lectures":
+                continue
+            where = f"{r['repo']} {r['lecture']}"
+            expected = f"lectures/{d['file']}"
+            if r.get("ref") != "main":
+                mig_problems.append(
+                    f"{d['file']}: {where} pins ref {r.get('ref')!r} — this "
+                    f"repo serves from main, and a stale ref 404s silently")
+            elif r.get("path") != expected:
+                mig_problems.append(
+                    f"{d['file']}: {where} reads {r.get('path')!r}, but the "
+                    f"published tree is flat — expected {expected!r}")
+            elif not (LECTURES / d["file"]).exists():
+                mig_problems.append(
+                    f"{d['file']}: {where} already reads it from data-lectures "
+                    f"but {expected} is not committed here yet")
 
     audit = {
         "generated": date.today().isoformat(),
