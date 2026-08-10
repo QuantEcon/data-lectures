@@ -81,28 +81,52 @@ def main() -> int:
             continue
 
         # Builder: the status must be a known one, a dataset that claims a
-        # builder must name it, and the path it names must exist. Nothing else
-        # in the repo validates any of this — build_audit only records the
-        # value and the catalog only formats it — so a manifest can currently
-        # assert a builder that was never committed, or that has been moved.
+        # builder must name it, and the path it names must be a file in this
+        # repo. Nothing else validates any of this — build_audit only records
+        # the value and the catalog only formats it — so a manifest can assert
+        # a builder that was never committed, or that has been moved.
+        #
+        # Types are checked first because YAML will hand us a list or a mapping
+        # for either field, and both would raise rather than report: `status not
+        # in BUILDER_STATUSES` is a TypeError on an unhashable value, and
+        # `REPO / builder` is a TypeError on anything but a string.
         status = manifest.get("builder_status")
         builder = manifest.get("builder")
-        if status is not None and status not in BUILDER_STATUSES:
+        if status is not None and not isinstance(status, str):
+            errors.append(
+                f"{declared}: builder_status must be a string, got "
+                f"{type(status).__name__}"
+            )
+        elif status is not None and status not in BUILDER_STATUSES:
             errors.append(
                 f"{declared}: unknown builder_status {status!r} — expected one "
                 f"of {', '.join(sorted(BUILDER_STATUSES))}"
             )
-        elif str(status).startswith("committed") and not builder:
+        elif isinstance(status, str) and status.startswith("committed") and not builder:
             errors.append(
                 f"{declared}: builder_status is {status!r} but no builder is "
                 f"named — a dataset claiming a committed builder must say "
                 f"where it is"
             )
-        if builder and not (REPO / builder).exists():
+
+        if builder is not None and not isinstance(builder, str):
             errors.append(
-                f"{declared}: builder {builder!r} does not exist — builders "
-                f"live in builders/<stem>.<ext> (AGENTS.md, 'Builders')"
+                f"{declared}: builder must be a string path, got "
+                f"{type(builder).__name__}"
             )
+        elif builder:
+            # Resolve before checking: `REPO / builder` silently discards REPO
+            # when builder is absolute, and a relative path can climb out with
+            # `../`. Either way the assertion would be satisfied by a file that
+            # is not a builder in this repo, which is the only thing it exists
+            # to establish. A directory passes `.exists()` too, hence is_file.
+            target = (REPO / builder).resolve()
+            if not target.is_relative_to(REPO) or not target.is_file():
+                errors.append(
+                    f"{declared}: builder {builder!r} must be a file inside "
+                    f"this repo — builders live in builders/<stem>.<ext> "
+                    f"(AGENTS.md, 'Builders')"
+                )
 
         consumers = manifest.get("consumers") or []
         integrity = manifest.get("integrity")
