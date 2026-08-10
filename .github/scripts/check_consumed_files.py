@@ -62,11 +62,25 @@ BUILDER_STATUSES = {"committed", "committed-frozen", "unrecovered", "not-applica
 
 
 SHA256_RE = re.compile(r"\b([0-9a-f]{64})\b")
+# A `sources/` entry is a `## <filename>` section. Requiring the heading to look
+# like a filename is what keeps a prose section from being read as one: the
+# README has several, and a sha256 quoted in an example inside any of them would
+# otherwise register as a recorded file and fail the no-such-file check below.
+SOURCE_HEADING_RE = re.compile(r"^[\w.\-]+\.\w+$")
 # An LFS pointer is <200 bytes of text whose second line is `oid sha256:<hex>`.
 # That oid IS the object's sha256, which is what makes this check work under
 # `lfs: false` — the real bytes are never fetched and never need to be.
+#
+# Line endings are tolerated rather than pinned. `.gitattributes` sets `-text` on
+# sources/** so git does no conversion, and CI is ubuntu — but if a pointer ever
+# did pick up a CR or a stray trailing newline, a stricter pattern would fall
+# through to hashing the pointer text and report "committed bytes do not match"
+# for an object that is perfectly correct. Still far too tight for any real
+# data file to match by accident.
 LFS_POINTER_RE = re.compile(
-    rb"\Aversion https://git-lfs\.github\.com/spec/v1\noid sha256:([0-9a-f]{64})\nsize (\d+)\n\Z"
+    rb"\Aversion https://git-lfs\.github\.com/spec/v1\r?\n"
+    rb"oid sha256:([0-9a-f]{64})\r?\n"
+    rb"size (\d+)\s*\Z"
 )
 
 
@@ -85,7 +99,9 @@ def main() -> int:
 
     for manifest_path in manifests:
         try:
-            manifest = yaml.safe_load(manifest_path.read_text())
+            # Explicit encoding: manifests carry em-dashes and non-ASCII source
+            # names, and read_text() otherwise decodes with the platform locale.
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
         except yaml.YAMLError as exc:
             errors.append(f"{manifest_path.name}: invalid YAML — {exc}")
             continue
@@ -212,14 +228,30 @@ def main() -> int:
     return 1 if errors else 0
 
 
-def lfs_tracked(path: pathlib.Path) -> bool:
-    """Whether the LFS rule captures `path`, per .gitattributes."""
+def lfs_tracked(path: pathlib.Path) -> tuple[bool, str | None]:
+    """Whether the LFS rule captures `path`, per .gitattributes.
+
+    Returns (tracked, error). A git failure must NOT come back as `False`: an
+    empty stdout would then read as "not captured by the LFS rule", which is
+    the one catastrophe this check exists to report. A broken environment
+    reporting the disaster it is meant to detect is worse than no check, so it
+    gets its own message.
+    """
     rel = path.relative_to(REPO).as_posix()
-    out = subprocess.run(
-        ["git", "check-attr", "filter", "--", rel],
-        cwd=REPO, capture_output=True, text=True,
-    )
-    return out.stdout.strip().endswith(": lfs")
+    try:
+        out = subprocess.run(
+            ["git", "check-attr", "filter", "--", rel],
+            cwd=REPO, capture_output=True, text=True,
+        )
+    except OSError as exc:                       # git absent entirely
+        return False, f"could not run `git check-attr` ({exc})"
+    if out.returncode != 0:
+        detail = out.stderr.strip().splitlines()
+        return False, (
+            f"`git check-attr` exited {out.returncode}"
+            + (f" — {detail[0]}" if detail else "")
+        )
+    return out.stdout.strip().endswith(": lfs"), None
 
 
 def check_sources(errors: list[str]) -> int:
@@ -245,11 +277,14 @@ def check_sources(errors: list[str]) -> int:
 
     # `## <filename>` starts a section; the first 64-hex token inside it is that
     # file's recorded sha256. Parsed by section rather than by table cell so the
-    # README stays free to change its formatting.
-    sections = re.split(r"^## +", readme.read_text(), flags=re.M)[1:]
+    # README stays free to change its formatting. Headings that are not
+    # filename-shaped are prose and are skipped — see SOURCE_HEADING_RE.
+    sections = re.split(r"^## +", readme.read_text(encoding="utf-8"), flags=re.M)[1:]
     recorded: dict[str, str] = {}
     for sec in sections:
         name = sec.splitlines()[0].strip().strip("`")
+        if not SOURCE_HEADING_RE.match(name):
+            continue
         if m := SHA256_RE.search(sec):
             recorded[name] = m.group(1)
 
@@ -257,7 +292,14 @@ def check_sources(errors: list[str]) -> int:
     checked = 0
 
     for path in files:
-        if not lfs_tracked(path):
+        tracked, git_error = lfs_tracked(path)
+        if git_error:
+            errors.append(
+                f"sources/{path.name}: {git_error}. This is a tooling failure, "
+                f"not a finding about the file — the LFS assertion could not be "
+                f"evaluated either way"
+            )
+        elif not tracked:
             errors.append(
                 f"sources/{path.name}: not captured by the LFS rule — "
                 f"`git check-attr filter` does not say `lfs`. Everything under "

@@ -41,7 +41,7 @@ re-fetched** — see `AGENTS.md`.
 | `us_adult_heights.py` | `us_adult_heights.csv` | committed |
 | `business_cycle.py` | `business_cycle_data.csv`, `business_cycle_info.md`, `business_cycle_metadata.md` | run by hand, no validate stage yet (PLAN Phase 5); its three outputs are the repo's only unmanifested files |
 | `webscrape_forbes.ipynb` | `forbes-global2000.csv`, `forbes-billionaires.csv` | **committed-frozen** — an undocumented Forbes API, a spoofed user-agent and hardcoded GDPR consent cookies. Defects recorded in the two manifests rather than fixed |
-| `generating_mini.md` | `SCF_plus_mini.csv`, `SCF_plus_mini_no_weights.csv` | **committed-frozen** — its `to_csv` calls are commented out upstream and stay that way. Reads `sources/SCF_plus.dta` in substance; the URL in the file is historical, see `sources/README.md` |
+| `generating_mini.md` | `SCF_plus_mini.csv`, `SCF_plus_mini_no_weights.csv` | **committed-frozen** — its `to_csv` calls are commented out upstream and stay that way. As written it still fetches the `high_dim_data` URL; that URL is historical, and the input is now committed at `sources/SCF_plus.dta`. See `sources/README.md` |
 
 Both frozen builders keep their upstream `high_dim_data` filenames rather than
 being renamed to their set stems (`forbes`, `SCF_plus_mini`), which preserves
