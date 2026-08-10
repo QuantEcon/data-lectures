@@ -84,7 +84,7 @@ The failure modes are silent in both directions, which is why all three are mach
 LFS exists here for one purpose: **upstream inputs that builders consume and no lecture reads**, which live in `sources/` and are never served.
 
 - `lectures/<file>` — a published dataset. Plain git, sidecar manifest required, its filename is an API.
-- `sources/<file>` — a builder input. Per-path LFS, **no** manifest, not served, recorded instead in `sources/README.md` — the audit trail: origin, retrieval date, licence, upstream identifier (DOI where one exists), `sha256`, and the builder that consumes it.
+- `sources/<file>` — a builder input. Per-path LFS, **no** manifest, not served, recorded instead in `sources/README.md` — the audit trail: origin, retrieval date, licence, upstream identifier (DOI where one exists), `sha256`, and the builder that consumes it. **CI enforces the last of those**: `check_consumed_files.py` requires every file here to be captured by the LFS rule and to hash to a `sha256` recorded under a `## <filename>` heading in that README, and fails on a README entry with no file. It reads the pointer's `oid` rather than the object, so it costs no LFS bandwidth.
 
 Rules that still apply:
 
@@ -92,7 +92,7 @@ Rules that still apply:
 - Do not LFS-track an **existing** file until you've confirmed no consumer fetches it via `raw.githubusercontent.com` — converting silently turns their download into pointer text.
 - A builder must read its input from `sources/`, never over the network from another QuantEcon repo. That is how a retired repo becomes load-bearing again.
 - **Two** workflows check this repo out, and both now say `lfs: false` — `.github/workflows/audit-dashboard.yml` (the Pages deploy) and `.github/workflows/consumed-file-check.yml` (every pull request). Leave them that way: `lfs: false` is the assertion that nothing published is an LFS object. If a `lectures/` file is ever tracked by mistake, the checker hashes the pointer and goes red, and Pages deploys the same pointer bytes a reader would get from `raw.githubusercontent.com` — whereas `lfs: true` fetches the real bytes, passes green, and publishes a file that works only from Pages. It also keeps `sources/` (a 99 MiB LFS object) off every run; LFS bandwidth is an org-wide quota.
-- `git check-attr filter -- sources/<file>` must print `filter: lfs` **before** you `git add` anything to `sources/`. `SCF_plus.dta` is 103,934,093 B against GitHub's 104,857,600 B hard limit, so a mis-scoped rule does not error — the push succeeds as plain git and the blob is in history permanently.
+- `git check-attr filter -- sources/<file>` must print `filter: lfs` **before** you `git add` anything to `sources/`. `SCF_plus.dta` is 103,934,093 B against GitHub's 104,857,600 B hard limit, so a mis-scoped rule does not error — the push succeeds as plain git and the blob is in history permanently. CI asserts this too, but only after the fact: by the time a PR goes red the blob is already in the branch's history, so run it yourself first.
 
 #### When a published file approaches the 100 MiB blob limit
 

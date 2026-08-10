@@ -25,17 +25,33 @@ them — and this is the repo's only byte-integrity gate.
 Files with no manifest yet (Phase 6 backfill pending), and manifests that
 record no hash, are out of scope here — the full validation suite (schema,
 dtypes, invariants) is PLAN Phase 5 and will subsume this check.
+
+Separately, for every file in sources/ (builder inputs, never served, no
+manifest — sources/README.md is their audit trail):
+
+  - the LFS rule must actually capture it
+  - sources/README.md must record its sha256, under a `## <filename>` heading
+  - the committed bytes must hash to that value
+
+Same principle as the manifest gate above, keyed on the README instead: hash
+whenever a hash is recorded. Without it, sources/ would carry no validation of
+any kind while every file in lectures/ is validated as it migrates — and
+SCF_plus.dta is the provenance root for two published datasets, so if its bytes
+drifted both would become unreproducible and nothing would notice.
 """
 from __future__ import annotations
 
 import hashlib
 import pathlib
+import re
+import subprocess
 import sys
 
 import yaml
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 LECTURES = REPO / "lectures"
+SOURCES = REPO / "sources"
 
 # One builder per published dataset, in builders/ (AGENTS.md, "Builders").
 # `committed` asserts a runnable four-stage builder; `committed-frozen` says the
@@ -43,6 +59,15 @@ LECTURES = REPO / "lectures"
 # will not re-run); `unrecovered` says it is absent; `not-applicable` is for
 # verbatim files.
 BUILDER_STATUSES = {"committed", "committed-frozen", "unrecovered", "not-applicable"}
+
+
+SHA256_RE = re.compile(r"\b([0-9a-f]{64})\b")
+# An LFS pointer is <200 bytes of text whose second line is `oid sha256:<hex>`.
+# That oid IS the object's sha256, which is what makes this check work under
+# `lfs: false` — the real bytes are never fetched and never need to be.
+LFS_POINTER_RE = re.compile(
+    rb"\Aversion https://git-lfs\.github\.com/spec/v1\noid sha256:([0-9a-f]{64})\nsize (\d+)\n\Z"
+)
 
 
 def sha256(path: pathlib.Path) -> str:
@@ -176,6 +201,8 @@ def main() -> int:
                 f"vintages')"
             )
 
+    checked += check_sources(errors)
+
     for e in errors:
         print(f"::error::{e}")
     print(
@@ -183,6 +210,97 @@ def main() -> int:
         f"{len(errors)} error(s)"
     )
     return 1 if errors else 0
+
+
+def lfs_tracked(path: pathlib.Path) -> bool:
+    """Whether the LFS rule captures `path`, per .gitattributes."""
+    rel = path.relative_to(REPO).as_posix()
+    out = subprocess.run(
+        ["git", "check-attr", "filter", "--", rel],
+        cwd=REPO, capture_output=True, text=True,
+    )
+    return out.stdout.strip().endswith(": lfs")
+
+
+def check_sources(errors: list[str]) -> int:
+    """Verify sources/ against the sha256 values in sources/README.md.
+
+    Two assertions per file. The LFS one is not ceremony: SCF_plus.dta sits
+    923,507 B (0.88%) under GitHub's hard blob limit, so a mis-scoped
+    .gitattributes does not error — the push succeeds as plain git and the blob
+    is in history permanently. That failure is silent in the one direction that
+    cannot be undone, so it is worth a check rather than a convention.
+    """
+    if not SOURCES.is_dir():
+        return 0
+
+    readme = SOURCES / "README.md"
+    if not readme.exists():
+        errors.append(
+            "sources/README.md is missing — it is the audit trail for a "
+            "directory whose files carry no manifest (AGENTS.md, 'LFS, and "
+            "sources/ vs lectures/')"
+        )
+        return 0
+
+    # `## <filename>` starts a section; the first 64-hex token inside it is that
+    # file's recorded sha256. Parsed by section rather than by table cell so the
+    # README stays free to change its formatting.
+    sections = re.split(r"^## +", readme.read_text(), flags=re.M)[1:]
+    recorded: dict[str, str] = {}
+    for sec in sections:
+        name = sec.splitlines()[0].strip().strip("`")
+        if m := SHA256_RE.search(sec):
+            recorded[name] = m.group(1)
+
+    files = sorted(p for p in SOURCES.iterdir() if p.is_file() and p.name != "README.md")
+    checked = 0
+
+    for path in files:
+        if not lfs_tracked(path):
+            errors.append(
+                f"sources/{path.name}: not captured by the LFS rule — "
+                f"`git check-attr filter` does not say `lfs`. Everything under "
+                f"sources/ must be LFS-tracked; a mis-scoped rule commits the "
+                f"real bytes as plain git and does not error below 100 MiB"
+            )
+
+        want = recorded.get(path.name)
+        if not want:
+            errors.append(
+                f"sources/{path.name}: no sha256 recorded in sources/README.md "
+                f"— add a `## {path.name}` section with its origin, retrieval, "
+                f"licence, sha256 and consuming builder"
+            )
+            continue
+
+        # Under `lfs: false` the working file IS the pointer, and the pointer's
+        # oid is the object's sha256 — so this verifies the real bytes without
+        # fetching ~100 MiB of them. With LFS smudge on locally it is the real
+        # file, and hashing it gives the same answer.
+        blob = path.read_bytes() if path.stat().st_size < 1024 else None
+        if blob is not None and (m := LFS_POINTER_RE.match(blob)):
+            actual, kind = m.group(1).decode(), "LFS pointer oid"
+        else:
+            actual, kind = sha256(path), "committed bytes"
+
+        checked += 1
+        if actual != want:
+            errors.append(
+                f"sources/{path.name}: {kind} {actual} does not match the "
+                f"sha256 recorded in sources/README.md ({want}). This file is "
+                f"a builder input, so a drift here makes its outputs "
+                f"unreproducible — update the README in the same PR if the "
+                f"change is deliberate"
+            )
+
+    for name in sorted(set(recorded) - {p.name for p in files}):
+        errors.append(
+            f"sources/README.md records `{name}`, which is not in sources/ — "
+            f"a stale audit-trail entry is worse than none"
+        )
+
+    return checked
 
 
 if __name__ == "__main__":
