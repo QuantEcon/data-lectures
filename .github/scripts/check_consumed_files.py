@@ -70,14 +70,23 @@ def main() -> int:
 
         consumers = manifest.get("consumers") or []
         integrity = manifest.get("integrity")
-        # A non-dict integrity (e.g. a stray string) is treated as missing, so
-        # it lands in the "not recorded" error below instead of crashing here.
-        recorded = integrity.get("sha256") if isinstance(integrity, dict) else None
+        # A present-but-malformed integrity block must fail loudly. Read as
+        # "no hash recorded" it would skip the byte check entirely for a
+        # manifest that has no consumers yet — which is how every new dataset
+        # lands here, since manifests precede their repoints.
+        if integrity is not None and not isinstance(integrity, dict):
+            errors.append(
+                f"{declared}: `integrity` must be a mapping, got "
+                f"{type(integrity).__name__} — check the indentation under "
+                f"`integrity:`; as written the sha256 is unreadable and the "
+                f"byte check would be skipped silently"
+            )
+            continue
+        recorded = (integrity or {}).get("sha256")
 
         if not consumers and not recorded:
             continue  # nothing reads it, nothing to verify — out of scope
 
-        checked += 1
         data_path = LECTURES / declared
         if not data_path.exists():
             errors.append(
@@ -97,6 +106,7 @@ def main() -> int:
             continue
 
         actual = sha256(data_path)
+        checked += 1    # counted where the hash is actually computed
         if actual != recorded:
             errors.append(
                 f"{declared}: bytes do not match the manifest (sha256 {actual} "
