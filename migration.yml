@@ -313,26 +313,88 @@ datasets:
         date: 2026-08-07
     cutover: null
 
+  # --- P3: the high_dim_data fold ----------------------------------------
+  # Six datasets folded in from QuantEcon/high_dim_data, which is retired
+  # (archive, never delete) once the repoints land. `prior_pattern: external`
+  # is the audit's own label for these reads — "external data repo,
+  # QuantEcon/high_dim_data via raw and media (LFS) hosts".
+  #
+  # They land at `landed` with `repoints: []` and their manifests at
+  # `consumers: []`, which is honest: no lecture reads a data-lectures URL for
+  # these until PR set C. The window between those repoints and the flip to
+  # `repointed` is RED by design — build_audit fails on a landed dataset whose
+  # consumers read this repo — so the flip is a same-day action.
+  #
+  # They were LFS-tracked upstream and are plain git here, so every consuming
+  # read must change HOST as well as org and repo (repoint rule 6). 28 reads
+  # across four repos: lecture-python-intro, lecture-wasm, lecture-intro.zh-cn
+  # and test-actions-lecture-intro.
+
+  forbes-global2000.csv:
+    pilot: P3
+    status: landed
+    prior_pattern: external
+    landed:
+      pr: QuantEcon/data-lectures#62
+      date: 2026-08-10
+    repoints: []
+    cutover: null
+
+  forbes-billionaires.csv:
+    pilot: P3
+    status: landed
+    prior_pattern: external
+    landed:
+      pr: QuantEcon/data-lectures#62
+      date: 2026-08-10
+    repoints: []
+    cutover: null
+
+  cities_us.csv:
+    pilot: P3
+    status: landed
+    prior_pattern: external
+    landed:
+      pr: QuantEcon/data-lectures#62
+      date: 2026-08-10
+    repoints: []
+    cutover: null
+
+  cities_brazil.csv:
+    pilot: P3
+    status: landed
+    prior_pattern: external
+    landed:
+      pr: QuantEcon/data-lectures#62
+      date: 2026-08-10
+    repoints: []
+    cutover: null
+
+  SCF_plus_mini.csv:
+    pilot: P3
+    status: landed
+    prior_pattern: external
+    landed:
+      pr: QuantEcon/data-lectures#62
+      date: 2026-08-10
+    repoints: []
+    cutover: null
+
+  SCF_plus_mini_no_weights.csv:
+    pilot: P3
+    status: landed
+    prior_pattern: external
+    landed:
+      pr: QuantEcon/data-lectures#62
+      date: 2026-08-10
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people
 # who are not doing the migration); `scope` carries the insider detail.
 pending:
-  - pilot: P3
-    title: Large data files, and the external data repository
-    scope: the host-migration case — heavy_tails Forbes/cities set + SCF extracts (fold in
-      high_dim_data). LFS-tracked there, plain git here, so all consuming reads must move off
-      media.githubusercontent.com as well as changing org and repo (repoint rule 6)
-    datasets:
-      - forbes-global2000.csv
-      - forbes-billionaires.csv
-      - cities_us.csv
-      - cities_brazil.csv
-      - SCF_plus_mini.csv
-      - SCF_plus_mini_no_weights.csv
-    tracking:
-      - QuantEcon/data-lectures#2
-      - QuantEcon/meta#337
   - pilot: P4
     title: Maintained snapshots for lectures that fetch live API data
     scope: the dynamic-snapshot case — a maintained UNRATE twin for the incidental FRED consumers

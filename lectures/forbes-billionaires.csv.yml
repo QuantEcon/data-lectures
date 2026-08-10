@@ -1,0 +1,126 @@
+# Manifest for forbes-billionaires.csv — folded in from QuantEcon/high_dim_data
+# (PLAN Phase 8, P3). Scraped from the Forbes API by webscrape_forbes.ipynb,
+# which lands here alongside it as a frozen builder.
+#
+# LICENCE NOTE: `restricted`, on the same grounds as its sibling
+# forbes-global2000.csv — commercial publisher, editorial product, undocumented
+# internal API. Inherited exposure, logged for review in
+# QuantEcon/data-lectures#35.
+
+filename: forbes-billionaires.csv
+title: Forbes Billionaires — individual net worth
+description: >
+  Individual billionaires with net worth, rank, country, industry and source of
+  wealth, as returned by the Forbes list API. The heavy-tails lecture uses
+  three columns — country, realTimeWorth and realTimeRank — to plot the upper
+  tail of the wealth distribution for four countries.
+
+class: constructed
+
+source:
+  name: Forbes Billionaires
+  url: https://www.forbes.com/billionaires/
+  citation: >
+    Forbes, The World's Billionaires (https://www.forbes.com/billionaires/),
+    retrieved via the Forbes list API.
+  note: >
+    high_dim_data's cross_section/README.md describes this as "the world's
+    richest 2000 people in 2020 according to Forbes". Both halves of that are
+    contradicted by the bytes and are recorded here rather than repeated: the
+    file holds 2935 rows, and its `timestamp` column carries 282 distinct
+    values spanning 2020-04-07 to 2023-04-15. See integrity.upstream.note.
+
+license:
+  name: null
+  url: https://www.forbes.com/terms/
+  redistribution: restricted
+  verified: 2026-08-10
+  note: >
+    Inherited exposure (served from lecture-python-intro and lecture-wasm for
+    years); cached here pending licence review — QuantEcon/data-lectures#35.
+    Not a blessed exception: resolve before promoting data.quantecon.org.
+
+retrieved: null                 # inherited from high_dim_data with no recorded
+                                # retrieval date. The per-row `timestamp`
+                                # column is the API's own stamp, not a
+                                # retrieval date for the file, and it is not
+                                # single-valued — do not promote it to this
+                                # field.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-10 against high_dim_data's
+# LFS object — the pointer's oid IS the sha256 below.
+
+integrity:
+  sha256: 45618eb7ccab9a132c87005d74bfbd0d18ffb7ff599f619f85083edad0149d63
+  upstream:
+    status: unverifiable
+    date: 2026-08-10
+    against: null
+    note: >
+      Not a single-vintage snapshot: 282 distinct `timestamp` values spanning
+      2020-04-07 to 2023-04-15, so the bytes accreted across at least three
+      annual lists rather than capturing one. The two rank/worth column
+      families are correspondingly uneven — `rank` is present on 2095 of 2935
+      rows and `realTimeRank` on 2655 — which is why the lecture reads the
+      realTime pair and drops nulls. Frozen builder against an undocumented
+      API, so there is nothing to re-fetch and compare.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: csv
+  columns:
+    - {name: "Unnamed: 0", dtype: int64, description: "unnamed positional index — an artifact of the builder's to_csv without index=None"}
+    - {name: name, dtype: str, description: full name}
+    - {name: lastName, dtype: str, description: surname}
+    - {name: uri, dtype: str, description: Forbes profile slug}
+    - {name: imageUri, dtype: str, description: portrait image slug, or "no-pic"}
+    - {name: worthChange, dtype: float64, description: change in net worth (USD millions)}
+    - {name: age, dtype: float64, description: age in years}
+    - {name: source, dtype: str, description: source of wealth}
+    - {name: industry, dtype: str, description: industry category}
+    - {name: gender, dtype: str, description: "M or F"}
+    - {name: country, dtype: str, description: "country of citizenship — used by the lecture"}
+    - {name: timestamp, dtype: int64, description: "API timestamp, epoch milliseconds — not single-valued, see integrity.upstream.note"}
+    - {name: headquarters, dtype: str, description: headquarters location (US state abbreviation where present)}
+    - {name: state, dtype: str, description: US state name}
+    - {name: realTimeWorth, dtype: float64, description: "real-time net worth (USD millions) — used by the lecture"}
+    - {name: realTimeRank, dtype: float64, description: "real-time rank — used by the lecture"}
+    - {name: realTimePosition, dtype: float64, description: real-time list position}
+    - {name: squareImage, dtype: str, description: portrait image URL}
+    - {name: position, dtype: float64, description: annual-list position}
+    - {name: rank, dtype: float64, description: annual-list rank}
+    - {name: worth, dtype: float64, description: annual-list net worth (USD millions)}
+    - {name: title, dtype: str, description: job title}
+    - {name: government, dtype: str, description: "whether the wealth is government-linked, as the string True/False"}
+    - {name: pay, dtype: float64, description: reported pay (USD millions)}
+    - {name: managementAssets, dtype: float64, description: assets under management (USD millions)}
+  row_count_floor: 2935         # frozen extract — exact row count by design
+  known_nulls:                  # extensive and correct: the API returns
+    worthChange: 281            # different field sets per list vintage, and the
+    age: 98                     # lecture's .dropna() on its three columns is
+    gender: 7                   # what makes that safe. Declared so the
+    headquarters: 2122          # invariant tests cannot be written to reject
+    state: 1915                 # them.
+    realTimeWorth: 280
+    realTimeRank: 280
+    realTimePosition: 280
+    squareImage: 804
+    position: 840
+    rank: 840
+    worth: 840
+    title: 2606
+    government: 2606
+    pay: 2918
+    managementAssets: 2933
+
+consumers: []                   # nothing reads this URL until PR set C
+
+builder: builders/webscrape_forbes.ipynb
+builder_status: committed-frozen

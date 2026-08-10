@@ -1,0 +1,97 @@
+# Manifest for SCF_plus_mini_no_weights.csv — folded in from
+# QuantEcon/high_dim_data (PLAN Phase 8, P3). The weight-expanded twin of
+# SCF_plus_mini.csv, built by the same frozen builder.
+#
+# PROVENANCE NOTE: same as its twin — the SCF+ deposit record could not be
+# located, so licence and retrieval are honest nulls, registered on
+# QuantEcon/data-lectures#35.
+
+filename: SCF_plus_mini_no_weights.csv
+title: SCF+ mini, weight-expanded — net wealth and income, 1950-2016
+description: >
+  SCF_plus_mini.csv with the survey weights applied by repetition instead of
+  carried as a column: each household-year is repeated round(weight) times and
+  the weights column dropped, so an unweighted statistic over these rows is
+  already population-representative. 1,672,214 rows against the weighted file's
+  509,455. The maximum-likelihood lecture reads it, filters to 2016 and
+  net wealth above 1, and samples from the result.
+
+class: constructed
+
+source:
+  name: SCF+ (Kuhn, Schularick and Steins) — an extension of the Survey of Consumer Finances
+  url: https://www.journals.uchicago.edu/doi/10.1086/708815
+  doi: 10.1086/708815
+  citation: >
+    Kuhn, Moritz, Moritz Schularick and Ulrike I. Steins (2020). Income and
+    Wealth Inequality in America, 1949-2016. Journal of Political Economy,
+    128(9), 3469-3519.
+  note: >
+    Derived from SCF_plus_mini.csv in the same builder run, so its provenance
+    chain is that file's. Underlying survey: the Federal Reserve Board's Survey
+    of Consumer Finances.
+
+license:
+  name: null
+  url: null
+  redistribution: permitted
+  verified: 2026-08-10
+  note: >
+    Replication data for a published article, served publicly from
+    lecture-python-intro and lecture-wasm for years, cached here with
+    attribution under the record-and-track policy. No licence statement was
+    locatable at any deposit — registered on QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited from high_dim_data with no recorded
+                                # retrieval date
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-10 against high_dim_data's
+# LFS object — the pointer's oid IS the sha256 below, so a 72 MiB file was
+# compared exactly without downloading it twice.
+
+integrity:
+  sha256: c3b2c78afa4b6cf87fb885947681fd8e54bbe6ee736fce0aaafccdc75788a0a6
+  upstream:
+    status: unverifiable
+    date: 2026-08-10
+    against: null
+    note: >
+      Same unlocatable SCF+ deposit as its twin — Crossref registers no data
+      relation and a null licence, DataCite and Dataverse return zero,
+      openICPSR and the JPE supplement are 403. The derivation from
+      SCF_plus_mini.csv was re-checked here and reproduces exactly: the row
+      count equals the sum of the rounded weights (1,672,214).
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: csv
+  columns:
+    - {name: year, dtype: int64, description: "3-year survey window (upstream `yearmerge`), 20 distinct values"}
+    - {name: n_wealth, dtype: float64, description: "net wealth in 2016 USD — may be negative"}
+    - {name: t_income, dtype: float64, description: "total household income excluding capital gains, 2016 USD — may be negative"}
+    - {name: l_income, dtype: float64, description: "labour income: wages, salaries and self-employment, 2016 USD"}
+    - {name: nw_groups, dtype: str, description: "net-wealth group: 0-50%, 50-90% or Top 10%"}
+    - {name: ti_groups, dtype: str, description: "total-income group: 0-50%, 50-90% or Top 10%"}
+  row_count_floor: 1672214      # frozen extract — exact row count by design
+  date_range: {start: 1950, end: 2016}
+  known_nulls: {}               # none — the builder drops them before writing
+
+  # A property of the expansion worth knowing before using this file for tail
+  # work: rounding the weight to zero drops the household entirely, so 45,709
+  # of the weighted file's rows are absent here — and because the wealthiest
+  # households carry the smallest survey weights, that truncates the top of the
+  # distribution. Maximum n_wealth falls from 2,928,346,000 in
+  # SCF_plus_mini.csv to 48,765,100 here. Measured 2026-08-10, not inferred.
+  # Use the weighted file for anything sensitive to the extreme upper tail.
+
+consumers: []                   # nothing reads this URL until PR set C
+
+builder: builders/generating_mini.md
+builder_status: committed-frozen

@@ -1,0 +1,107 @@
+# Manifest for SCF_plus_mini.csv — folded in from QuantEcon/high_dim_data
+# (PLAN Phase 8, P3). A seven-column extract of the SCF+ panel, built by
+# generating_mini.md, which lands here alongside it as a frozen builder.
+#
+# PROVENANCE NOTE: SCF+ is the Kuhn-Schularick-Steins (JPE 2020) reconstruction
+# of the Survey of Consumer Finances. Its deposit record could not be located —
+# see integrity.upstream.note — so the licence and retrieval fields are honest
+# nulls, registered on QuantEcon/data-lectures#35.
+
+filename: SCF_plus_mini.csv
+title: SCF+ mini — net wealth, income and survey weights, 1950-2016
+description: >
+  A seven-column extract of the SCF+ household panel: net wealth, total income
+  and labour income per household-year, with the survey weight and the wealth
+  and income group labels. All monetary variables are in 2016 dollars. The
+  inequality lecture reads it whole and uses the weights to build
+  population-weighted Lorenz curves and Gini coefficients.
+
+# Constructed: generating_mini.md selects 7 of the SCF+ .dta's ~50 variables,
+# renames them, coerces the year and drops nulls.
+class: constructed
+
+source:
+  name: SCF+ (Kuhn, Schularick and Steins) — an extension of the Survey of Consumer Finances
+  url: https://www.journals.uchicago.edu/doi/10.1086/708815
+  doi: 10.1086/708815
+  citation: >
+    Kuhn, Moritz, Moritz Schularick and Ulrike I. Steins (2020). Income and
+    Wealth Inequality in America, 1949-2016. Journal of Political Economy,
+    128(9), 3469-3519.
+  note: >
+    The variable dictionary inherited as SCF_plus/README.md upstream carries no
+    URL, no date, no licence and no DOI — it documents the columns, not the
+    source. The citation above was established from the article, not from
+    anything the migrated files supply. Underlying survey: the Federal Reserve
+    Board's Survey of Consumer Finances.
+
+license:
+  name: null
+  url: null
+  # Published replication data for a JPE article. Crossref registers
+  # `license: null` for the DOI and declares no data relation; DataCite and
+  # Harvard Dataverse return zero; openICPSR and the JPE supplement path are
+  # both 403. So there is no licence statement to record — not a permissive one
+  # inferred, and not a restrictive one assumed.
+  redistribution: permitted
+  verified: 2026-08-10
+  note: >
+    Replication data for a published article, served publicly from
+    lecture-python-intro and lecture-wasm for years, cached here with
+    attribution under the record-and-track policy. No licence statement was
+    locatable at any deposit — registered on QuantEcon/data-lectures#35 rather
+    than left silent.
+
+retrieved: null                 # inherited from high_dim_data with no recorded
+                                # retrieval date; do not reconstruct one from
+                                # git history
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-10 against high_dim_data's
+# LFS object — the pointer's oid IS the sha256 below, so a 31 MiB file was
+# compared exactly without downloading it twice.
+
+integrity:
+  sha256: 38d4cb6640fcfbd5ee204a27ca2e6a4d5da9a1313a7e4edb9884ccc359ac0e31
+  upstream:
+    status: unverifiable
+    date: 2026-08-10
+    against: null
+    note: >
+      No citable SCF+ deposit could be located: Crossref registers the DOI with
+      no data relation and a null licence, DataCite and Harvard Dataverse
+      return zero results, and openICPSR and the JPE supplement path both
+      return 403. The builder's input — SCF_plus.dta, inherited in
+      high_dim_data — is therefore the deepest recoverable provenance, and it
+      is itself unverifiable against any published deposit.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: csv
+  columns:
+    - {name: year, dtype: int64, description: "3-year survey window (upstream `yearmerge`), 20 distinct values"}
+    - {name: n_wealth, dtype: float64, description: "net wealth in 2016 USD (upstream `ffanw`) — may be negative"}
+    - {name: t_income, dtype: float64, description: "total household income excluding capital gains, 2016 USD (upstream `tinc`) — may be negative"}
+    - {name: l_income, dtype: float64, description: "labour income: wages, salaries and self-employment, 2016 USD (upstream `incws`)"}
+    - {name: weights, dtype: float64, description: "survey weight (upstream `wgtI95W95`) — required for any population-representative statistic"}
+    - {name: nw_groups, dtype: str, description: "net-wealth group: 0-50%, 50-90% or Top 10%"}
+    - {name: ti_groups, dtype: str, description: "total-income group: 0-50%, 50-90% or Top 10%"}
+  row_count_floor: 509455       # frozen extract — exact row count by design
+  date_range: {start: 1950, end: 2016}
+  known_nulls: {}               # none — the builder drops them before writing
+
+consumers: []                   # nothing reads this URL until PR set C
+
+builder: builders/generating_mini.md
+# committed-frozen, not committed: the notebook is kept as the record of what
+# produced these bytes and deliberately will not run. Its two to_csv calls are
+# commented out upstream and stay that way, and its input URL still points at
+# high_dim_data — historical, not a live dependency. The re-fetchable input is
+# committed at sources/SCF_plus.dta (PR B2); see sources/README.md.
+builder_status: committed-frozen

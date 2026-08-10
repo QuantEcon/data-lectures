@@ -1,0 +1,77 @@
+# Manifest for cities_brazil.csv — folded in from QuantEcon/high_dim_data
+# (PLAN Phase 8, P3).
+#
+# LICENCE NOTE: `restricted`, on the same grounds as cities_us.csv — same
+# publisher, same absence of a redistribution grant. Inherited exposure,
+# logged for review in QuantEcon/data-lectures#35.
+
+filename: cities_brazil.csv
+title: World Population Review — Brazilian city populations, 2023
+description: >
+  The 400 largest Brazilian cities with 2023 population and centroid
+  coordinates. The heavy-tails lecture uses pop2023 alone, to plot an empirical
+  CCDF of the city size distribution beside the US one.
+
+class: verbatim
+
+source:
+  name: World Population Review — cities in Brazil
+  url: https://worldpopulationreview.com/countries/cities/brazil
+  citation: >
+    World Population Review, Brazil city populations
+    (https://worldpopulationreview.com/countries/cities/brazil).
+
+license:
+  name: null
+  url: https://worldpopulationreview.com/terms
+  redistribution: restricted
+  verified: 2026-08-10
+  note: >
+    Inherited exposure (served from lecture-python-intro and lecture-wasm for
+    years); cached here pending licence review — QuantEcon/data-lectures#35.
+    Not a blessed exception: resolve before promoting data.quantecon.org.
+
+retrieved: null                 # inherited from high_dim_data; no retrieval
+                                # date recorded upstream
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-10 against high_dim_data's
+# LFS object — the pointer's oid IS the sha256 below.
+
+integrity:
+  sha256: 127c77ad01d5c6fc6225222698bee6a0f2fbf9e6dbef9ccff96e6cc92d722e39
+  upstream:
+    status: unverifiable
+    date: 2026-08-10
+    against: null
+    note: >
+      World Population Review refreshes this table continuously and publishes
+      no dated archive, so a current re-fetch will not byte-match this
+      retrieval and there is no vintage to compare against.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: csv
+  columns:
+    - {name: city, dtype: str, description: city name}
+    - {name: country, dtype: str, description: "country — constant, \"Brazil\""}
+    - {name: pop2023, dtype: int64, description: "population estimate, 2023 — the only column the lecture uses"}
+    - {name: latitude, dtype: float64, description: city centroid latitude}
+    - {name: longitude, dtype: float64, description: city centroid longitude}
+    - {name: fill, dtype: str, description: "map fill colour as a hex string, present only on the 25 cities the source's map legend colours"}
+  row_count_floor: 400          # frozen extract — exact row count by design
+  known_nulls:
+    fill: 375                   # correct and by design: the source colours only
+                                # the largest 25 cities on its map. A blanket
+                                # no-nulls rule would reject this file.
+
+consumers: []                   # nothing reads this URL until PR set C
+
+# verbatim — no builder
+builder_status: not-applicable
