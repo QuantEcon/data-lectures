@@ -236,10 +236,12 @@ a URL**. That is what justifies dropping `fetch()`.
 
 ### 5.4 Two latent bugs found, worth fixing regardless
 
-- `inequality.md` imports `pyodide_http` and **never calls `patch_all()`**.
-- `short_path.md` calls `requests.get` under Pyodide **with no shim at all**.
+- `inequality.md:96` imports `pyodide_http` and **never calls `patch_all()`** — the read it was imported for
+  is `pd.read_csv(url)` at `:251`.
+- `short_path.md:274-277` calls `requests.get` under Pyodide **with no shim at all**.
 
-Both are incidentally fixed by §3.2's shim, but neither should wait for it.
+Both are in `lecture-wasm` only, both are live on its `main`, and both are incidentally fixed by §3.2's shim
+— but neither should wait for it. Filed as QuantEcon/lecture-wasm#59.
 
 ### 5.5 Two problems no syntax solves
 
@@ -307,6 +309,9 @@ thebe-lite in quantecon-theme v2.1.0" and re-run when the theme moves.
 ---
 
 ## 8. Ambiguities — decide before the phase that needs them
+
+**Tracked and discussed in [#66](https://github.com/QuantEcon/data-lectures/issues/66).** This section is the
+authoritative text; that issue is where each one gets closed.
 
 ### 8.1 `pandas_panel`'s carve-out — permanent or revisited?
 
