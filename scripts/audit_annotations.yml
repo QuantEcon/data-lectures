@@ -96,7 +96,7 @@ datasets:
     provenance: constructed-lost
     note: lecture names the FRED series; no build script anywhere
   graph.txt:
-    description: 15-node weighted digraph for the shortest-path problem
+    description: 100-node weighted digraph for the shortest-path problem
     provenance: toy
     note: >
       maintained as %%file blocks in intro, dp and jax; lecture-wasm instead
