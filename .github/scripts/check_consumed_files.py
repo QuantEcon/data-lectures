@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Go-live guardrail: a PR must not break a file a live lecture consumes.
+"""Go-live guardrail: a PR must not break a file a live lecture consumes, and
+must not land bytes that do not match what the manifest says they are.
 
 For every manifest sidecar lectures/<datafile>.yml:
 
@@ -7,11 +8,19 @@ For every manifest sidecar lectures/<datafile>.yml:
   - if `consumers` is non-empty (a lecture reads this file in production):
       * the data file must exist
       * `integrity.sha256` must be recorded
+  - if `integrity.sha256` is recorded, with or without consumers:
+      * the data file must exist
       * the committed bytes must hash to it
 
-Files with no manifest yet (Phase 6 backfill pending) or an empty `consumers`
-list are out of scope here — the full validation suite (schema, dtypes,
-invariants) is PLAN Phase 5 and will subsume this check.
+The second clause exists because manifests land *ahead* of their repoints by
+convention, so a dataset arrives with `consumers: []` and is flipped by a
+later PR in another repo. Keying the hash check on `consumers` alone meant
+the one PR that introduces new bytes was the one PR that never verified
+them — and this is the repo's only byte-integrity gate.
+
+Files with no manifest yet (Phase 6 backfill pending), and manifests that
+record no hash, are out of scope here — the full validation suite (schema,
+dtypes, invariants) is PLAN Phase 5 and will subsume this check.
 """
 from __future__ import annotations
 
@@ -60,22 +69,35 @@ def main() -> int:
             continue
 
         consumers = manifest.get("consumers") or []
-        if not consumers:
-            continue  # nothing live reads it — out of scope for this guardrail
+        integrity = manifest.get("integrity")
+        # A present-but-malformed integrity block must fail loudly. Read as
+        # "no hash recorded" it would skip the byte check entirely for a
+        # manifest that has no consumers yet — which is how every new dataset
+        # lands here, since manifests precede their repoints.
+        if integrity is not None and not isinstance(integrity, dict):
+            errors.append(
+                f"{declared}: `integrity` must be a mapping, got "
+                f"{type(integrity).__name__} — check the indentation under "
+                f"`integrity:`; as written the sha256 is unreadable and the "
+                f"byte check would be skipped silently"
+            )
+            continue
+        recorded = (integrity or {}).get("sha256")
 
-        checked += 1
+        if not consumers and not recorded:
+            continue  # nothing reads it, nothing to verify — out of scope
+
         data_path = LECTURES / declared
         if not data_path.exists():
             errors.append(
                 f"{declared}: consumed by {len(consumers)} lecture(s) but the "
                 f"data file is missing — this would break a live lecture build"
+                if consumers else
+                f"{declared}: integrity.sha256 is recorded but the data file "
+                f"is missing — a manifest describes a file this repo publishes"
             )
             continue
 
-        integrity = manifest.get("integrity")
-        # A non-dict integrity (e.g. a stray string) is treated as missing, so
-        # it lands in the "not recorded" error below instead of crashing here.
-        recorded = integrity.get("sha256") if isinstance(integrity, dict) else None
         if not recorded:
             errors.append(
                 f"{declared}: consumed but integrity.sha256 is not recorded — "
@@ -84,6 +106,7 @@ def main() -> int:
             continue
 
         actual = sha256(data_path)
+        checked += 1    # counted where the hash is actually computed
         if actual != recorded:
             errors.append(
                 f"{declared}: bytes do not match the manifest (sha256 {actual} "
@@ -96,8 +119,8 @@ def main() -> int:
     for e in errors:
         print(f"::error::{e}")
     print(
-        f"{len(manifests)} manifest(s) found, {checked} consumed file(s) "
-        f"checked, {len(errors)} error(s)"
+        f"{len(manifests)} manifest(s) found, {checked} file(s) hash-checked, "
+        f"{len(errors)} error(s)"
     )
     return 1 if errors else 0
 
