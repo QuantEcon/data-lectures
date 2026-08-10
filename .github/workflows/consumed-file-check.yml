@@ -21,8 +21,16 @@ jobs:
           # goes red — which is exactly what a reader would get from
           # raw.githubusercontent.com. Fetching the real bytes would hash them
           # correctly and pass green while every consumer downloads ~130 bytes
-          # of pointer text. LFS belongs to `sources/**` only (.gitattributes),
-          # and nothing here reads `sources/`.
+          # of pointer text. LFS belongs to `sources/**` only (.gitattributes).
+          #
+          # This job DOES read `sources/` now, and `lfs: false` is right there
+          # too, for the opposite reason: those files are meant to be LFS, so
+          # the checkout hands us pointers — and a pointer's `oid` IS the
+          # object's sha256, which is the value sources/README.md records. The
+          # check verifies ~100 MiB of bytes without fetching one of them, and
+          # the direction still holds: a `sources/` file committed as plain git
+          # by mistake arrives as real bytes, hashes to something the README
+          # does not record, and goes red.
           lfs: false
       - uses: actions/setup-python@v5
         with:
