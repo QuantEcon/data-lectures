@@ -1,0 +1,100 @@
+# Manifest for cities_us.csv — folded in from QuantEcon/high_dim_data
+# (PLAN Phase 8, P3).
+#
+# LICENCE NOTE: `restricted`, and the same publisher class as countries.csv —
+# a commercial data aggregator with no redistribution grant. Inherited
+# exposure, logged for review in QuantEcon/data-lectures#35.
+
+filename: cities_us.csv
+title: World Population Review — US city populations, 2023
+description: >
+  The 300 largest US cities with population counts for 2023, 2022 and the 2020
+  and 2010 censuses, plus census geography identifiers, land and water area,
+  centroid coordinates and density. The heavy-tails lecture uses pop2023 alone,
+  to plot an empirical CCDF of the city size distribution.
+
+# Verbatim: the World Population Review table as distributed. Original column
+# names preserved, no re-serialisation.
+class: verbatim
+
+source:
+  name: World Population Review — US cities
+  url: https://worldpopulationreview.com/us-cities
+  citation: >
+    World Population Review, US city populations
+    (https://worldpopulationreview.com/us-cities).
+
+license:
+  name: null
+  url: https://worldpopulationreview.com/terms
+  # Commercial aggregator, no redistribution grant stated. Same publisher class
+  # as countries.csv, which this repo already records as restricted.
+  redistribution: restricted
+  verified: 2026-08-10
+  note: >
+    Inherited exposure (served from lecture-python-intro and lecture-wasm for
+    years); cached here pending licence review — QuantEcon/data-lectures#35.
+    Not a blessed exception: resolve before promoting data.quantecon.org.
+
+retrieved: null                 # inherited from high_dim_data; no retrieval
+                                # date recorded upstream. The 2023 population
+                                # column dates the vintage, not the retrieval.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-10 against high_dim_data's
+# LFS object — the pointer's oid IS the sha256 below.
+
+integrity:
+  sha256: fa831de3a9e318712fc688e62908fb353eb18497b729fc8b6fda17b2653ceebb
+  upstream:
+    status: unverifiable
+    date: 2026-08-10
+    against: null
+    note: >
+      World Population Review refreshes this table continuously and publishes
+      no dated archive, so a current re-fetch will not byte-match this
+      retrieval and there is no vintage to compare against. Recorded upstream
+      as "37kb"; the file measures 48,126 B, so that row of high_dim_data's
+      cross_section/README.md is wrong and is not carried forward.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: csv
+  columns:
+    - {name: pop2023, dtype: int64, description: "population estimate, 2023 — the only column the lecture uses"}
+    - {name: pop2022, dtype: int64, description: population estimate, 2022}
+    - {name: pop2020, dtype: int64, description: population, 2020 census}
+    - {name: pop2010, dtype: int64, description: population, 2010 census}
+    - {name: growth, dtype: float64, description: population growth rate as a fraction}
+    - {name: usps, dtype: str, description: USPS state abbreviation}
+    - {name: geoid, dtype: int64, description: Census Bureau GEOID}
+    - {name: ansicode, dtype: int64, description: ANSI/GNIS feature code}
+    - {name: name, dtype: str, description: city name}
+    - {name: lsad, dtype: str, description: Census legal/statistical area description code}
+    - {name: funcstat, dtype: int64, description: Census functional status code}
+    - {name: aland, dtype: int64, description: land area (square metres)}
+    - {name: awater, dtype: int64, description: water area (square metres)}
+    - {name: aland_sqmi, dtype: float64, description: land area (square miles)}
+    - {name: awater_sqmi, dtype: float64, description: water area (square miles)}
+    - {name: intptlat, dtype: float64, description: internal point latitude}
+    - {name: intptlong, dtype: float64, description: internal point longitude}
+    - {name: slug, dtype: str, description: URL slug}
+    - {name: metroId, dtype: int64, description: metropolitan area identifier}
+    - {name: countyfips, dtype: str, description: county FIPS code}
+    - {name: rank, dtype: int64, description: "population rank, 1-300"}
+    - {name: density, dtype: int64, description: population density (per square mile)}
+  row_count_floor: 300          # frozen extract — exact row count by design
+  # date_range omitted: a cross-section with population columns per year, not a
+  # time series.
+  known_nulls: {}               # none — every column is complete
+
+consumers: []                   # nothing reads this URL until PR set C
+
+# verbatim — no builder
+builder_status: not-applicable

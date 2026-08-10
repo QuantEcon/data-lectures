@@ -1,0 +1,110 @@
+# Manifest for forbes-global2000.csv — folded in from QuantEcon/high_dim_data
+# (PLAN Phase 8, P3). Scraped from the Forbes API by webscrape_forbes.ipynb,
+# which lands here alongside it as a frozen builder.
+#
+# LICENCE NOTE: `restricted`. Forbes is a commercial publisher and the list is
+# its editorial product; the scraper reaches an undocumented internal API. This
+# is an inherited exposure — the lectures have served it publicly for years —
+# recorded honestly and logged for licence review in
+# QuantEcon/data-lectures#35. Resolve before data.quantecon.org is promoted as
+# a public open-data host.
+
+filename: forbes-global2000.csv
+title: Forbes Global 2000 — firm size measures
+description: >
+  The world's 2000 largest public companies by the Forbes composite ranking,
+  with four size measures per firm (sales, profits, assets, market value) in
+  millions of USD. The heavy-tails lecture uses market value alone, taking the
+  top 500 to plot an empirical CCDF of the firm size distribution.
+
+# Constructed: the Forbes API returns JSON, and the builder selects, flattens
+# and serialises it. Not a file Forbes distributes.
+class: constructed
+
+source:
+  name: Forbes Global 2000
+  url: https://www.forbes.com/lists/global2000/
+  citation: >
+    Forbes, The Global 2000 (https://www.forbes.com/lists/global2000/),
+    retrieved via the Forbes list API.
+  note: >
+    Provenance inherited as prose from high_dim_data's cross_section/README.md,
+    which describes this file as "the world's largest 2000 firms in 2020
+    according to Forbes". The file itself carries no scrape timestamp, so that
+    vintage cannot be confirmed from the bytes — unlike its sibling
+    forbes-billionaires.csv, whose timestamps contradict the same claim.
+
+license:
+  name: null
+  url: https://www.forbes.com/terms/
+  # Commercial publisher, editorially assembled ranking, obtained through an
+  # undocumented internal API. No redistribution grant of any kind is stated,
+  # and attribution alone does not cure that.
+  redistribution: restricted
+  verified: 2026-08-10
+  note: >
+    Inherited exposure (served from lecture-python-intro and lecture-wasm for
+    years); cached here pending licence review — QuantEcon/data-lectures#35.
+    Not a blessed exception: resolve before promoting data.quantecon.org.
+
+retrieved: null                 # inherited from high_dim_data; the upstream
+                                # README states a 2020 vintage but records no
+                                # retrieval date, and the bytes carry none
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): verified 2026-08-10 against high_dim_data's
+# LFS object — the pointer's oid IS the sha256 below, so the comparison needed
+# no download of the real bytes to be exact.
+
+integrity:
+  sha256: 29c7af7c1ee77064094b17327150e27dd3c56147f8e343526681e35bcee3e4c6
+  upstream:
+    status: unverifiable
+    date: 2026-08-10
+    against: null
+    note: >
+      The builder is committed but frozen: the Forbes list API is undocumented
+      and the ranking is re-published annually, so a re-run returns a different
+      vintage rather than these bytes. There is no dated Forbes deposit to
+      compare against.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+
+schema:
+  format: csv
+  columns:
+    - {name: "Unnamed: 0", dtype: int64, description: "unnamed positional index, 0-1999 — an artifact of the builder's to_csv without index=None, preserved because it is what consumers read"}
+    - {name: Company, dtype: str, description: company name}
+    - {name: Country, dtype: str, description: country of domicile}
+    - {name: Sales, dtype: float64, description: sales (USD millions)}
+    - {name: Profits, dtype: float64, description: profits (USD millions)}
+    - {name: Assets, dtype: float64, description: assets (USD millions)}
+    - {name: Market Value, dtype: float64, description: "market value (USD millions) — the only column the lecture uses"}
+  row_count_floor: 2000         # frozen extract — exact row count by design
+  # date_range omitted: a single-vintage cross-section, no time dimension.
+  known_nulls: {}               # none — every column is complete
+
+consumers: []                   # nothing reads this URL until PR set C
+
+builder: builders/webscrape_forbes.ipynb
+# committed-frozen, not committed: the notebook is kept as the record of what
+# produced these bytes and deliberately will not run. It spoofs a browser
+# user-agent and hardcodes GDPR consent cookies against an undocumented
+# internal API, and re-running it would return a later vintage — which under
+# "Corrections vs vintages" would be a new filename, not a refresh of this one.
+#
+# Three further defects in it, recorded here rather than fixed, because a
+# frozen artifact's value is being the record of what ran (AGENTS.md, "Two
+# inherited-file states"). This file's own cell reaches
+# `https://www.forbes.com/forbesapi/org/global2000/2020/position/true.json`
+# over TLS, but the notebook's other cell — the one that writes
+# forbes-billionaires.csv — uses plain `http://www.forbes.com/ajax/list/data`.
+# That cell also creates a `./sources` directory it never writes to, and its
+# `to_csv` omits `index=None`, which is where this file's `Unnamed: 0` column
+# comes from.
+builder_status: committed-frozen
