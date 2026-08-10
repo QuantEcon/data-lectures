@@ -63,7 +63,7 @@ When writing or reviewing URLs that fetch from this repo (in docs, tests, or lec
 | Form | LFS-tracked file | plain-git file | fetchable from a browser |
 | --- | --- | --- | --- |
 | `raw.githubusercontent.com/…` | ❌ 200 with pointer text | ✅ | ✅ `access-control-allow-origin: *` |
-| `github.com/{org}/{repo}/raw/{ref}/…` | ✅ | ✅ | ❌ 302 with an **empty** ACAO |
+| `github.com/{org}/{repo}/raw/{ref}/…` | ✅ | ✅ | ❌ 302 with an **empty** `access-control-allow-origin` |
 | `media.githubusercontent.com/media/…` | ✅ | ❌ 404 | ✅ |
 
 There is **no form that is safe in every case**, and that is the whole trap. The `github.com/…/raw/` form resolves whatever the storage, but only because the *server* resolves storage on your behalf — and it is exactly the form a browser rejects.
