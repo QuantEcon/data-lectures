@@ -71,5 +71,5 @@ consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
 
-builder: scripts/ames_house_prices.py
+builder: builders/ames_house_prices.py
 builder_status: committed

@@ -82,5 +82,5 @@ consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
 
-builder: scripts/us_adult_heights.py
+builder: builders/us_adult_heights.py
 builder_status: committed

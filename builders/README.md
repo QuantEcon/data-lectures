@@ -1,0 +1,50 @@
+# builders
+
+One builder per published dataset. This directory sits **outside** the published
+tree — it is never served.
+
+## The naming rule
+
+`builders/<stem>.<ext>` builds `lectures/<stem>.<ext2>`.
+
+The stem is the dataset's, not the lecture's: `builders/japan_earthquakes.py`
+writes `lectures/japan_earthquakes.csv`. That makes the manifest's `builder:`
+field predictable and lets CI assert it.
+
+**Where one builder produces a set of files**, name it for the set and let each
+file's manifest point at the same builder path. `business_cycle.py` writes three
+files; the SCF and Forbes builders each write two. The rule is the default, not
+an invariant — what CI asserts is that every `builder:` path exists, and that a
+dataset claiming a builder names one.
+
+## The contract
+
+Builders follow four stages — **fetch → pre-process → validate → write** — and
+only write on validation pass. Lectures always read the last-good snapshot: an
+upstream outage may fail a refresh, it must never break a lecture build. The
+template and the architecture discussion are in
+[#14](https://github.com/QuantEcon/data-lectures/issues/14).
+
+Most builders fetch from the third-party upstream at run time, which is the
+normal case. A builder reads from `sources/` only when its input **cannot be
+re-fetched** — see `AGENTS.md`.
+
+## What is here
+
+| Builder | Writes to `lectures/` | Status |
+| --- | --- | --- |
+| `ames_house_prices.py` | `ames_house_prices.csv` | committed |
+| `epl_match_goals.py` | `epl_match_goals.csv` | committed |
+| `japan_deaths_by_age.py` | `japan_deaths_by_age.csv` | committed |
+| `japan_earthquakes.py` | `japan_earthquakes.csv` | committed |
+| `japan_population_by_age.py` | `japan_population_by_age.csv` | committed |
+| `us_adult_heights.py` | `us_adult_heights.csv` | committed |
+| `business_cycle.py` | `business_cycle_data.csv`, `business_cycle_info.md`, `business_cycle_metadata.md` | run by hand, no validate stage yet (PLAN Phase 5); its three outputs are the repo's only unmanifested files |
+
+**This listing is the coverage report.** The repo has 13 `constructed` datasets
+and 7 builders; the difference is the Phase 9 recovery backlog, carried as
+`builder_status: unrecovered` in each manifest rather than hidden by
+reclassifying the file as `verbatim`.
+
+Repo tooling — the audit dashboard and the catalog generator — lives in
+`scripts/` and is not a builder.
