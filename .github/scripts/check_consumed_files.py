@@ -11,6 +11,10 @@ For every manifest sidecar lectures/<datafile>.yml:
   - if `integrity.sha256` is recorded, with or without consumers:
       * the data file must exist
       * the committed bytes must hash to it
+  - the builder record must be internally consistent:
+      * `builder_status` must be a known value
+      * a `committed*` status must name a builder
+      * a named builder must exist on disk
 
 The second clause exists because manifests land *ahead* of their repoints by
 convention, so a dataset arrives with `consumers: []` and is flipped by a
@@ -30,7 +34,15 @@ import sys
 
 import yaml
 
-LECTURES = pathlib.Path(__file__).resolve().parents[2] / "lectures"
+REPO = pathlib.Path(__file__).resolve().parents[2]
+LECTURES = REPO / "lectures"
+
+# One builder per published dataset, in builders/ (AGENTS.md, "Builders").
+# `committed` asserts a runnable four-stage builder; `committed-frozen` says the
+# builder is here and deliberately will not run (a frozen vintage, a scraper we
+# will not re-run); `unrecovered` says it is absent; `not-applicable` is for
+# verbatim files.
+BUILDER_STATUSES = {"committed", "committed-frozen", "unrecovered", "not-applicable"}
 
 
 def sha256(path: pathlib.Path) -> str:
@@ -67,6 +79,54 @@ def main() -> int:
                 f"the sidecar's own name (expected {expected!r})"
             )
             continue
+
+        # Builder: the status must be a known one, a dataset that claims a
+        # builder must name it, and the path it names must be a file in this
+        # repo. Nothing else validates any of this — build_audit only records
+        # the value and the catalog only formats it — so a manifest can assert
+        # a builder that was never committed, or that has been moved.
+        #
+        # Types are checked first because YAML will hand us a list or a mapping
+        # for either field, and both would raise rather than report: `status not
+        # in BUILDER_STATUSES` is a TypeError on an unhashable value, and
+        # `REPO / builder` is a TypeError on anything but a string.
+        status = manifest.get("builder_status")
+        builder = manifest.get("builder")
+        if status is not None and not isinstance(status, str):
+            errors.append(
+                f"{declared}: builder_status must be a string, got "
+                f"{type(status).__name__}"
+            )
+        elif status is not None and status not in BUILDER_STATUSES:
+            errors.append(
+                f"{declared}: unknown builder_status {status!r} — expected one "
+                f"of {', '.join(sorted(BUILDER_STATUSES))}"
+            )
+        elif isinstance(status, str) and status.startswith("committed") and not builder:
+            errors.append(
+                f"{declared}: builder_status is {status!r} but no builder is "
+                f"named — a dataset claiming a committed builder must say "
+                f"where it is"
+            )
+
+        if builder is not None and not isinstance(builder, str):
+            errors.append(
+                f"{declared}: builder must be a string path, got "
+                f"{type(builder).__name__}"
+            )
+        elif builder:
+            # Resolve before checking: `REPO / builder` silently discards REPO
+            # when builder is absolute, and a relative path can climb out with
+            # `../`. Either way the assertion would be satisfied by a file that
+            # is not a builder in this repo, which is the only thing it exists
+            # to establish. A directory passes `.exists()` too, hence is_file.
+            target = (REPO / builder).resolve()
+            if not target.is_relative_to(REPO) or not target.is_file():
+                errors.append(
+                    f"{declared}: builder {builder!r} must be a file inside "
+                    f"this repo — builders live in builders/<stem>.<ext> "
+                    f"(AGENTS.md, 'Builders')"
+                )
 
         consumers = manifest.get("consumers") or []
         integrity = manifest.get("integrity")

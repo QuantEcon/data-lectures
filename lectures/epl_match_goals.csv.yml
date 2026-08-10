@@ -65,5 +65,5 @@ consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
 
-builder: scripts/epl_match_goals.py
+builder: builders/epl_match_goals.py
 builder_status: committed

@@ -167,7 +167,7 @@ consumers: []
 # Builder — required for constructed and dynamic-snapshot; omit for verbatim
 # ---------------------------------------------------------------------------
 
-builder: scripts/business_cycle.py      # path to the committed builder, or null
+builder: builders/business_cycle.py      # path to the committed builder, or null
 
 # AGENTS.md says a constructed dataset without its builder is a bug — but the
 # repo has inherited several (PLAN Phase 9), and P1's own pilot file is one.
@@ -175,7 +175,7 @@ builder: scripts/business_cycle.py      # path to the committed builder, or null
 # the gap. This field keeps it visible in the generated catalog instead.
 # `unrecovered` is for inherited files only; a NEW constructed file must ship
 # its builder (AGENTS.md, "Two inherited-file states").
-builder_status: committed               # committed | unrecovered | not-applicable
+builder_status: committed               # committed | committed-frozen | unrecovered | not-applicable
 
 # Dynamic snapshots only. Drives the scheduled refresh-as-PR (PLAN Phase 5).
 cadence: annual                         # e.g. daily | weekly | monthly | annual

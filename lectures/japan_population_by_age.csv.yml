@@ -85,5 +85,5 @@ consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/prob_dist.md
 
-builder: scripts/japan_population_by_age.py
+builder: builders/japan_population_by_age.py
 builder_status: committed
