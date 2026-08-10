@@ -1,8 +1,8 @@
 # PLAN — `data-lectures` (formerly `QuantEcon/data`)
 
-**Status:** active roadmap (last updated 2026-08-07) — **the repo is LIVE**: the first repoint merged 2026-07-17 (P1, `lingcod_msy_recovery.csv` → `msy_fishery`), so published filenames are an API from here on
+**Status:** active roadmap (last updated 2026-08-10) — **the repo is LIVE**: the first repoint merged 2026-07-17 (P1, `lingcod_msy_recovery.csv` → `msy_fishery`), so published filenames are an API from here on
 
-**Where the numbers stand (`audit.json`, 2026-08-07):** 18 of 41 static datasets migrated and repointed, 23 to go; 22 lectures still fetch live API data; 26 committed orphans; 0 legacy-repo references; 5 URL forms in use.
+**Where the numbers stand (`audit.json`, 2026-08-10):** 18 of 41 static datasets migrated and repointed, 23 to go; 22 lectures still fetch live API data; 26 committed orphans; 0 legacy-repo references; 5 URL forms in use.
 
 Every figure on that line comes from `stats` in the generated `audit.json`, and every figure below that restates one is a copy that can drift — as all seven of them had by 2026-08-07, each understating progress by three repoint sets. Re-read them from `audit.json` before quoting them, and prefer citing the generated file over this document.
 
@@ -44,7 +44,7 @@ This repository is being shaped into the **single canonical repository for data 
 
 ## Repoint rules
 
-Six rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*; rules 5 and 6 about *URL form and host*, and CI covers only a corner of them — the strict audit checks the `github.com/*/raw/` form in `lecture-wasm` and nothing else.
+Six rules learned the hard way, three of them the hard way twice. Rules 1-3 are about *ordering* and none is enforced by CI — the strict audit catches rule 2 only after the fact, and cannot see rule 3 at all. Rule 4 is about *scope*. Rules 5 and 6 are about *URL form and host*, and are the ones CI does cover: since [#55](https://github.com/QuantEcon/data-lectures/pull/55) the strict audit fails on the `github.com/*/raw/` form in `lecture-wasm` (rule 5), on any `data-lectures` reference served from the media host (rule 6), and on a reference whose ref is not `main`, whose path is not `lectures/<file>`, or whose file is not committed here. It still cannot see `lecture-intro.zh-cn` or `lectures/_static/**`.
 
 ### 1. Repoint a sibling reader before deleting the file it reads
 
@@ -58,7 +58,7 @@ This affects every `intro` + `wasm` dataset, which is all 8 of the multi-consume
 
 | Class | Repos | Why it is missed |
 | --- | --- | --- |
-| **Translations** | five of the six live editions read another repo's blobs — everything except `lecture-python-programming.ml` | excluded from `SCAN_REPOS` by decision (`scripts/build_audit.py:45-46`), so no audit run can ever see them. `lecture-intro.zh-cn` alone holds 7 reads of the `high_dim_data` six |
+| **Translations** | five of the six live editions read another repo's blobs — everything except `lecture-python-programming.ml` | excluded from `SCAN_REPOS` by decision (`scripts/build_audit.py:46-47`), so no audit run can ever see them. `lecture-intro.zh-cn` alone holds 7 reads of the `high_dim_data` six |
 | **Generated mirrors** | `lecture-python-intro.notebooks` | auto-published, so it self-heals on the next publish — but only *after* one |
 | **Course forks and canaries** | `tom-econ370-2025`, `test-actions-lecture-intro` | not in any manifest, publish their own Pages sites, and no CI in the family covers them |
 
@@ -96,7 +96,7 @@ Cost is one extra PR per set and a slower orphan cleanup; the benefit is that no
 | `lecture-python-intro` | `publish*` tag (manual) | **yes** |
 | `lecture-wasm` | push to `main` | no — self-heals on merge |
 
-A repo that publishes on push needs no split. Neither does deleting a copy that **no lecture reads in either repo** — typically one a repo committed alongside its mirrored sources while the lecture itself fetches the *other* repo's copy by URL (a *mirror-orphan*); `lecture-wasm` holds a dozen of these.
+A repo that publishes on push needs no split. Neither does deleting a copy that **no lecture reads in either repo** — typically one a repo committed alongside its mirrored sources while the lecture itself fetches the *other* repo's copy by URL (a *mirror-orphan*); `lecture-wasm` holds five of these (Track X, below).
 
 ### 4. A migration moves bytes; it does not update them
 
@@ -123,7 +123,7 @@ Learned from the independent validation ([#45](https://github.com/QuantEcon/data
 | Consumer runtime | Form to use |
 | --- | --- |
 | CPython — intro site notebooks, Colab, every other series | any resolving form; `github.com/…/raw/` is fine |
-| Browser — `lecture-wasm` code-cell reads | `raw.githubusercontent.com/QuantEcon/data-lectures/main/lectures/<file>`, or `media.githubusercontent.com/media/…` for LFS-tracked files |
+| Browser — `lecture-wasm` code-cell reads | `raw.githubusercontent.com/QuantEcon/data-lectures/main/lectures/<file>`, and nothing else. **Never the media host** — everything published here is plain git, so it 404s (rule 6) |
 
 `{download}` targets and prose links are plain navigations — CORS does not apply, and the `github.com` form is fine there. The audit classifies references by org/repo across all URL forms, so both spellings count as the same pattern — but the strict build now also checks the *form*: any `lecture-wasm` code-cell read via a `github.com/…` URL fails the audit. That is a **post-merge net, not a gate** — the scan reads each lecture repo's `main`, so a violation turns the dashboard red at the next audit run rather than blocking the offending PR; the repoint PR remains the place the rule is actually upheld. Quick test from any `quantecon.github.io` page console: `fetch('<url>')` — the bad form rejects, the good form resolves.
 
@@ -142,7 +142,7 @@ Both hosts send `access-control-allow-origin: *`, so this is **host routing, not
 
 This matters for exactly one piece of remaining work, and it matters a lot. `high_dim_data` tracks `*.csv` **and** `*.dta` under a blanket LFS rule, so **every** consuming lecture reads its datasets through the media host today. The storage decision lands those six datasets here as **plain git** (both SCF minis fit under the 100 MiB blob limit). After the fold the media host will 404 for them, so **every consuming read must change host as well as org and repo** — a mechanical org/repo swap that preserves the host breaks all of them.
 
-**21 source reads are affected across three repos: 17 on the media host, 4 on the `github.com/*/raw/` redirect form.** The `github.com/<org>/<repo>/raw/…` form is a *smart* redirect that routes per path by LFS status, so those 4 survive an org/repo/path swap with no host decision; **the other 17 must change host as well.** `lecture-intro.zh-cn` is the third consumer and is invisible to every audit run (`scripts/build_audit.py:45-57`) — see rule 1.
+**21 source reads are affected across three repos: 17 on the media host, 4 on the `github.com/*/raw/` redirect form.** The `github.com/<org>/<repo>/raw/…` form is a *smart* redirect that routes per path by LFS status, so those 4 survive an org/repo/path swap with no host decision; **the other 17 must change host as well.** `lecture-intro.zh-cn` is the third consumer and is invisible to every audit run (`scripts/build_audit.py:46-57`) — see rule 1.
 
 Counting by repo, since the intro + wasm subset alone is 12 media reads and that number has already been mistaken for the total once:
 
@@ -195,13 +195,13 @@ The remaining work decomposes by **consuming series** rather than by hosting pat
 | **D — `programming`** | 1: `test_pwt.csv` | none | nothing — a single-PR track |
 | **E — dynamic / live-API** | the UNRATE twin, then the 15 incidental API lectures | wasm is the forcing customer | [#14](https://github.com/QuantEcon/data-lectures/issues/14) schema decisions, [#26](https://github.com/QuantEcon/data-lectures/issues/26) fetch layer |
 | **X — orphan sweep** | 26 committed orphans across 6 repos — dp 10, programming 5, wasm 5, intro 3, python.myst 2, `continuous_time_mcs` 1 | per repo | that repo's repoints landing first |
-| **Y — infra / cutover** | DNS → custom domain → interim-to-final URL sweep → QEP | — | an external infra answer on `52.64.86.66` |
+| **Y — infra / cutover** | DNS → custom domain → interim-to-final URL sweep → QEP | — | nothing external: the name is NXDOMAIN and the record is ours to create |
 
 `lecture-dp`, `lecture-jax` and `continuous_time_mcs` are **not data consumers** — dp's 10 committed files are inherited orphans, jax embeds `graph.txt` via `%%file`, and continuous_time_mcs has one orphan scratch file. They appear only in Track X.
 
 **Tracks A–D are independent of each other and can run in any order or in parallel.** The only hard dependencies in the whole programme are: `usa-gini-nwealth-tincome-lincome.csv` is built from `SCF_plus_mini.csv` (so it follows the SCF migration inside Track A); Track E's rollout needs its own template proven first; Track X follows its repo's repoints; and Track Y's cutover is last.
 
-Track Y is the one item with **external lead time** — it waits on whether `52.64.86.66` can be decommissioned, which is an infrastructure answer rather than a migration one. Worth starting that enquiry in parallel with the data work rather than at the end.
+Track Y no longer has external lead time: the stale A record was deleted and `data.quantecon.org` is now NXDOMAIN at its own authoritative nameserver, so creating it is ours to do. One thing to settle before it: `classify_url` recognises six GitHub-host regexes and neither `quantecon.github.io` nor `data.quantecon.org`, so a consumer on the canonical host classifies as `external-web`, `migrated` goes false, and **the `final` status is a state the audit is structurally guaranteed to report as broken** — which also lapses both of rule 6's assertions at the cutover. Teach the classifier the canonical host before the sweep, not after.
 
 ### Where this work happens
 
@@ -242,19 +242,19 @@ Only one file genuinely forces LFS, and it is not a dataset:
 | `sources/` | upstream inputs that builders consume but no lecture reads — `SCF_plus.dta` (99.1 MiB) | **per-path LFS** | **no** |
 
 - [ ] Add `sources/` for builder inputs, with `sources/README.md` as the **audit trail**: one row per committed file recording where it came from, when, its licence, the upstream identifier (DOI where one exists), its `sha256`, and which builder consumes it. A file in `sources/` is not a published dataset and gets no sidecar manifest — this README is its provenance record
-- [ ] Per-path LFS via `.gitattributes`, scoped to `sources/` only — never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta` (data#1)
+- [x] Per-path LFS via `.gitattributes`, scoped to `sources/**` only — never a blanket rule like `high_dim_data`'s `*.csv` **and** `*.dta` (data#1). Landed in [#57](https://github.com/QuantEcon/data-lectures/pull/57), with `sources/README.md` excluded so the audit trail stays readable text
 - [ ] Fold in `high_dim_data` content (data#2; coordinate with meta#337 for consuming-lecture repoints)
-- [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving. **Also uncomment its two `to_csv` writes** — both are commented out upstream, so the builder as committed produces both frames in memory and writes nothing. Its fetch and transform stages are complete; the validate stage is a Phase 5 retrofit alongside `scripts/business_cycle.py`
+- [ ] **Repoint `generating_mini.md`'s input URL.** The SCF builder currently reads its source over the network from the repo being retired — `pd.read_stata('https://github.com/QuantEcon/high_dim_data/blob/main/SCF_plus/SCF_plus.dta?raw=true')`. Archiving `high_dim_data` while that line stands re-introduces exactly the legacy-repo dependency this project drove to zero. Point it at `sources/` before archiving. **Do not uncomment its two `to_csv` writes, or edit it in any other way, until [#14](https://github.com/QuantEcon/data-lectures/issues/14) settles whether it lands as a runnable builder or as provenance.** Both writes are commented out upstream, so the builder as committed produces both frames in memory and writes nothing — which matters only under the runnable-builder reading. Under the provenance reading, editing the artifact destroys the thing that makes it provenance: it stops being the code that produced these bytes. The input-URL repoint above is required either way, because an archived repo keeps serving that URL
 - [ ] **Repoint all 21 consuming reads, moving the 17 media-host ones off `media.githubusercontent.com`**, in the same set as the fold — they are LFS-tracked in `high_dim_data` and land here as plain git, so the media host 404s for them and changing only org and repo breaks every read. The reads span **three** repos: `lecture-python-intro` (7), `lecture-wasm` (7) and `lecture-intro.zh-cn` (7), the last by hand rather than by sync. See **repoint rule 6** for the enumerated reads, the acceptance check, and why CI does not cover it
-- [ ] Set `lfs: false` on **both** workflows that check this repo out, not only the Pages job — `.github/workflows/audit-dashboard.yml:43` (push to `main` plus weekly, and its paths filter includes `migration.yml` and `lectures/*.yml`, so the fold PR's own files trigger it) and `.github/workflows/consumed-file-check.yml:22` (**every** pull request). Nothing under `lectures/` is an LFS object, so the 99 MiB `.dta` need never download. Land this **before** the object does: LFS bandwidth is an org-wide quota shared with `high_dim_data`, and a 403 on LFS downloads takes out the live media-host reads in `lecture-python-intro`, `lecture-wasm` and `lecture-intro.zh-cn` simultaneously — a lecture outage, not a CI failure
+- [x] Set `lfs: false` on **both** workflows that check this repo out, not only the Pages job — landed in [#57](https://github.com/QuantEcon/data-lectures/pull/57). `.github/workflows/audit-dashboard.yml:51` (push to `main` plus weekly, and its paths filter includes `migration.yml` and `lectures/*.yml`, so the fold PR's own files trigger it) and `.github/workflows/consumed-file-check.yml:26` (**every** pull request). `lfs: false` is the *assertion* that nothing published is an LFS object, not a saving: a mis-tracked `lectures/` file then hashes as its pointer and the required check goes red, where `lfs: true` would fetch the real bytes, pass green, and publish a file that resolves only from Pages. On the quota, measured 2026-08-10: the org's net LFS charge for all of 2026 is $0.04 on $1.04 gross, and `high_dim_data`'s bandwidth is 0 GB since June — so the outage scenario is not currently binding. The mechanism is real, though: anonymous public downloads bill the repository owner with no open-source exemption, forks count against the parent, and a **$0 budget blocks LFS downloads** for the rest of the month rather than billing them
 - [ ] Record in `sources/README.md` that `SCF_plus.dta` is 103,934,093 B — **923,507 B, or 0.88%, under GitHub's hard 104,857,600 B blob limit**. It must stay LFS-tracked permanently; an upstream vintage 1% larger could not be pushed as plain git at all
 
 **Sequencing constraint** (still applies to anything that *does* enter LFS): enabling LFS breaks every `raw.githubusercontent.com` URL for the paths it covers — those URLs return the pointer text with HTTP **200**, so a status-code check is a false green. `pd.read_csv` then raises **nothing at all**: it returns a 2×1 frame whose single column name is `version https://git-lfs.github.com/spec/v1`. (`pd.read_stata` does raise, misleadingly, on the Stata version byte.) Silence is the case that matters, since every affected lecture read is a `read_csv`. Verify with `curl -s <url> | head -1` rather than a status code. Do not LFS-track an existing file until its consumers use a form that survives it; keeping the published tree plain-git means no consumer-facing path is ever affected.
 
 ### Phase 4 — Publishing
 
-- [x] GitHub Pages deploy of the published tree, **`lfs: true` at checkout** (else pointer files publish) — landed 2026-07-17 with the audit dashboard (`.github/workflows/audit-dashboard.yml`, [#20](https://github.com/QuantEcon/data-lectures/issues/20)): the default `quantecon.github.io/data-lectures/` site serves the dashboard at `/` and the published tree at `/lectures/`. The custom domain below stays open
-- [ ] `data.quantecon.org` DNS + custom domain (an old NestJS box on AWS Sydney currently answers this name — investigate before repointing)
+- [x] GitHub Pages deploy of the published tree, **`lfs: false` at checkout** (inverted by [#57](https://github.com/QuantEcon/data-lectures/pull/57): a mis-tracked file must publish as its pointer, so the mistake is visible rather than masked) — landed 2026-07-17 with the audit dashboard (`.github/workflows/audit-dashboard.yml`, [#20](https://github.com/QuantEcon/data-lectures/issues/20)): the default `quantecon.github.io/data-lectures/` site serves the dashboard at `/` and the published tree at `/lectures/`. The custom domain below stays open
+- [ ] `data.quantecon.org` DNS + custom domain. **Measured 2026-08-10: the name is NXDOMAIN at `quantecon.org`'s own authoritative nameserver, and the repo's Pages `cname` is null.** The stale A record and the AWS box it pointed at are gone, so this is no longer an external-ownership question — it is two actions QuantEcon controls: create the record, then set the custom domain on the repo
 - [x] Verify `access-control-allow-origin: *` on served files (pyodide/JupyterLite, meta#143) — **verified 2026-08-06**: `quantecon.github.io/data-lectures/lectures/lingcod_msy_recovery.csv` returns `access-control-allow-origin: *`. The requirement is met on the default Pages domain today and does **not** wait on the custom domain; re-verify once DNS moves
 - [ ] Monitor Pages soft limits (~1 GB site, 100 GB/month)
 
@@ -263,7 +263,7 @@ Only one file genuinely forces LFS, and it is not a dataset:
 **Go-live guardrails** — the minimal subset that must precede the first repoint (Phase 8); the rest of this phase follows at its own pace:
 
 - [x] Branch protection on `main`: PRs required (no direct pushes; zero approvals so a solo maintainer can still merge), force-pushes and deletion blocked. Once a lecture repoints, `raw/main` is a production URL and an accidental force-push is a lecture outage (ruleset added 2026-07-17)
-- [x] Minimal consumed-file check: CI that asserts every file in `lectures/` whose manifest has a non-empty `consumers` list still exists and matches its manifest `sha256` — the narrowest possible test that a PR cannot break a live lecture. Subsumed later by the full PR validation below (added 2026-07-17: `.github/workflows/consumed-file-check.yml`, and made a **required status check** in the `protect-main` ruleset the same day — a red check blocks the merge)
+- [x] Minimal consumed-file check: CI that asserts every file in `lectures/` whose manifest records an `integrity.sha256` still exists and matches it — rekeyed off `consumers` in [#56](https://github.com/QuantEcon/data-lectures/pull/56), since manifests land ahead of their repoints and the old keying meant the one PR that introduced new bytes was the one PR that never verified them — the narrowest possible test that a PR cannot break a live lecture. Subsumed later by the full PR validation below (added 2026-07-17: `.github/workflows/consumed-file-check.yml`, and made a **required status check** in the `protect-main` ruleset the same day — a red check blocks the merge)
 
 Full automation:
 

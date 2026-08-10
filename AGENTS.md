@@ -56,19 +56,25 @@ Cross-repo repoints are worked from [`QuantEcon/workspace-lectures`](https://git
 - **New vintages** (e.g. Maddison 2020 → 2023): **new filename** — the old vintage stays valid; consumers opt in.
 - Never delete or rename a published file without checking `consumers` (and, until manifests are backfilled, grepping the lecture repos).
 
-### URL forms — the LFS trap
+### URL forms — the host is a function of storage *and* of runtime
 
 When writing or reviewing URLs that fetch from this repo (in docs, tests, or lecture repoints):
 
-| Form | LFS-tracked file | plain-git file |
-| --- | --- | --- |
-| `raw.githubusercontent.com/…` | ❌ returns pointer text | ✅ |
-| `github.com/{org}/{repo}/raw/{ref}/…` | ✅ | ✅ |
-| `media.githubusercontent.com/media/…` | ✅ | ❌ 404 |
+| Form | LFS-tracked file | plain-git file | fetchable from a browser |
+| --- | --- | --- | --- |
+| `raw.githubusercontent.com/…` | ❌ 200 with pointer text | ✅ | ✅ `access-control-allow-origin: *` |
+| `github.com/{org}/{repo}/raw/{ref}/…` | ✅ | ✅ | ❌ 302 with an **empty** `access-control-allow-origin` |
+| `media.githubusercontent.com/media/…` | ✅ | ❌ 404 | ✅ |
 
-- Interim safe form (works regardless of storage): `https://github.com/QuantEcon/data-lectures/raw/main/<path>`
-- Final form once Pages is live: `https://data.quantecon.org/lectures/<filename>`
-- Never reference a non-default branch in a published URL.
+There is **no form that is safe in every case**, and that is the whole trap. The `github.com/…/raw/` form resolves whatever the storage, but only because the *server* resolves storage on your behalf — and it is exactly the form a browser rejects.
+
+- **CPython consumers** (site notebooks, Colab, every series except `lecture-wasm`): `https://github.com/QuantEcon/data-lectures/raw/main/lectures/<file>`.
+- **`lecture-wasm`** (code cells execute under Pyodide in the reader's browser — **repoint rule 5**): `https://raw.githubusercontent.com/QuantEcon/data-lectures/main/lectures/<file>`, and nothing else. The strict audit hard-fails any `lecture-wasm` code-cell read via a `github.com/…` form. `{download}` targets and prose links are navigations and are CORS-exempt, so any resolving form is fine there.
+- **Never `media.githubusercontent.com` for a path in this repo** (**repoint rule 6**). It is the LFS media endpoint and routes per *path*, so it 404s everything `lectures/` publishes — which is all of it, since the published tree is 100% plain git. The strict audit fails on this too.
+- Final form once Pages is live: `https://data.quantecon.org/lectures/<filename>`.
+- Never reference a non-default branch in a published URL — the audit fails on any ref that is not `main`.
+
+The failure modes are silent in both directions, which is why all three are machine-checked: a `raw` read of an LFS path returns **HTTP 200 with ~133 bytes of pointer text**, and `pd.read_csv` on it raises nothing and yields a 2×1 frame.
 
 ### LFS, and `sources/` vs `lectures/`
 
@@ -86,6 +92,18 @@ Rules that still apply:
 - A builder must read its input from `sources/`, never over the network from another QuantEcon repo. That is how a retired repo becomes load-bearing again.
 - **Two** workflows check this repo out, and both now say `lfs: false` — `.github/workflows/audit-dashboard.yml` (the Pages deploy) and `.github/workflows/consumed-file-check.yml` (every pull request). Leave them that way: `lfs: false` is the assertion that nothing published is an LFS object. If a `lectures/` file is ever tracked by mistake, the checker hashes the pointer and goes red, and Pages deploys the same pointer bytes a reader would get from `raw.githubusercontent.com` — whereas `lfs: true` fetches the real bytes, passes green, and publishes a file that works only from Pages. It also keeps `sources/` (a 99 MiB LFS object) off every run; LFS bandwidth is an org-wide quota.
 - `git check-attr filter -- sources/<file>` must print `filter: lfs` **before** you `git add` anything to `sources/`. `SCF_plus.dta` is 103,934,093 B against GitHub's 104,857,600 B hard limit, so a mis-scoped rule does not error — the push succeeds as plain git and the blob is in history permanently.
+
+#### When a published file approaches the 100 MiB blob limit
+
+The limits: **50 MiB** warns on push, **100 MiB** (104,857,600 B) is a hard block, 2 GiB per push. Work down this ladder in order — every rung but the last keeps a browser consumer working with at most a change of filename. Reasoning and measurements: [#58](https://github.com/QuantEcon/data-lectures/issues/58).
+
+1. **Subset it** (any published file over 50 MiB). Justify the size in the PR: does the lecture read all of it? The house precedent is the SCF chain — a 103,934,093 B `.dta` became a 75,902,999 B mini and then a no-weights mini. A derived teaching extract is a dataset in its own right and gets its own manifest.
+2. **Plain git**, up to ~90 MiB. Served gzipped by both `raw` and Pages, packed compressed in git, no metered quota.
+3. **gzip it in place**, over ~90 MiB. Lossless, so it does not violate "a migration moves bytes; it does not update them" — `SCF_plus.dta` goes to 17,854,577 B (5.82×), and pandas infers decompression from the `.gz` suffix, so the only consumer change is the filename. Both hosts return `application/gzip` with identity encoding, so there is no double-decompression trap.
+4. **Split into ≤50 MiB parts**, if compression is not enough.
+5. **Publish from outside git via the Pages artifact.** This repo is already `build_type: workflow`; the blob limit binds only because the workflow copies `lectures/` out of the checkout. Fetching a file during the workflow escapes it entirely — at the cost that the published file is no longer reproducible from a checkout, and the hash gate needs another source.
+
+**Never** put an LFS object under `lectures/`, and never reach for GitHub release assets: they send no `access-control-allow-origin` on any hop, so a browser cannot read them. Parquet is not a size remedy here either — `pyarrow` is absent from the Pyodide `lecture-wasm` pins, and gzipped CSV is smaller than Parquet on this data anyway.
 
 ### Dynamic builders
 

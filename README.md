@@ -12,11 +12,14 @@ The canonical repository for **data consumed by the QuantEcon lecture series**, 
 
 ## Referencing data
 
-Until the `data.quantecon.org` Pages deployment is live, use the interim form — it works for both plain-git and LFS-tracked files:
+Until the `data.quantecon.org` Pages deployment is live, use the interim form. **There is no single safe form — it depends on the consumer's runtime** (repoint rule 5):
 
-```
-https://github.com/QuantEcon/data-lectures/raw/main/<path>
-```
+| Consumer | Use |
+| --- | --- |
+| CPython — site notebooks, Colab, every series except `lecture-wasm` | `https://github.com/QuantEcon/data-lectures/raw/main/lectures/<file>` |
+| Browser — `lecture-wasm` code cells, which execute under Pyodide in the reader's browser | `https://raw.githubusercontent.com/QuantEcon/data-lectures/main/lectures/<file>` |
+
+The `github.com/…/raw/` form is a 302 whose response carries an **empty** `access-control-allow-origin`, so a browser rejects it before following the redirect. The strict audit fails on any `lecture-wasm` code-cell read that uses it. `{download}` targets and prose links are plain navigations, so any resolving form is fine there.
 
 Once publishing lands (PLAN Phase 4), the canonical form becomes:
 
@@ -24,7 +27,7 @@ Once publishing lands (PLAN Phase 4), the canonical form becomes:
 https://data.quantecon.org/lectures/<filename>
 ```
 
-Avoid `raw.githubusercontent.com` (serves pointer text for LFS-tracked files), `media.githubusercontent.com` (404s for plain-git files), and any URL pinning a non-default branch.
+**Never** use `media.githubusercontent.com`. It is the LFS media endpoint and routes per path, so it 404s every file this repo publishes — `lectures/` is 100% plain git, and LFS is confined to `sources/`, which is never served ([#58](https://github.com/QuantEcon/data-lectures/issues/58)). Never pin a branch other than `main`.
 
 ## Adding a dataset
 
