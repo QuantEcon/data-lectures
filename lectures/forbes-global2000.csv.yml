@@ -97,4 +97,14 @@ builder: builders/webscrape_forbes.ipynb
 # user-agent and hardcodes GDPR consent cookies against an undocumented
 # internal API, and re-running it would return a later vintage — which under
 # "Corrections vs vintages" would be a new filename, not a refresh of this one.
+#
+# Three further defects in it, recorded here rather than fixed, because a
+# frozen artifact's value is being the record of what ran (AGENTS.md, "Two
+# inherited-file states"). This file's own cell reaches
+# `https://www.forbes.com/forbesapi/org/global2000/2020/position/true.json`
+# over TLS, but the notebook's other cell — the one that writes
+# forbes-billionaires.csv — uses plain `http://www.forbes.com/ajax/list/data`.
+# That cell also creates a `./sources` directory it never writes to, and its
+# `to_csv` omits `index=None`, which is where this file's `Unnamed: 0` column
+# comes from.
 builder_status: committed-frozen

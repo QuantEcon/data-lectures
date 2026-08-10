@@ -68,6 +68,11 @@ integrity:
       rows and `realTimeRank` on 2655 — which is why the lecture reads the
       realTime pair and drops nulls. Frozen builder against an undocumented
       API, so there is nothing to re-fetch and compare.
+      The committed builder does not account for that spread either: its only
+      active request is `{'type': 'person', 'year': 2020, 'uri':
+      'billionaires'}`, so the notebook as committed asks for one year and
+      these bytes carry three. It is a record of the extraction method, not a
+      recipe that reproduces this file.
 
 # ---------------------------------------------------------------------------
 # Shape
@@ -123,4 +128,10 @@ schema:
 consumers: []                   # nothing reads this URL until PR set C
 
 builder: builders/webscrape_forbes.ipynb
+# committed-frozen, not committed — same reasoning as its sibling
+# forbes-global2000.csv.yml, which carries the full note. Defects recorded
+# rather than fixed, and this file is the one they bite: the cell that writes
+# it fetches over plain `http://www.forbes.com/ajax/list/data` (the global2000
+# cell uses TLS), creates a `./sources` directory it never writes to, and calls
+# `to_csv` without `index=None` — the origin of the `Unnamed: 0` column above.
 builder_status: committed-frozen
