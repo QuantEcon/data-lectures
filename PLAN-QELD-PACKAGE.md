@@ -194,9 +194,10 @@ reader the lecture will actually use**. 2.1e-16 is immaterial to a figure, but P
 
 ## 5. The call-site audit — input to the package
 
-**Snapshot: 2026-08-10**, six repos, 40 lectures, 115 read sites. Machine-readable worklist:
-`scripts/qeld_callsites.yml`. **Regenerate before the sweep** — `lecture-python-intro` and this repo both
-moved during the session that produced it.
+**Snapshot: 2026-08-10**, six repos, 40 lectures, 115 read sites. Working artifacts live in `.dev/qeld/`:
+the machine-readable worklist (`callsites.yml`) and the worked before/after evidence per idiom
+(`migration-catalog.md`, the spec for what a correct conversion produces). **Regenerate the worklist before
+the sweep** — `lecture-python-intro` and this repo both moved during the session that produced it.
 
 ### 5.1 The unit of work is ~78 URL definitions, not 115 reads
 
