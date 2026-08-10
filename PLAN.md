@@ -30,7 +30,7 @@ This repository is being shaped into the **single canonical repository for data 
   - **8 duplicates of data in active use** — `mpd2020.xlsx`, `longprices.xls`, `chapter_3.xlsx`, `assignat.xlsx`, `dette.xlsx`, `fig_3.xlsx`, `caron.npy`, `nom_balances.npy` are consumed by intro lectures (`long_run_growth`, `inflation_history`, `french_rev`), but via intro's **own copies** (own-repo URLs, or local paths for the `.npy` pair) — these are the Phase 8 repoint targets
   - **2 dead on both ends** — the World Bank GDP-per-capita CSV and its metadata twin are orphaned in intro too; nothing reads either copy anywhere
   - **2 never adopted** — `business_cycle_data.csv` (the one dynamic snapshot; intro's `business_cycle` still fetches live from wbgapi/FRED) and `fig_3.ods` (a source-format twin of `fig_3.xlsx`, referenced by nothing)
-- one manual refresh script (`scripts/business_cycle.py`), run by hand — it has fetch/transform/write but **no validate stage**
+- one manual refresh script (`builders/business_cycle.py`), run by hand — it has fetch/transform/write but **no validate stage**
 - **no `.github/`** — no CI, no PR validation, no scheduled refresh
 - no LFS, no per-dataset manifests, no license records
 - referenced by **zero lectures** (confirmed by the audit and by live GitHub code search, 2026-07-16) — the Feb 2025 migration (data#5–#7) landed the files but the repoint (data#4) never happened. Until the first repoint merges, everything here can be restructured freely
@@ -269,7 +269,7 @@ Full automation:
 
 - [x] Audit dashboard workflow ([#20](https://github.com/QuantEcon/data-lectures/issues/20), added 2026-07-17): `.github/workflows/audit-dashboard.yml` rebuilds the full-universe data audit + migration tracker from the 8 lecture repos' `main` (push to main / weekly / dispatch) and deploys it with the published tree to Pages. Strict mode fails the build on an unannotated data reference or a `migration.yml` status the scan contradicts
 - [ ] PR validation: manifest schema check + per-dataset invariant tests (expected columns/dtypes, row-count floor, date-range recency, no all-NaN columns, overlap-window agreement with the previous vintage) on every PR touching data. The schema decisions these tests force — column patterns for wide files, `known_nulls` exact-vs-ceiling, a canonical dtype vocabulary — are researched in [#14](https://github.com/QuantEcon/data-lectures/issues/14)
-- [ ] Retrofit `scripts/business_cycle.py` to the four-stage builder contract — it has fetch/transform/write today but **no validate stage**. Builder architecture and a copy-able template: [#14](https://github.com/QuantEcon/data-lectures/issues/14)
+- [ ] Retrofit `builders/business_cycle.py` to the four-stage builder contract — it has fetch/transform/write today but **no validate stage**. Builder architecture and a copy-able template: [#14](https://github.com/QuantEcon/data-lectures/issues/14)
 - [ ] Scheduled refresh workflow for dynamic datasets — cron per cadence class, runs the builder (fetch → pre-process → validate → write), lands the result as a PR whose diff summary (rows added, date-range delta, overlap-window changes) is the review surface; low-risk series may auto-merge on green (first consumer: the UNRATE pilot, meta#338 P4)
 - [ ] Weekly sources-alive canary: fetch + validate, no commit, opens an issue on failure — relocates API fragility from 7 lecture repos' CI into one scheduled job here
 - [ ] Consumer fan-out: a merged refresh or in-place correction dispatches rebuilds of the repos in the dataset's machine-readable `consumers` list
@@ -293,7 +293,7 @@ Verify that what this repo holds is actually the data it claims to be — agains
 
 - [ ] **Byte-compare against the in-use copies**: each file migrated in Feb 2025 must be identical to the copy `lecture-python-intro` currently consumes (git blob hash compare). If a copy diverged, a repoint silently changes lecture output — this check is a hard prerequisite for Phase 8. Recorded **in the repoint PR** as a one-time gate, reproducible later from the manifest's `sha256` — not a manifest field (P1 decision)
 - [ ] **Verbatim files**: re-fetch from the upstream source and compare (e.g. `mpd2020.xlsx` against the published Maddison Project 2020 release); record `sha256`, `status`, what it was compared `against`, and the date in the manifest's `integrity.upstream`
-- [ ] **Constructed / dynamic files**: re-run the committed builder (`scripts/business_cycle.py` → `business_cycle_data.csv`) and confirm values agree in the overlap window with the committed snapshot
+- [ ] **Constructed / dynamic files**: re-run the committed builder (`builders/business_cycle.py` → `business_cycle_data.csv`) and confirm values agree in the overlap window with the committed snapshot
 - [ ] **Author-assembled files** (the French Revolution spreadsheets, `caron.npy`, `nom_balances.npy` — prose-only provenance): spot-check key values against the cited publication and record what was checked; full verification may be impossible, and the manifest should say so (`status: unverifiable` with a one-line `note` — the honest known status, per P1)
 - [ ] **Unverifiable or failing files**: flag in the manifest and open an issue — do not promote a file to the canonical URL namespace with a known-bad or unknown integrity status
 

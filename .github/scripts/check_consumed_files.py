@@ -11,6 +11,10 @@ For every manifest sidecar lectures/<datafile>.yml:
   - if `integrity.sha256` is recorded, with or without consumers:
       * the data file must exist
       * the committed bytes must hash to it
+  - the builder record must be internally consistent:
+      * `builder_status` must be a known value
+      * a `committed*` status must name a builder
+      * a named builder must exist on disk
 
 The second clause exists because manifests land *ahead* of their repoints by
 convention, so a dataset arrives with `consumers: []` and is flipped by a
@@ -30,7 +34,15 @@ import sys
 
 import yaml
 
-LECTURES = pathlib.Path(__file__).resolve().parents[2] / "lectures"
+REPO = pathlib.Path(__file__).resolve().parents[2]
+LECTURES = REPO / "lectures"
+
+# One builder per published dataset, in builders/ (AGENTS.md, "Builders").
+# `committed` asserts a runnable four-stage builder; `committed-frozen` says the
+# builder is here and deliberately will not run (a frozen vintage, a scraper we
+# will not re-run); `unrecovered` says it is absent; `not-applicable` is for
+# verbatim files.
+BUILDER_STATUSES = {"committed", "committed-frozen", "unrecovered", "not-applicable"}
 
 
 def sha256(path: pathlib.Path) -> str:
@@ -67,6 +79,30 @@ def main() -> int:
                 f"the sidecar's own name (expected {expected!r})"
             )
             continue
+
+        # Builder: the status must be a known one, a dataset that claims a
+        # builder must name it, and the path it names must exist. Nothing else
+        # in the repo validates any of this — build_audit only records the
+        # value and the catalog only formats it — so a manifest can currently
+        # assert a builder that was never committed, or that has been moved.
+        status = manifest.get("builder_status")
+        builder = manifest.get("builder")
+        if status is not None and status not in BUILDER_STATUSES:
+            errors.append(
+                f"{declared}: unknown builder_status {status!r} — expected one "
+                f"of {', '.join(sorted(BUILDER_STATUSES))}"
+            )
+        elif str(status).startswith("committed") and not builder:
+            errors.append(
+                f"{declared}: builder_status is {status!r} but no builder is "
+                f"named — a dataset claiming a committed builder must say "
+                f"where it is"
+            )
+        if builder and not (REPO / builder).exists():
+            errors.append(
+                f"{declared}: builder {builder!r} does not exist — builders "
+                f"live in builders/<stem>.<ext> (AGENTS.md, 'Builders')"
+            )
 
         consumers = manifest.get("consumers") or []
         integrity = manifest.get("integrity")

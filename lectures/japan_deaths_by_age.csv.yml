@@ -74,5 +74,5 @@ consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
 
-builder: scripts/japan_deaths_by_age.py
+builder: builders/japan_deaths_by_age.py
 builder_status: committed

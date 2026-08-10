@@ -75,5 +75,5 @@ consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
 
-builder: scripts/japan_earthquakes.py
+builder: builders/japan_earthquakes.py
 builder_status: committed

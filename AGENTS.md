@@ -34,6 +34,7 @@ A constructed dataset without its committed builder is a bug. Manifest fields: `
 The Feb 2025 migration left files that cannot fully satisfy the rules above. The manifest records each gap **explicitly** — visible in the generated catalog — rather than burying it by misclassification. Both are provisional decisions from the P1 pilot ([meta#338](https://github.com/QuantEcon/meta/issues/338)), to be folded into [manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108).
 
 - **`retrieved: null` — inherited-undated bytes.** `retrieved` is required, but may be `null` when the bytes were inherited (e.g. from a lecture repo) with **no recorded upstream-retrieval date**. Do **not** reconstruct one from git history — that records when QuantEcon acquired the file, not when it was retrieved from the source, and the false precision is worse than an honest null. A null `retrieved` must be paired with an `integrity.upstream` entry that says why (`status: unverifiable` with a `note`).
+- **`builder_status: committed-frozen` — the builder is here, and deliberately will not run.** For a dataset built from a source that must not be refreshed: a frozen vintage, or a scraper we will not re-run. The artifact is kept as the record of what produced these bytes, so it is committed verbatim and not edited — editing it is what would destroy its value as provenance. Distinct from `committed`, which asserts a runnable four-stage builder, and from `unrecovered`, which says the builder is absent.
 - **`builder_status: unrecovered` — constructed without a recoverable builder.** A constructed dataset ships its builder, and one that omits it *silently* is the bug. Several inherited files are constructed with no recoverable extraction steps (PLAN Phase 9 tracks them). Keep `class: constructed` — reclassifying to `verbatim` to dodge the rule is misclassification — set `builder: null` and `builder_status: unrecovered`, and the gap stays visible for Phase 9 to recover. `unrecovered` is for **inherited files only**; never introduce a *new* constructed file without its builder.
 
 ### Repointing a lecture — three ordering traps
@@ -105,7 +106,15 @@ The limits: **50 MiB** warns on push, **100 MiB** (104,857,600 B) is a hard bloc
 
 **Never** put an LFS object under `lectures/`, and never reach for GitHub release assets: they send no `access-control-allow-origin` on any hop, so a browser cannot read them. Parquet is not a size remedy here either — `pyarrow` is absent from the Pyodide `lecture-wasm` pins, and gzipped CSV is smaller than Parquet on this data anyway.
 
-### Dynamic builders
+### Builders
+
+**One builder per published dataset, in `builders/`, named for the dataset it produces:** `builders/<stem>.<ext>` builds `lectures/<stem>.<ext2>`. The stem is the dataset's, not the lecture's — `builders/japan_earthquakes.py` writes `lectures/japan_earthquakes.csv`. That makes the manifest's `builder:` field predictable and lets CI assert it.
+
+Where one builder produces a **set** of files, name it for the set and let each file's manifest point at the same path — `business_cycle.py` writes three. The stem rule is the default, not an invariant; what CI asserts is that every `builder:` path exists, and that a dataset claiming a builder names one.
+
+`scripts/` is repo tooling — the audit dashboard and the catalog generator — and produces no dataset. Keep the two apart.
+
+**Where a builder reads its input from.** The normal case is the third-party upstream, fetched at run time: six of the seven builders here do that, and it is the fetch stage of the contract below. A builder reads from `sources/` **only when the input cannot be re-fetched** — the upstream is gone, unlocatable, or was inherited with no recoverable source. `sources/` is that exception layer, not a general input tree, and it is emphatically not "the big-file directory": the defining property is un-refetchability, not size. What it must never be is a network read from another QuantEcon repo — that is how a retired repo becomes load-bearing again.
 
 Builders follow four stages — **fetch → pre-process → validate → write** — and only write on validation pass (expected columns/dtypes, row-count floor, recency of date range, no all-NaN columns, values unchanged in the overlap window with the previous vintage). Lectures always read the last-good snapshot: an upstream outage may fail a refresh, it must never break a lecture build.
 
@@ -142,12 +151,13 @@ The generated dashboard (`scripts/build_audit.py`, [#20](https://github.com/Quan
 
 ```
 lectures/            # the published tree — flat, live on Pages; data.quantecon.org pending
-                     #   19 datasets (10 with manifests; the 8 static intro files
-                     #   and business_cycle_data.csv still need theirs) plus
-                     #   business_cycle's two upstream metadata dumps (see #13)
-                     #   manifests live here as sidecars: <filename>.yml
-scripts/             # builders + generators — NOT published
-  business_cycle.py  #   writes business_cycle_data.csv into lectures/
+                     #   21 files, 18 with manifests (business_cycle's three still
+                     #   need theirs — see #13). Manifests are sidecars: <filename>.yml
+builders/            # one builder per published dataset — NOT published
+                     #   builders/<stem>.py builds lectures/<stem>.<ext>
+sources/             # inputs a builder cannot re-fetch — NOT published, per-path LFS
+                     #   no manifests; sources/README.md is the audit trail
+scripts/             # repo tooling — NOT published, produces no dataset
   build_catalog.py   #   generates CATALOG.md from the manifests
   build_audit.py     #   the audit dashboard: scan lecture repos → audit.json → site/
   render_audit.py    #   its render stage
