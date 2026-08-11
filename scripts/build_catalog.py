@@ -8,8 +8,11 @@ after adding or editing any manifest:
 
     python scripts/build_catalog.py
 
-CI asserts the catalog is current with `git diff --exit-code CATALOG.md` after
-regenerating, so a stale catalog fails the build (PLAN Phase 5).
+`consumed-file-check.yml` asserts the catalog is current — it regenerates and
+runs `git diff --exit-code -- CATALOG.md`, so a stale catalog fails the build
+(PLAN Phase 5). That gate was claimed here long before it existed, which is how
+#69 populated six manifests' `consumers` without regenerating and left the
+committed catalog contradicting them (#71). A docstring is not a gate.
 
 Scope: migrated-only. A dataset appears here once it has a manifest; files in
 lectures/ without a manifest are not yet migrated and are tracked in PLAN

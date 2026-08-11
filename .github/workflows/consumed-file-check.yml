@@ -37,3 +37,18 @@ jobs:
           python-version: "3.12"
       - run: pip install pyyaml
       - run: python .github/scripts/check_consumed_files.py
+
+      # CATALOG.md is generated from the same manifests this job validates, and
+      # `scripts/build_catalog.py` has claimed since it was written that CI
+      # asserts its freshness. Nothing did: no workflow ran the generator at
+      # all, so #69 could populate six manifests' `consumers` and leave the
+      # committed catalog contradicting them — invisible until an unrelated PR
+      # inherited the surprise diff (#71). This is that gate, put where the
+      # manifests are already parsed and pyyaml is already installed.
+      - name: CATALOG.md is current
+        run: |
+          python scripts/build_catalog.py
+          git diff --exit-code -- CATALOG.md || {
+            echo "::error file=CATALOG.md::CATALOG.md is stale. A manifest changed without regenerating the catalog — run 'python scripts/build_catalog.py' and commit the result."
+            exit 1
+          }
