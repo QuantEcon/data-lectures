@@ -91,7 +91,17 @@ schema:
   # SCF_plus_mini.csv to 48,765,100 here. Measured 2026-08-10, not inferred.
   # Use the weighted file for anything sensitive to the extreme upper tail.
 
-consumers: []                   # nothing reads this URL until PR set C
+consumers:
+  # All four repointed 2026-08-11. zh-cn and the canary are outside the
+  # audit's SCAN_REPOS, so they are recorded here or nowhere.
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/mle.md
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/mle.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/mle.md
+  - repo: QuantEcon/test-actions-lecture-intro
+    file: lectures/mle.md
 
 builder: builders/generating_mini.md
 builder_status: committed-frozen

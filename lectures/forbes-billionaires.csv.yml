@@ -125,7 +125,17 @@ schema:
     pay: 2918
     managementAssets: 2933
 
-consumers: []                   # nothing reads this URL until PR set C
+consumers:
+  # All four repointed 2026-08-11. zh-cn and the canary are outside the
+  # audit's SCAN_REPOS, so they are recorded here or nowhere.
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/heavy_tails.md
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/heavy_tails.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/heavy_tails.md
+  - repo: QuantEcon/test-actions-lecture-intro
+    file: lectures/heavy_tails.md
 
 builder: builders/webscrape_forbes.ipynb
 # committed-frozen, not committed — same reasoning as its sibling
