@@ -26,7 +26,12 @@ PATTERN_META = {
     "own-repo": ("p-own", "own-repo URL", "fetches a file committed in its own repo via a GitHub raw URL"),
     "local-path": ("p-local", "local path", "pd.read_csv('…') relative path — no URL; breaks in Colab/download"),
     "sibling": ("p-sib", "sibling repo URL", "fetches another lecture repo's committed copy by URL"),
-    "external": ("p-ext", "external data repo", "reads a data file from another QuantEcon repo by URL"),
+    # `external` is defined by what it EXCLUDES, and classify_url reaches it by
+    # two routes: a non-QuantEcon org (build_audit.py:180-181) and a QuantEcon
+    # repo that is none of this repo, the consuming repo, a legacy name or a
+    # scanned sibling (:190-191). Describe the exclusion, not whichever repo
+    # happens to be using it — this label has now been too narrow twice.
+    "external": ("p-ext", "external data repo", "reads a data file by URL from a GitHub repo outside the audited lecture set — any org"),
     "external-web": ("p-ext", "external web host", "fetches a data file from a non-GitHub host by URL"),
     "legacy": ("p-legacy", "legacy-repo URL", "fetches from the retired pre-MyST lecture-python repo"),
     "embedded": ("p-embed", "%%file embedded", "written by the lecture itself, then read back"),
