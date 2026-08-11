@@ -28,17 +28,6 @@ datasets:
       A migration candidate — it is read from lecture-python.myst main by raw
       URL, and the lecture documents every transformation and rebuilds the
       post-2000Q4 continuation from FRED
-  SCF_plus_mini.csv:
-    description: SCF+ wealth/income survey extract
-    provenance: constructed-committed
-    note: built by generating_mini.md (executable MyST) in high_dim_data from SCF_plus.dta
-  SCF_plus_mini_no_weights.csv:
-    description: SCF+ extract, no survey weights
-    provenance: constructed-committed
-    note: >
-      variant of the SCF_plus_mini pipeline. Was pinned to feature branch
-      update_scf_noweights (critical flag in the 2026-07-15 audit); reads
-      high_dim_data main since lecture-python-intro#793
   acs_data_summary.csv:
     description: ACS occupation summary
     provenance: constructed-lost
@@ -62,14 +51,6 @@ datasets:
     description: Hyperinflation tables, Sargent "Ends of Four Big Inflations"
     provenance: author-assembled
     note: hand-transcribed by authors
-  cities_brazil.csv:
-    description: Brazilian city populations
-    provenance: author-assembled
-    note: manual download from worldpopulationreview.com, documented in high_dim_data README
-  cities_us.csv:
-    description: US city populations
-    provenance: author-assembled
-    note: manual download from worldpopulationreview.com, documented in high_dim_data README
   dataBHS.mat:
     description: US consumption/income series, MATLAB replication bundle
     provenance: verbatim
@@ -80,14 +61,6 @@ datasets:
   fig_3.xlsx:
     description: French Revolution fiscal data
     provenance: author-assembled
-  forbes-billionaires.csv:
-    description: Forbes billionaires list
-    provenance: constructed-committed
-    note: webscrape_forbes.ipynb in high_dim_data (Forbes API)
-  forbes-global2000.csv:
-    description: Forbes Global 2000 firm size
-    provenance: constructed-committed
-    note: webscrape_forbes.ipynb in high_dim_data (Forbes API)
   fp.dta:
     description: Treisman (2016) Russia billionaires replication data
     provenance: verbatim
