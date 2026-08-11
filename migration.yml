@@ -332,62 +332,134 @@ datasets:
 
   forbes-global2000.csv:
     pilot: P3
-    status: landed
+    status: repointed
     prior_pattern: external
     landed:
       pr: QuantEcon/data-lectures#62
       date: 2026-08-10
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#832
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#60
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#292
+        date: 2026-08-11
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#53
+        date: 2026-08-11
     cutover: null
 
   forbes-billionaires.csv:
     pilot: P3
-    status: landed
+    status: repointed
     prior_pattern: external
     landed:
       pr: QuantEcon/data-lectures#62
       date: 2026-08-10
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#832
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#60
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#292
+        date: 2026-08-11
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#53
+        date: 2026-08-11
     cutover: null
 
   cities_us.csv:
     pilot: P3
-    status: landed
+    status: repointed
     prior_pattern: external
     landed:
       pr: QuantEcon/data-lectures#62
       date: 2026-08-10
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#832
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#60
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#292
+        date: 2026-08-11
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#53
+        date: 2026-08-11
     cutover: null
 
   cities_brazil.csv:
     pilot: P3
-    status: landed
+    status: repointed
     prior_pattern: external
     landed:
       pr: QuantEcon/data-lectures#62
       date: 2026-08-10
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#832
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#60
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#292
+        date: 2026-08-11
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#53
+        date: 2026-08-11
     cutover: null
 
   SCF_plus_mini.csv:
     pilot: P3
-    status: landed
+    status: repointed
     prior_pattern: external
     landed:
       pr: QuantEcon/data-lectures#62
       date: 2026-08-10
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#832
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#60
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#292
+        date: 2026-08-11
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#53
+        date: 2026-08-11
     cutover: null
 
   SCF_plus_mini_no_weights.csv:
     pilot: P3
-    status: landed
+    status: repointed
     prior_pattern: external
     landed:
       pr: QuantEcon/data-lectures#62
       date: 2026-08-10
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#832
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#60
+        date: 2026-08-11
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#292
+        date: 2026-08-11
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#53
+        date: 2026-08-11
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
