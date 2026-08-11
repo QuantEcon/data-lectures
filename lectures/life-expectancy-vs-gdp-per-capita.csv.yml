@@ -1,0 +1,177 @@
+# Manifest for life-expectancy-vs-gdp-per-capita.csv — migrated out of
+# QuantEcon/lecture-python-intro, where it sat at
+# lectures/_static/lecture_specific/simple_linear_regression/ and was read by
+# URL from four repos (PLAN Phase 8, wave A4).
+#
+# READ THE `integrity.upstream` BLOCK BEFORE REFRESHING THIS FILE. Today's OWID
+# export is a different vintage with four renamed columns and half the rows, and
+# `simple_linear_regression.md` hardcodes one of the old labels in `usecols`. A
+# well-meaning refresh raises ValueError on three lecture repos.
+
+filename: life-expectancy-vs-gdp-per-capita.csv
+title: Life expectancy vs GDP per capita — Our World in Data grapher export
+description: >
+  The full long-run panel behind Our World in Data's "Life expectancy vs. GDP
+  per capita" scatter: period life expectancy at birth and GDP per capita in
+  constant international dollars, by entity and year, with population and
+  continent as auxiliary columns. `simple_linear_regression` reads four of the
+  eight columns, drops the rows where either variable is missing, and fits an
+  OLS line to the 2018 cross-section.
+
+# Verbatim: this is the grapher's own CSV export, republished as downloaded.
+# OWID assembles it from several third-party series, but no QuantEcon
+# processing was applied to the bytes.
+class: verbatim
+
+source:
+  name: Our World in Data — "Life expectancy vs. GDP per capita" grapher
+  url: https://ourworldindata.org/grapher/life-expectancy-vs-gdp-per-capita
+  citation: >
+    Riley (2005); Zijdeman et al. (2015); HMD; UN World Population Prospects;
+    Bolt and van Zanden — Maddison Project Database, with processing by Our
+    World in Data. Retrieved from the grapher's full CSV export.
+  note: >
+    A COMPOSITE, not a single upstream dataset — each column carries its own
+    provenance chain, which is why there is no one licence to record below. The
+    lecture also embeds the live grapher as an iframe beside the data read
+    (`simple_linear_regression.md`), so readers see the current OWID vintage
+    next to a figure built from this frozen one.
+
+license:
+  name: null
+  url: https://ourworldindata.org/faqs#can-i-reuse-or-republish-your-data
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution"). There is no single licence to name: OWID's own FAQ says
+  # "It depends on the data source ... Most of the data on Our World in Data
+  # comes from third-party providers and is subject to the license terms of
+  # those providers", and this export joins four such chains (Riley, Zijdeman
+  # et al., HMD, UN WPP for life expectancy; Maddison for GDP; HYDE, Gapminder
+  # and UN WPP for population; OWID's own regions). The metadata endpoint
+  # carries citations but no machine-readable licence field for any column.
+  redistribution: permitted
+  verified: 2026-08-12
+  note: >
+    An inherited exposure: served publicly from lecture-python-intro since
+    before this repo existed, and cached here with attribution rather than
+    left silent. None of the contributing sources is a commercial
+    all-rights-reserved publisher — the class that produced the `restricted`
+    records here — but the per-source terms have NOT been established one by
+    one. Registered for that review on QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited from lecture-python-intro with no
+                                # recorded retrieval date; not reconstructed
+                                # from git history (AGENTS.md). The vintage is
+                                # bounded instead — see integrity.upstream.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): the bytes landing here are byte-identical to
+# the copy all four consuming repos read today —
+# sha256 ec5d3235… against lecture-python-intro @ 0066783,
+# lectures/_static/lecture_specific/simple_linear_regression/. The wasm, zh-cn
+# and canary copies of the same path carry the identical git blob. Verified
+# 2026-08-12; a repoint to this file therefore cannot change a single figure.
+
+integrity:
+  sha256: ec5d3235f23aabfba36a000d31903c82aedb7e0d6f9c01566babfd307e5587ec
+  upstream:
+    # `diverged`, not `unverifiable`: the check WAS performed, against the live
+    # grapher endpoint, and the difference is known, large and accepted. This
+    # is the expected result of a migration — rule 4, "a migration moves bytes;
+    # it does not update them" — not a defect.
+    status: diverged
+    date: 2026-08-12
+    against: https://ourworldindata.org/grapher/life-expectancy-vs-gdp-per-capita.csv?csvType=full&useColumnShortNames=false
+    note: >
+      OWID has published a newer vintage under the same grapher slug. Our copy
+      is an older export and is what every consuming lecture reads. See `delta`
+      before refreshing — the change is not cosmetic.
+    delta_kind: upstream-moved
+    delta: >
+      Fetched 2026-08-12: HTTP 200, 1,414,428 B against our 2,059,709 B.
+      FOUR of eight columns are renamed, and only Entity / Code / Year /
+      "GDP per capita" are stable:
+        "Life expectancy at birth (historical)" -> "Life expectancy at birth"
+        "Population (historical estimates)"     -> "Population"
+        "Continent"                             -> "World region according to OWID"
+        "417485-annotations"                    -> "GDP per capita (Annotations)",
+                                                   also MOVED from position 6 to 8
+      The annotations column is renamed and moved, NOT dropped — a widely
+      repeated description of this delta that is wrong. Coverage also changes:
+      62,156 -> 29,912 rows, Year -10000..2021 -> 1..2023, 317 -> 276 entities.
+      Today's metadata cites Maddison Project Database 2023, HMD 2025 and
+      UN WPP 2024, all of which postdate this export.
+    delta_evidence: >
+      `upstream-moved` rather than `local-edit`: the committed file's column
+      names are OWID's own older schema (the "(historical)" suffixes and the
+      numeric `417485-annotations` variable id), not names anyone here would
+      invent, and its Year ceiling of 2021 is consistent with an export taken
+      before the 2023/2024/2025 source releases the current metadata cites. No
+      QuantEcon edit is implicated: 62,156 rows is a superset of the current
+      29,912 in coverage, so this is a re-cut of the panel upstream and not a
+      local truncation.
+
+      WHY A REFRESH IS A BREAKING CHANGE, not a data update. All four consuming
+      lectures hardcode the old label — `cols = ['Code', 'Year',
+      'Life expectancy at birth (historical)', 'GDP per capita']` — and pass it
+      as `usecols`. Reproduced against today's export:
+      `ValueError: Usecols do not match columns, columns expected but not
+      found: ['Life expectancy at birth (historical)']`. Note the error names
+      ONLY the life-expectancy column, because the annotations column is not in
+      `usecols` — the annotations change is not what breaks the read.
+
+      And the quiet half: after relabelling `usecols`, `dropna()` yields 13,239
+      rows on the new export against 12,445 on this file, so the sentence
+      "dropped the number of rows in our DataFrame from 62156 to 12445" —
+      hardcoded in the prose of all four repos — becomes wrong. Meanwhile
+      `year == 2018` returns 166 rows in BOTH vintages, so the final scatter and
+      OLS figure would look superficially unchanged while every life-expectancy
+      value shifted. That is the silent-change failure mode rule 4 exists for.
+
+      Per AGENTS.md "Corrections vs vintages", adopting the new vintage means a
+      NEW filename so consumers opt in, never a replacement of this file.
+    register: QuantEcon/data-lectures#39
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured with pandas 3.0.5 (the anaconda=2026.07 pin), not assumed. Text
+# columns are `str` under pandas 3, not `string` and not `object`.
+
+schema:
+  format: csv
+  columns:
+    - {name: Entity, dtype: str, description: "country, region or aggregate name — 317 distinct values"}
+    - {name: Code, dtype: str, description: "ISO 3166 alpha-3 code; null for OWID aggregates and historical entities"}
+    - {name: Year, dtype: int64, description: "year, -10000 to 2021 (negative = BCE)"}
+    - {name: Life expectancy at birth (historical), dtype: float64, description: "period life expectancy at birth, years. NOTE: upstream has renamed this column — see integrity.upstream"}
+    - {name: GDP per capita, dtype: float64, description: "GDP per capita, constant international dollars (Maddison)"}
+    - {name: 417485-annotations, dtype: str, description: "sparse OWID annotation strings keyed to the GDP series (21 non-null of 62,156)"}
+    - {name: Population (historical estimates), dtype: float64, description: "population estimate"}
+    - {name: Continent, dtype: str, description: "OWID region label, populated on one row per entity only (285 non-null)"}
+  row_count_floor: 62156        # frozen export — exact row count by design
+  date_range: {start: -10000, end: 2021}
+  # Extensive and correct: this is a WIDE JOIN across sources with very
+  # different coverage, so most cells of most columns are legitimately empty.
+  # A blanket no-nulls rule would reject the file; the lecture's own first step
+  # is to drop them, from 62,156 rows to 12,445.
+  known_nulls:
+    Code: 3871
+    Life expectancy at birth (historical): 41711
+    GDP per capita: 42280
+    417485-annotations: 62135
+    Population (historical estimates): 4984
+    Continent: 61871
+
+consumers: []
+  # Empty at `landed`, populated when wave A4's repoints merge. FIVE
+  # reference-holders, not the two the audit can see: lecture-python-intro,
+  # lecture-wasm, lecture-intro.zh-cn, QuantEcon/test-actions-lecture-intro,
+  # and the generated lecture-python-intro.notebooks mirror. Each consuming
+  # `.md` holds TWO executable reads — the `data_url` literal and a second
+  # `read_csv(data_url, usecols=cols)` further down.
+
+builder: null
+builder_status: not-applicable

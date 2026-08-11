@@ -469,6 +469,49 @@ datasets:
         date: 2026-08-11
     cutover: null
 
+  # --- A4: Track A's last two CSVs ---------------------------------------
+  # The intro statics that were NOT part of the Feb 2025 migration, because
+  # they sat under lectures/_static/lecture_specific/ rather than in the
+  # datasets/ tree. Both are read by URL from intro's own copy, by FIVE
+  # reference-holders each: intro, lecture-wasm, lecture-intro.zh-cn,
+  # test-actions-lecture-intro, and the generated notebooks mirror. Only two
+  # of those are in SCAN_REPOS, so a green audit here proves less than usual —
+  # zh-cn and the canary are verified by hand.
+  #
+  # They land together at `landed`, with consumers unchanged. Track A's third
+  # remaining item, graph.txt, is NOT here and never will be: it is synthetic
+  # teaching data with null provenance, and its one URL reader is being given
+  # an inline literal instead (PLAN, Track A).
+  #
+  # DELETION IS NOT PART OF THIS WAVE. Unlike P3, which deleted nothing, intro
+  # holds the only live copy of both files — so the phase-2 split of rule 3
+  # applies in full, and its gate is FOUR publishes, not one: intro, wasm
+  # (automatic), lecture-intro.zh-cn and the canary. Merging zh-cn's sync PR
+  # changes its `main`, not its published site.
+
+  life-expectancy-vs-gdp-per-capita.csv:
+    pilot: A4
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#74
+      date: 2026-08-12
+    repoints: []
+    cutover: null
+
+  usa-gini-nwealth-tincome-lincome.csv:
+    pilot: A4
+    status: landed
+    # Second-order: built from SCF_plus_mini.csv, which landed in #62. That
+    # dependency is why this file waited for P3 rather than moving with the
+    # other intro statics.
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#74
+      date: 2026-08-12
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people
