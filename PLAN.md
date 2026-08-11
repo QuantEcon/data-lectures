@@ -156,7 +156,7 @@ Counting by repo. Two superseded figures are recorded here because **each has al
 | `test-actions-lecture-intro` | 5 | 2 | 7 | **nothing** |
 | **all** | **22** | **6** | **28** | |
 
-Line numbers below were measured against each repo's `main` on **2026-08-11**. Treat them as a snapshot, not a fact — `lecture-intro.zh-cn`'s drift by +1 in the course of one afternoon, from a `[translation-sync]` PR that never touched a data-read line. **Re-derive immediately before editing**, with `bin/zh-fold-lines` in `QuantEcon/workspace-lectures` for zh-cn (no clone needed) and a plain `grep -rn high_dim_data lectures/` for the rest.
+Line numbers below were measured against each repo's `main` on **2026-08-11**. Treat them as a snapshot, not a fact — `lecture-intro.zh-cn`'s drift by +1 in the course of one afternoon, from a `[translation-sync]` PR that never touched a data-read line. **Re-derive immediately before editing**, with `bin/zh-fold-lines` in `QuantEcon/workspace-lectures` for zh-cn (no clone needed) and a plain `grep -rn high_dim_data lectures/` for the rest. The bare needle is deliberate here and in the acceptance check below — see the note there.
 
 | Repo | File | Lines | Current host |
 | --- | --- | --- | --- |
@@ -194,6 +194,8 @@ A second grep is what actually proves the fold, since the one above passes trivi
     grep -rn 'high_dim_data' <the same four lecture trees>
 
 That must also return nothing.
+
+**The bare needle is deliberate — do not narrow it to `QuantEcon/high_dim_data`.** This is an acceptance gate, and its two error costs are not symmetric: a false positive costs someone five seconds of looking, a false negative ships a broken fold. The broad form also catches a fork reference (`<someone-else>/high_dim_data`) and a URL that lost its org prefix, which the qualified form cannot. And a **non-URL hit inside a lecture tree is a finding, not noise** — org-wide the archive gate is deliberately worded as zero *executable data reads*, because prose mentions there are permanent (frozen reports, `quantecon-book-networks/data/README.md:72`), but inside these four trees a surviving mention of the retired repo is something the close-out should sweep. Measured 2026-08-11: all 28 hits across the four trees are org-qualified URL reads, so the two forms are equivalent today and the broad one only differs on the cases you want to hear about.
 
 This **is** covered by CI now, for the repos the audit scans. A reference classified `pattern: data-lectures` fails the strict audit if it is on `media.githubusercontent.com`, and separately if its `(ref, path)` is anything but `main` + `lectures/<file>`, or if that file is not committed here yet. Those are two independent assertions on purpose: a media URL parses to exactly the same `ref` and `path` as the raw URL beside it, only the host differs, so neither check can stand in for the other. Before this, `scripts/build_audit.py` computed `lfs_media` per reference and asserted on it nowhere — a tree with all 12 `.md` reads left on the media host and `migration.yml` flipped to `repointed` exited `--strict` with code 0, verified end to end.
 
