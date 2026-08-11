@@ -144,16 +144,19 @@ Both hosts send `access-control-allow-origin: *`, so this is **host routing, not
 
 This matters for exactly one piece of remaining work, and it matters a lot. `high_dim_data` tracks `*.csv` **and** `*.dta` under a blanket LFS rule, so **every** consuming lecture reads its datasets through the media host today. The storage decision lands those six datasets here as **plain git** (both SCF minis fit under the 100 MiB blob limit). After the fold the media host will 404 for them, so **every consuming read must change host as well as org and repo** — a mechanical org/repo swap that preserves the host breaks all of them.
 
-**21 source reads are affected across three repos: 17 on the media host, 4 on the `github.com/*/raw/` redirect form.** The `github.com/<org>/<repo>/raw/…` form is a *smart* redirect that routes per path by LFS status, so those 4 survive an org/repo/path swap with no host decision; **the other 17 must change host as well.** `lecture-intro.zh-cn` is the third consumer and is invisible to every audit run (`scripts/build_audit.py:46-57`) — see rule 1.
+**28 source reads are affected across four repos: 22 on the media host, 6 on the `github.com/*/raw/` redirect form.** The `github.com/<org>/<repo>/raw/…` form is a *smart* redirect that routes per path by LFS status, so those 6 survive an org/repo/path swap with no host decision; **the other 22 must change host as well.** Two of the four consumers are invisible to every audit run: `lecture-intro.zh-cn` is excluded from `SCAN_REPOS` by decision (`scripts/build_audit.py:48-57`) — see rule 1 — and `QuantEcon/test-actions-lecture-intro`, the `quantecon/actions` canary, is not a Python-family repo and was never in scope for it.
 
-Counting by repo, since the intro + wasm subset alone is 12 media reads and that number has already been mistaken for the total once:
+Counting by repo. Two superseded figures are recorded here because **each has already been mistaken for the total once**: "12 media reads" is the intro + wasm subset, and "21 reads across three repos" omits the canary, which was found late. If a restatement of this rule disagrees with the table below, the table is the one that was measured.
 
-| Repo | media | `github.com/*/raw/` | total |
-| --- | --- | --- | --- |
-| `lecture-python-intro` | 5 | 2 | 7 |
-| `lecture-wasm` | 7 | 0 | 7 |
-| `lecture-intro.zh-cn` | 5 | 2 | 7 |
-| **all** | **17** | **4** | **21** |
+| Repo | media | `github.com/*/raw/` | total | seen by |
+| --- | --- | --- | --- | --- |
+| `lecture-python-intro` | 5 | 2 | 7 | strict audit (`.md` only) + its own `data-url-guard` |
+| `lecture-wasm` | 7 | 0 | 7 | strict audit (`.md` only) + its own `data-url-guard` |
+| `lecture-intro.zh-cn` | 5 | 2 | 7 | **nothing** |
+| `test-actions-lecture-intro` | 5 | 2 | 7 | **nothing** |
+| **all** | **22** | **6** | **28** | |
+
+Line numbers below were measured against each repo's `main` on **2026-08-11**. Treat them as a snapshot, not a fact — `lecture-intro.zh-cn`'s drift by +1 in the course of one afternoon, from a `[translation-sync]` PR that never touched a data-read line. **Re-derive immediately before editing**, with `bin/zh-fold-lines` in `QuantEcon/workspace-lectures` for zh-cn (no clone needed) and a plain `grep -rn high_dim_data lectures/` for the rest.
 
 | Repo | File | Lines | Current host |
 | --- | --- | --- | --- |
@@ -165,25 +168,38 @@ Counting by repo, since the intro + wasm subset alone is 12 media reads and that
 | `lecture-wasm` | `lectures/mle.md` | 95 | media |
 | `lecture-wasm` | `lectures/inequality.md` | 250 | media |
 | `lecture-wasm` | `lectures/_static/lecture_specific/inequality/data.ipynb` | 37 | media |
-| `lecture-intro.zh-cn` | `lectures/heavy_tails.md` | 810, 837, 838, 862 | media |
+| `lecture-intro.zh-cn` | `lectures/heavy_tails.md` | 811, 838, 839, 863 | media |
 | `lecture-intro.zh-cn` | `lectures/_static/lecture_specific/inequality/data.ipynb` | 37 | media |
 | `lecture-intro.zh-cn` | `lectures/mle.md` | 105 | `github.com/*/raw/` |
 | `lecture-intro.zh-cn` | `lectures/inequality.md` | 256 | `github.com/*/raw/` |
+| `test-actions-lecture-intro` | `lectures/heavy_tails.md` | 822, 849, 850, 874 | media |
+| `test-actions-lecture-intro` | `lectures/_static/lecture_specific/inequality/data.ipynb` | 37 | media |
+| `test-actions-lecture-intro` | `lectures/mle.md` | 93 | `github.com/*/raw/` |
+| `test-actions-lecture-intro` | `lectures/inequality.md` | 249 | `github.com/*/raw/` |
 
 The plain-git decision does not *dissolve* the raw-vs-media trap for the repoint — it **inverts** it. The trap stops being "consumers must know to use the media host" and becomes "consumers already on the media host must be moved off it, in the same PR as the fold."
 
-**Acceptance check for the fold** — scope it to the consuming *lecture trees*, and clone `lecture-intro.zh-cn` for it, since that repo is never under `repos/`:
+**Acceptance check for the fold** — scope it to the consuming *lecture trees*. Two of the four paths are not under `repos/`: clone `lecture-intro.zh-cn`, and take the canary from `repos-infrastructure/`, where the workspace already clones it:
 
     grep -rn 'media.githubusercontent.com/media/QuantEcon/data-lectures' \
       repos/lecture-python-intro/lectures \
       repos/lecture-wasm/lectures \
+      repos-infrastructure/test-actions-lecture-intro/lectures \
       <path-to>/lecture-intro.zh-cn/lectures
 
-That must return nothing. The scoping is not cosmetic: the form quoted here before was `… repos/`, which could never pass, because it matched this document's own occurrences of the string. Any restatement of this check must exclude the rules that describe it.
+That must return nothing. The scoping is not cosmetic: the form quoted here before was `… repos/`, which could never pass, because it matched this document's own occurrences of the string — and it also silently omitted the canary, which lives under the *other* clone root. Any restatement of this check must exclude the rules that describe it and include all four consumers.
+
+A second grep is what actually proves the fold, since the one above passes trivially on a tree that was never repointed at all:
+
+    grep -rn 'high_dim_data' <the same four lecture trees>
+
+That must also return nothing.
 
 This **is** covered by CI now, for the repos the audit scans. A reference classified `pattern: data-lectures` fails the strict audit if it is on `media.githubusercontent.com`, and separately if its `(ref, path)` is anything but `main` + `lectures/<file>`, or if that file is not committed here yet. Those are two independent assertions on purpose: a media URL parses to exactly the same `ref` and `path` as the raw URL beside it, only the host differs, so neither check can stand in for the other. Before this, `scripts/build_audit.py` computed `lfs_media` per reference and asserted on it nowhere — a tree with all 12 `.md` reads left on the media host and `migration.yml` flipped to `repointed` exited `--strict` with code 0, verified end to end.
 
-**What CI still cannot see is 9 of the fold's 21 reads.** `SCAN_REPOS` is the eight Python-family repos, so `lecture-intro.zh-cn`'s seven reads are outside it; `lectures/_static/**` is excluded by design, so the three `data.ipynb` copies are too. Those are builder notebooks, which the translation sync never carries either (it is `.md`-only), so they must be changed by hand in all three repos and checked by hand. The pre-merge grep in `lecture-python-intro` and `lecture-wasm` ([workspace-lectures#23](https://github.com/QuantEcon/workspace-lectures/issues/23) gate 2) does cover both of those repos' `_static` notebooks, which leaves `lecture-intro.zh-cn` as the only consumer with no automated check of any kind.
+**The strict audit sees only 12 of the fold's 28 reads** — the `.md` reads in `lecture-python-intro` and `lecture-wasm`. `SCAN_REPOS` is the eight Python-family repos, so `lecture-intro.zh-cn`'s seven reads and the canary's seven are outside it; `lectures/_static/**` is excluded by design, so all four `data.ipynb` copies are too. Those are builder notebooks, which the translation sync never carries either (it is `.md`-only), so they must be changed by hand in every repo and checked by hand.
+
+The `data-url-guard` in `lecture-python-intro` and `lecture-wasm` ([workspace-lectures#23](https://github.com/QuantEcon/workspace-lectures/issues/23) gate 2) recovers two of the sixteen — it greps all of `lectures/`, `_static` notebooks included. **That leaves 14 reads, across `lecture-intro.zh-cn` and `test-actions-lecture-intro`, with no automated check of any kind.** Both are hand-written PRs, verified by hand.
 
 ## Migration tracks
 
