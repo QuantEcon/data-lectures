@@ -491,17 +491,29 @@ datasets:
 
   life-expectancy-vs-gdp-per-capita.csv:
     pilot: A4
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#74
       date: 2026-08-12
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#834
+        date: 2026-08-12
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#61
+        date: 2026-08-12
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#294
+        date: 2026-08-12
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#56
+        date: 2026-08-12
     cutover: null
 
   usa-gini-nwealth-tincome-lincome.csv:
     pilot: A4
-    status: landed
+    status: repointed
     # Second-order: built from SCF_plus_mini.csv, which landed in #62. That
     # dependency is why this file waited for P3 rather than moving with the
     # other intro statics.
@@ -509,7 +521,19 @@ datasets:
     landed:
       pr: QuantEcon/data-lectures#74
       date: 2026-08-12
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#834
+        date: 2026-08-12
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#61
+        date: 2026-08-12
+      - repo: QuantEcon/lecture-intro.zh-cn
+        pr: QuantEcon/lecture-intro.zh-cn#294
+        date: 2026-08-12
+      - repo: QuantEcon/test-actions-lecture-intro
+        pr: QuantEcon/test-actions-lecture-intro#56
+        date: 2026-08-12
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
