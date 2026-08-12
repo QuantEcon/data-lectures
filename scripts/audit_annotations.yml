@@ -319,12 +319,6 @@ committed_unreferenced:
   lecture-dp:lectures/_static/lecture_specific/pandas_panel/realwage.csv:
     kind: orphan
     note: inherited copy; the consuming lectures live in other repos and now read data-lectures
-  lecture-wasm:lectures/_static/lecture_specific/inequality/usa-gini-nwealth-tincome-lincome.csv:
-    kind: mirror-orphan
-    note: wasm's inequality reads intro's copy by URL
-  lecture-wasm:lectures/_static/lecture_specific/simple_linear_regression/life-expectancy-vs-gdp-per-capita.csv:
-    kind: mirror-orphan
-    note: wasm's simple_linear_regression reads intro's copy by URL
   lecture-wasm:lectures/datasets/GDP_per_capita_world_bank.csv:
     kind: mirror-orphan
     note: orphan in intro, mirrored into wasm
