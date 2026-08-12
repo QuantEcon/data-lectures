@@ -1,6 +1,6 @@
 # PLAN — `qeld`, the consumer-side data package
 
-**Status:** design settled, nothing implemented · **Last updated:** 2026-08-10
+**Status:** design settled, nothing implemented · **Last updated:** 2026-08-12
 **Relationship to `PLAN.md`:** that document migrates *bytes* into this repo. This one gives *consumers* a
 stable way to read them. They are independent — the migration completes with or without `qeld` — but the
 call-site convention here replaces repoint rules 5–6 for any lecture that adopts it.
@@ -26,8 +26,10 @@ It exists to solve three concrete problems:
    because the first fails CORS in the browser. That split *is* repoint rules 5–6. `qeld.url()` erases it.
 2. **`pyodide_http.patch_all()` is in every wasm lecture.** Importing `qeld` under emscripten installs the
    transport shim, and those two lines leave the lectures.
-3. **The host cutover.** When `data.quantecon.org` lands (#37, #15), it is one constant in one package
-   rather than an edit in every lecture.
+3. **The backend stays reworkable.** Any future change of host or serving arrangement is one constant in
+   one package rather than an edit in every lecture. This property is now load-bearing rather than
+   incidental: the `data.quantecon.org` cutover it originally anticipated was itself retired in favor of
+   it (D11) — the package, not a branded host, is the stable interface.
 
 **What it is not:** a cache, a fetcher, a loader, a data-version manager, or an integrity client. See §3.1.
 
@@ -37,7 +39,8 @@ It exists to solve three concrete problems:
 
 D1–D5 were taken 2026-08-10 against the original design report. D2, D3 and D5 were **revised the same day**
 in a working session that re-scoped the package from fetch-and-cache to URL-resolver; D1 and D4 stand
-unchanged. D6–D10 are new.
+unchanged. D6–D10 are new. D11 was taken 2026-08-12 and reaches outside the package: it retires the
+`data.quantecon.org` plan this document previously deferred to.
 
 | # | decision | status |
 |---|---|---|
@@ -51,6 +54,7 @@ unchanged. D6–D10 are new.
 | **D8** | **Data format: tier 1 binds at intake, tier 2 is a forward-looking preference** | new — §4.2 |
 | **D9** | **Integrity lives in CI, not at the call site** | new — §6 |
 | **D10** | **Rollout is ordered by win, not by migration track** | new — §7 |
+| **D11** | **`qeld` replaces the host cutover: `data.quantecon.org` is deferred indefinitely, and the base URL stays on the raw repo forms** | new — §2.2 |
 
 **The scoping principle throughout:** ship the minimum; add sophistication as demand requires.
 
@@ -68,6 +72,42 @@ on inspection, and the reasoning is recorded here so it is not re-proposed:
 
 **What `<2` protects, and therefore what the major version means:** catalog keys are append-only, and a
 key's meaning never changes within a major version.
+
+### 2.2 D11 — the package replaces the custom domain (2026-08-12)
+
+The programme carried two candidate stable interfaces without ever choosing between them: a branded host
+(`data.quantecon.org/lectures/<file>` — PLAN Track Y, #37, #15) and this package. **Decision: invest in
+`qeld`; defer the domain indefinitely.** Taken by the maintainer 2026-08-12; the recorded reasons:
+
+1. **Tidier lectures.** A dataset lookup reads better than a URL literal — and the URL is still one
+   `print(url)` away for any reader who wants it, since `url()` returns a plain string.
+2. **Backend freedom.** The serving arrangement can be reworked as project needs evolve behind one
+   constant interface point in the lectures. A branded host offers the same indirection only for host
+   moves; the package's indirection covers key naming, transport, and context too.
+3. **More than a URL.** `info()` puts provenance, licence and citation metadata at the call site —
+   something no URL scheme can offer.
+4. **No forever-promise.** A branded public data host must be served at that name indefinitely, and #35
+   makes its licensing review a gate on promoting it. The package makes no such promise: it points at
+   whatever the repo already serves, so the #35 promotion gate simply never comes due unless a public
+   host is someday established after all.
+
+It is not an effort trade — #37 is two DNS/settings actions while Q3 "is not a weekend" — it is a
+commitment trade, and the technical ground is already level: the raw forms and the Pages default URL both
+serve `access-control-allow-origin: *` on a direct 200, so nothing consumer-facing waits on a domain.
+
+**The operational consequence — the base URL stays on the raw repo forms** (`raw.githubusercontent.com`
+under Pyodide, the 302-tolerant `github.com/…/raw/` form elsewhere) **and must never move to
+`quantecon.github.io`.** The moment a custom domain is attached to a Pages site, GitHub starts
+301-redirecting the `github.io` form to it — re-creating for already-shipped wheels exactly the
+redirect-CORS failure §3.2 exists to avoid. Raw URLs are untouched by Pages domain changes, so on a
+raw-link base the deferral is reversible at any time for one minor release. What is accepted in exchange:
+emitted and leaked URLs name `QuantEcon/data-lectures@main`, with GitHub's rename redirects as the only
+safety net — the same exposure every lecture URL has today.
+
+Consequences recorded elsewhere in this document and the repo: the "interim" URL forms are **standing,
+not interim**; #15's final-URL sweep is superseded by Q6–Q7 adoption; `migration.yml`'s `final` status is
+redefined (Q1); §8.7's note that #37 "races this work" is retracted; PLAN.md Track Y is re-scoped to this
+plan.
 
 ---
 
@@ -94,7 +134,9 @@ everywhere. A design where context changes *what you get* produces "works in my 
 Exactly two jobs:
 
 1. **URL form** — `raw.githubusercontent.com` under Pyodide (the `github.com/…/raw/` form 302s and fails
-   CORS); the 302-tolerant form elsewhere; `data.quantecon.org` for both after #37.
+   CORS); the 302-tolerant form elsewhere. These are the standing forms, not interim ones: the
+   single-host collapse a custom domain would have offered was declined in D11, and the base never moves
+   to `quantecon.github.io` (redirect trap, §2.2).
 2. **Browser transport shim** — under emscripten, `import qeld` installs the fetch shim, because the right
    URL is still not enough: `pd.read_excel(url)` goes through urllib, which fails in the browser.
 
@@ -222,8 +264,8 @@ convertible today** and the rest are blocked on the format decision (§8.3, §8.
 shortenings of literals adopted in the *recent repoint PRs*; a plain one-line literal would win those back
 without a package. 32 are neutral or excluded.
 
-**The case rests on:** those ~10 structural sites, the wasm shim, the host-cutover property, and group D's
-portability bugs. **Not** on the read-site tally. Anyone re-reading this plan should weigh it on that basis.
+**The case rests on:** those ~10 structural sites, the wasm shim, the backend-rework property (§1, now
+load-bearing per D11), and group D's portability bugs. **Not** on the read-site tally. Anyone re-reading this plan should weigh it on that basis.
 
 The best diff in the corpus is `lecture-python-advanced.myst/lectures/hansen_jagannathan_1991.md:182`, where
 `qeld` deletes a hand-rolled version of itself — a 3-fragment URL literal, a local-vs-remote branch and a
@@ -290,7 +332,7 @@ or every migrated read classifies `local-path` and the dashboard inverts.
 
 | phase | work | gate |
 |---|---|---|
-| **Q1 — Audit first** | `build_audit.py` learns `qeld.url('X')` → pattern `qeld`, counted migrated **and terminal**. For `pattern == 'qeld'`, assert the key exists in `lectures/` and is not deprecated — otherwise the qeld path loses every assertion #55/#48/#47 added. `migration.yml`: `final` := canonical-host *or* qeld | `audit.json` `stats` and `problems` unchanged on today's repos (**not** "byte-identical" — the audit stamps `date.today()`) |
+| **Q1 — Audit first** | `build_audit.py` learns `qeld.url('X')` → pattern `qeld`, counted migrated **and terminal**. For `pattern == 'qeld'`, assert the key exists in `lectures/` and is not deprecated — otherwise the qeld path loses every assertion #55/#48/#47 added. `migration.yml`: `final` := every code read via qeld, with §4.1 carve-outs terminal on the direct form (the canonical-host arm was retired with D11) | `audit.json` `stats` and `problems` unchanged on today's repos (**not** "byte-identical" — the audit stamps `date.today()`) |
 | **Q2 — Schema hygiene** | Document `read_as` (used in 6 manifests) and `sheets` (5) in `manifest-schema.yml` — both are in use and neither appears in the file `AGENTS.md` calls "the authoritative, commented field reference". Add `deprecated:` (new, used nowhere yet) since §3.3 warns on it. `shape` is already documented. Delete `then: "iloc[1:]"` from `longprices.xls.yml:70` by moving `iloc[1:]` into the lecture — a post-read transform encoded as a string to evaluate is exactly what D5 excludes | `manifest-schema.yml` covers every field any manifest uses. Needs none of #14's decisions — do not block on it |
 | **Q3 — Package** | `packages/qeld/`: `url()`, `info()`, context detection, advisory catalog. Catalog compiler shares a freshness gate with `CATALOG.md`. Format tier-1 assertion. First release to PyPI via trusted publishing | Offline suite green on every PR: catalog compiles and is fresh; unknown key warns and still returns a URL; URL form correct per detected context; suffix fidelity incl. `.csv.gz`; `info()` fields present. CPython matrix |
 | **Q4 — Live leg** | Post-merge + scheduled job: fetch each served URL, compare to the manifest hash, open an issue on failure | Green on `main`; an induced failure opens an issue |
@@ -361,7 +403,8 @@ intro file also touches zh-cn.**
 - Ask Spencer/Tom what actually retired `qeds` — it is dead as a project but **still installable** (PyPI
   returns 200 for 0.7.0, not yanked), one letter-transposition from `qeld`. Consider reserving
   `quantecon-data` and `qedata` as stubs.
-- `data.quantecon.org` DNS (#37) is the nearest unblocked item and races this work for the same weekend.
+- ~~`data.quantecon.org` DNS (#37) is the nearest unblocked item and races this work for the same
+  weekend.~~ **Retracted 2026-08-12** — D11 defers #37 indefinitely; nothing races this work.
 - Publishing `qeld` does **not** move #35's licensing gate — it rehosts nothing and fetches the same public
   URLs `pandas_panel` reads today. Do not add a release check that fails on `redistribution: restricted`;
   `countries.csv` is restricted and unresolved, so it would block every release from day one.

@@ -649,8 +649,8 @@ def stepper(fname: str, rec: dict, verified: bool) -> str:
         "landed": pr_link(str((rec.get("landed") or {}).get("pr", ""))) +
                   f'<br>{esc((rec.get("landed") or {}).get("date", ""))}',
         "repointed": "<br>".join(pr_link(str(r.get("pr", ""))) for r in rec.get("repoints") or []),
-        "final": ("awaits " + issue_link("QuantEcon/data-lectures#15")) if status != "final"
-                 else esc((rec.get("cutover") or {}).get("date", "")),
+        "final": ("awaits qeld adoption" if status != "final"
+                  else esc((rec.get("cutover") or {}).get("date", ""))),
     }
     steps = ""
     for i, name in enumerate(STATUS_STEPS):
@@ -667,7 +667,7 @@ def stepper(fname: str, rec: dict, verified: bool) -> str:
 def milestones(audit: dict) -> str:
     """The migration programme as reader-facing milestones — completed waves
     (derived from migration.yml records), upcoming waves, the broad sweep, and
-    the final-URL switch. This section is what lets the rest of the dashboard
+    the qeld adoption milestone. This section is what lets the rest of the dashboard
     stay plan-agnostic: wave codes like P3 mean something only because they
     are presented here."""
     mig = audit["migration"] or {}
@@ -716,11 +716,13 @@ process for each kind of data. Mechanical from there: one data PR here, one swit
 per consuming lecture repo.</p>
 </div>
 <div class="finding">
-<b>○ Final URLs — serve everything from <code>data.quantecon.org</code></b>
-<p>Migrated lectures currently read this repository's GitHub URL. Once the custom domain
-is live, every migrated dataset switches to its permanent
-<code>data.quantecon.org/lectures/…</code> address in a single sweep
-({issue_link("QuantEcon/data-lectures#15")}). No dataset has made this step yet.</p>
+<b>○ Stable interface — lecture code reads <code>qeld.url('&lt;file&gt;')</code></b>
+<p>Migrated lectures currently read this repository's GitHub URL directly. Once the
+<code>qeld</code> package ships, each code read is switched to a <code>qeld.url()</code>
+call that resolves to the same URL — one constant interface point that survives any
+future backend rework. (This milestone replaced the <code>data.quantecon.org</code>
+URL sweep on 2026-08-12 — {issue_link("QuantEcon/data-lectures#37")},
+{issue_link("QuantEcon/data-lectures#15")}.) No dataset has made this step yet.</p>
 </div>
 """
     return f"""
@@ -791,7 +793,7 @@ claim a migration that didn't happen.</p>
 <b>landed</b> — the file and its metadata are merged into the central repo; lectures unchanged.
 <b>repointed</b> — every consuming lecture now reads the central copy (shown as
 <em>✓ migrated</em> in the table below).
-<b>final</b> — the lecture reads the permanent <code>data.quantecon.org</code> address
+<b>final</b> — every code read resolves through the <code>qeld</code> package
 (the last milestone below).</p>
 {consistency}
 {series_manifest(audit)}
