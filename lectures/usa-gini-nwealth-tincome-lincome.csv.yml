@@ -115,12 +115,20 @@ schema:
   date_range: {start: 1950, end: 2016}
   known_nulls: {}               # none — the builder drops nulls before computing
 
-consumers: []
-  # Empty at `landed`, populated when wave A4's repoints merge. FIVE
-  # reference-holders, not the two the audit can see: lecture-python-intro,
-  # lecture-wasm, lecture-intro.zh-cn, QuantEcon/test-actions-lecture-intro,
-  # and the generated lecture-python-intro.notebooks mirror.
-
+consumers:
+  # All four repointed 2026-08-12. lecture-intro.zh-cn and the canary are
+  # outside the audit's SCAN_REPOS, so they are recorded here or nowhere.
+  # The generated lecture-python-intro.notebooks mirror is a fifth
+  # reference-holder; it self-heals after a publish tag and is not a repo
+  # anyone repoints, so it is deliberately not listed.
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/inequality.md
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/inequality.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/inequality.md
+  - repo: QuantEcon/test-actions-lecture-intro
+    file: lectures/inequality.md
 builder: builders/usa-gini-nwealth-tincome-lincome.ipynb
 # `committed-frozen`, not `committed`, on three independent grounds — any one
 # of which would rule out `committed`:
