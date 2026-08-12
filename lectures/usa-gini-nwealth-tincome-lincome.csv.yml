@@ -1,0 +1,152 @@
+# Manifest for usa-gini-nwealth-tincome-lincome.csv — migrated out of
+# QuantEcon/lecture-python-intro, where it sat at
+# lectures/_static/lecture_specific/inequality/ beside the notebook that built
+# it (PLAN Phase 8, wave A4).
+#
+# This is the SECOND-ORDER dataset in the programme: it is derived from
+# SCF_plus_mini.csv, which lives in this repo and is itself derived from the
+# frozen sources/SCF_plus.dta. Its builder therefore had to wait for the P3
+# fold, which is why it is the last of Track A's CSVs to land.
+
+filename: usa-gini-nwealth-tincome-lincome.csv
+title: US Gini coefficients — net wealth, total income and labour income, 1950-2016
+description: >
+  Population-weighted Gini coefficients for three SCF+ variables, one row per
+  survey year. The inequality lecture plots the three series together to
+  contrast wealth inequality with income inequality; the committed notebook
+  beside it is offered to readers as "this notebook can be used to compute
+  this information over the full dataset".
+
+# Constructed: the builder expands each household by its survey weight and
+# runs quantecon.gini_coefficient over the resulting population, per year and
+# per variable.
+class: constructed
+
+source:
+  name: Derived from SCF_plus_mini.csv (this repo), an extract of the SCF+ panel
+  url: https://github.com/QuantEcon/data-lectures/blob/main/lectures/SCF_plus_mini.csv
+  doi: 10.1086/708815
+  citation: >
+    Computed by QuantEcon from Kuhn, Moritz, Moritz Schularick and Ulrike I.
+    Steins (2020). Income and Wealth Inequality in America, 1949-2016. Journal
+    of Political Economy, 128(9), 3469-3519.
+  note: >
+    The provenance chain is three deep and every link is in this repo:
+    sources/SCF_plus.dta -> builders/generating_mini.md -> lectures/SCF_plus_mini.csv
+    -> builders/usa-gini-nwealth-tincome-lincome.ipynb -> this file. Only the
+    root is un-refetchable; see sources/README.md.
+
+license:
+  name: null
+  url: null
+  # Inherits SCF_plus_mini.csv's position exactly: published replication data
+  # for a JPE article with no locatable deposit record. Crossref registers the
+  # DOI with a null licence and no data relation; DataCite and Harvard
+  # Dataverse return zero; openICPSR and the JPE supplement path are 403.
+  # Established by exhaustion 2026-08-10, not re-litigated here.
+  redistribution: permitted
+  verified: 2026-08-12
+  note: >
+    Twenty aggregate statistics computed by QuantEcon from a licence-silent
+    input. Even on the most restrictive reading of the input's terms, a Gini
+    coefficient per year is a derived summary rather than a redistribution of
+    the underlying microdata — but the input's own record remains the honest
+    limit, and it is registered on QuantEcon/data-lectures#35.
+
+retrieved: null                 # constructed here, not retrieved. The input's
+                                # own `retrieved` is null for the same reason
+                                # (see SCF_plus_mini.csv.yml).
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate): byte-identical to the copy all four consuming
+# repos read today — sha256 bed9074a… against lecture-python-intro @ 0066783,
+# lectures/_static/lecture_specific/inequality/. The wasm, zh-cn and canary
+# copies carry the identical git blob (3ec95a66). Verified 2026-08-12.
+
+integrity:
+  sha256: bed9074a2839eb4aed6b7e86dadd4639247ab2321f15c2491dad72a755795719
+  upstream:
+    # `unverifiable`, and for a sharper reason than its input's: there is no
+    # upstream publication of these numbers to check against, AND the committed
+    # builder cannot reproduce them even in principle. See the note.
+    status: unverifiable
+    date: 2026-08-12
+    against: null
+    note: >
+      No upstream publishes these coefficients — they are computed here — so
+      the only available check is re-running the builder, and THAT CANNOT
+      REPRODUCE THESE BYTES. The builder shuffles the weight-expanded
+      population with an unseeded `rd.shuffle` before each Gini call.
+      `quantecon.gini_coefficient` is mathematically order-invariant, but it
+      accumulates in a `prange` loop, so a different permutation changes the
+      float64 summation order in the low-order digits; the CSV is written at
+      full repr precision, so two runs differ textually. Measured: the same
+      4,000-element vector re-permuted yields …332055 and …332056.
+
+      The input's own record is the deeper limit: SCF_plus_mini.csv is
+      `unverifiable` against any published deposit, so nothing downstream of it
+      can be better than that.
+
+      One value is worth flagging for the eventual review rather than leaving
+      to be re-discovered: `l_income` at 1965 is 0.7487860020887701, against a
+      0.5159-0.6707 range in every other year. It is in the published bytes and
+      migrates unchanged (rule 4). Whether it is a genuine SCF+ 1965 feature or
+      an artefact is an author-facing question, and the frozen non-deterministic
+      builder means it cannot be settled by re-running.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured with pandas 3.0.5 (the anaconda=2026.07 pin). The 20 years are the
+# SCF triennial survey waves and match SCF_plus_mini.csv's `year.unique()`
+# exactly, in the same order — 1974 is absent upstream, not dropped here.
+
+schema:
+  format: csv
+  columns:
+    - {name: year, dtype: int64, description: "SCF survey year — 20 waves, 1950 to 2016, 1974 absent"}
+    - {name: n_wealth, dtype: float64, description: "Gini coefficient of net wealth, population-weighted (0.7494-0.8343)"}
+    - {name: t_income, dtype: float64, description: "Gini coefficient of total income excluding capital gains (0.4209-0.5541)"}
+    - {name: l_income, dtype: float64, description: "Gini coefficient of labour income (0.5159-0.7488; see the 1965 note above)"}
+  row_count_floor: 20           # frozen extract — exact row count by design
+  date_range: {start: 1950, end: 2016}
+  known_nulls: {}               # none — the builder drops nulls before computing
+
+consumers: []
+  # Empty at `landed`, populated when wave A4's repoints merge. FIVE
+  # reference-holders, not the two the audit can see: lecture-python-intro,
+  # lecture-wasm, lecture-intro.zh-cn, QuantEcon/test-actions-lecture-intro,
+  # and the generated lecture-python-intro.notebooks mirror.
+
+builder: builders/usa-gini-nwealth-tincome-lincome.ipynb
+# `committed-frozen`, not `committed`, on three independent grounds — any one
+# of which would rule out `committed`:
+#
+#   1. It has no validate stage. `committed` asserts a runnable four-stage
+#      builder (fetch -> pre-process -> validate -> write); this notebook has
+#      fetch, a one-line `dropna()` and write.
+#   2. It does not run today. Line 88 is `y = np.asarray(y)`, and under pandas
+#      3 copy-on-write that array is read-only, so `rd.shuffle(y)` at line 90
+#      raises `ValueError: assignment destination is read-only`. The identical
+#      idiom in the LECTURE was fixed to `.copy()` by
+#      QuantEcon/lecture-python-intro#776; the notebook never received it,
+#      because `lectures/_config.yml` excludes `_static/*` from execution so
+#      nothing alerts. Tracked in that repo — this copy stays verbatim.
+#   3. It is non-deterministic (see integrity.upstream), so even a fixed
+#      version could not regenerate these bytes.
+#
+# `unrecovered` would be a lie: the builder is here, and was here all along in
+# four repos. This is also the first dataset to answer the open sub-question in
+# QuantEcon/data-lectures#14 — a notebook kept as provenance takes
+# `committed-frozen` rather than a new `notebook` status, matching the two
+# existing frozen builders (webscrape_forbes.ipynb, generating_mini.md).
+#
+# Committed VERBATIM, as required of a frozen builder: byte-identical to
+# lecture-python-intro's `_static/lecture_specific/inequality/data.ipynb`
+# (sha256 0b48c97b…), including its original author's stale execution outputs.
+# Its input URL already reads this repo — repointed by
+# QuantEcon/lecture-python-intro#832 during the P3 fold, before the freeze.
+builder_status: committed-frozen

@@ -42,14 +42,23 @@ re-fetched** — see `AGENTS.md`.
 | `business_cycle.py` | `business_cycle_data.csv`, `business_cycle_info.md`, `business_cycle_metadata.md` | run by hand, no validate stage yet (PLAN Phase 5); its three outputs are the repo's only unmanifested files |
 | `webscrape_forbes.ipynb` | `forbes-global2000.csv`, `forbes-billionaires.csv` | **committed-frozen** — an undocumented Forbes API, a spoofed user-agent and hardcoded GDPR consent cookies. Defects recorded in the two manifests rather than fixed |
 | `generating_mini.md` | `SCF_plus_mini.csv`, `SCF_plus_mini_no_weights.csv` | **committed-frozen** — its `to_csv` calls are commented out upstream and stay that way. As written it still fetches the `high_dim_data` URL; that URL is historical, and the input is now committed at `sources/SCF_plus.dta`. See `sources/README.md` |
+| `usa-gini-nwealth-tincome-lincome.ipynb` | `usa-gini-nwealth-tincome-lincome.csv` | **committed-frozen** — three independent reasons, any one sufficient: no validate stage; it raises under the pinned pandas 3 (`np.asarray` of a Series is read-only under copy-on-write, so `rd.shuffle` fails — the lecture got the `.copy()` fix in QuantEcon/lecture-python-intro#776, this notebook did not); and it is non-deterministic, so it cannot reproduce its own bytes. It is also the only builder here whose input is **another file in this repo** |
 
-Both frozen builders keep their upstream `high_dim_data` filenames rather than
-being renamed to their set stems (`forbes`, `SCF_plus_mini`), which preserves
-the textual link to that repo's history. Permitted by the rule above — what CI
-asserts is that the path exists.
+The two `high_dim_data` builders keep their upstream filenames rather than being
+renamed to their set stems (`forbes`, `SCF_plus_mini`), which preserves the
+textual link to that repo's history. Permitted by the rule above — what CI
+asserts is that the path exists. `usa-gini-nwealth-tincome-lincome.ipynb` takes
+the opposite choice deliberately: its upstream name was `data.ipynb`, which is
+meaningless in a flat directory, so it is renamed to its output stem.
 
-**This listing is the coverage report.** The repo has 17 `constructed` datasets
-and 9 builders; the difference is the Phase 9 recovery backlog, carried as
+**A frozen builder is committed verbatim and not edited.** That is what makes it
+provenance rather than code, and it is why the pandas-3 defect above is recorded
+here instead of patched — fixing it would mean this file is no longer the thing
+that produced those bytes. The fix belongs in `lecture-python-intro`, which still
+serves that notebook to readers.
+
+**This listing is the coverage report.** The repo has 18 `constructed` datasets
+and 10 builders; the difference is the Phase 9 recovery backlog, carried as
 `builder_status: unrecovered` in each manifest rather than hidden by
 reclassifying the file as `verbatim`.
 

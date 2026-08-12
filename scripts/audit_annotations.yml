@@ -87,10 +87,6 @@ datasets:
     description: FRED-derived snapshot
     provenance: constructed-committed
     note: make_data.py + README beside the data
-  life-expectancy-vs-gdp-per-capita.csv:
-    description: Our World in Data, life expectancy vs GDP per capita
-    provenance: verbatim
-    note: OWID export, as downloaded
   longprices.xls:
     description: Long-run price levels (Sargent–Velde)
     provenance: author-assembled
@@ -114,10 +110,6 @@ datasets:
   test_pwt.csv:
     description: Penn World Table 7.0 extract
     provenance: author-assembled
-  usa-gini-nwealth-tincome-lincome.csv:
-    description: US Gini coefficients, wealth & income (long series)
-    provenance: constructed-committed
-    note: built by inequality/data.ipynb (committed beside it) from SCF_plus_mini
 
 # ---------------------------------------------------------------------------
 # Live-API uses, keyed repo:lecture:access. `pedagogy` says WHY the call is
