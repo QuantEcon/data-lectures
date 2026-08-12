@@ -14,9 +14,13 @@
 # Lifecycle (status):
 #   pending    identified for migration; nothing landed here yet
 #   landed     file + manifest merged in data-lectures; consumers unchanged
-#   repointed  every consumer reads this repo's interim raw URL
-#   final      every consumer reads https://data.quantecon.org/lectures/…
-#              (gated on the Phase 4 DNS work — data-lectures#15)
+#   repointed  every consumer reads this repo's raw URL directly
+#   final      every consumer code read resolves through qeld.url(), with the
+#              PLAN-QELD-PACKAGE.md section 4.1 carve-outs terminal on the direct
+#              form. (Redefined 2026-08-12, D11 — this status previously meant the
+#              data.quantecon.org address, a cutover retired in favor of qeld;
+#              see data-lectures#37 and #15. The audit learns the qeld pattern
+#              in Q1, before any consumer adopts it.)
 
 datasets:
   lingcod_msy_recovery.csv:

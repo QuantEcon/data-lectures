@@ -29,7 +29,9 @@ REPO = Path(__file__).resolve().parent.parent
 LECTURES = REPO / "lectures"
 OUT = REPO / "CATALOG.md"
 
-# Interim URL form (AGENTS.md); swaps to data.quantecon.org/lectures/ at Phase 4.
+# The standing direct URL form (AGENTS.md). Catalog links are navigations, so the
+# 302-tolerant form is fine; the data.quantecon.org swap was retired 2026-08-12
+# in favor of qeld (PLAN-QELD-PACKAGE.md D11).
 RAW = "https://github.com/QuantEcon/data-lectures/raw/main/lectures"
 
 
