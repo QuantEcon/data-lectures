@@ -72,9 +72,14 @@ datasets:
     description: 100-node weighted digraph for the shortest-path problem
     provenance: toy
     note: >
-      maintained as %%file blocks in intro, dp and jax; lecture-wasm instead
-      fetches intro's committed copy by URL (requests.get), making that copy
-      load-bearing — it was merely "shadowed" in the 2026-07-15 audit
+      maintained as %%file blocks in intro, dp, jax and (since
+      QuantEcon/lecture-wasm#63) lecture-wasm — every consumer now embeds the
+      data in its own lecture, so no repo reads another's copy. wasm used to
+      fetch intro's committed copy by URL, which made that copy load-bearing;
+      with that read gone graph.txt no longer appears as a scanned dataset at
+      all. Two of the four repos also commit a copy the %%file cell overwrites
+      before reading (intro, dp) — those are shadowed; jax and wasm commit no
+      copy at all, which is the cleaner shape
   hansen_jagannathan_1991_data.json:
     description: Hansen–Jagannathan (1991) asset-returns bundle
     provenance: constructed-lost
@@ -277,6 +282,13 @@ committed_unreferenced:
   lecture-python.myst:lectures/web_graph_data.txt:
     kind: shadowed
     note: shadowed duplicate at lectures/ root
+  lecture-python-intro:lectures/graph.txt:
+    kind: shadowed
+    note: >
+      short_path regenerates it via %%file before reading it, so the committed
+      bytes are never consumed — the build prints "Overwriting graph.txt". It
+      became an orphan when QuantEcon/lecture-wasm#63 removed the only URL read
+      of it in the organisation; deletable as Track X
   lecture-dp:lectures/graph.txt:
     kind: shadowed
     note: short_path regenerates it via %%file
@@ -307,9 +319,6 @@ committed_unreferenced:
   lecture-dp:lectures/_static/lecture_specific/pandas_panel/realwage.csv:
     kind: orphan
     note: inherited copy; the consuming lectures live in other repos and now read data-lectures
-  lecture-wasm:lectures/graph.txt:
-    kind: mirror-orphan
-    note: wasm's short_path fetches intro's committed graph.txt by URL, not this copy
   lecture-wasm:lectures/_static/lecture_specific/inequality/usa-gini-nwealth-tincome-lincome.csv:
     kind: mirror-orphan
     note: wasm's inequality reads intro's copy by URL
