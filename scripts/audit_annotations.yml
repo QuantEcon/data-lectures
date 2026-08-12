@@ -76,8 +76,10 @@ datasets:
       QuantEcon/lecture-wasm#63) lecture-wasm — every consumer now embeds the
       data in its own lecture, so no repo reads another's copy. wasm used to
       fetch intro's committed copy by URL, which made that copy load-bearing;
-      with that read gone the file is genuinely shadowed everywhere and
-      graph.txt no longer appears as a scanned dataset at all
+      with that read gone graph.txt no longer appears as a scanned dataset at
+      all. Two of the four repos also commit a copy the %%file cell overwrites
+      before reading (intro, dp) — those are shadowed; jax and wasm commit no
+      copy at all, which is the cleaner shape
   hansen_jagannathan_1991_data.json:
     description: Hansen–Jagannathan (1991) asset-returns bundle
     provenance: constructed-lost
