@@ -213,13 +213,15 @@ The remaining work decomposes by **consuming series** rather than by hosting pat
 
 | Track | Datasets | Coupling | Blocked on |
 | --- | --- | --- | --- |
-| **A — `intro` + `wasm`** | 17, of which **3 remain**: `life-expectancy…`, `usa-gini…`, `graph.txt` (the 8 intro statics and the 6 `high_dim_data` files are done) | **paired — repoint together, always**; `lecture-intro.zh-cn` and `test-actions-lecture-intro` are third and fourth consumers of the two CSVs | nothing — `usa-gini`'s SCF dependency was discharged by P3 |
+| **A — `intro` + `wasm`** | 17, **all done**. The last two CSVs landed as wave A4 ([#74](https://github.com/QuantEcon/data-lectures/pull/74), flipped in [#75](https://github.com/QuantEcon/data-lectures/pull/75)); `graph.txt` was never a migration — see below | — | — |
 | **B — `python.myst`** | 7: `maketable1/2/4.dta`, `fp.dta`, `hansen_singleton_1982/1983_data.csv`, `NEWQDATA.csv` | none | nothing |
 | **C — `advanced.myst`** | 6: `dataBHS.mat`, `acs_data_summary.csv`, `bbh` ×2, `fred_data.csv`, `hansen_jagannathan_1991_data.json` | none | nothing (builder recovery is in-wave work, not a gate) |
 | **D — `programming`** | 1: `test_pwt.csv` | none | nothing — a single-PR track |
 | **E — dynamic / live-API** | the UNRATE twin, then the 15 incidental API lectures | wasm is the forcing customer | [#14](https://github.com/QuantEcon/data-lectures/issues/14) schema decisions, [#26](https://github.com/QuantEcon/data-lectures/issues/26) fetch layer |
 | **X — orphan sweep** | 26 committed orphans across 6 repos — dp 10, programming 5, wasm 5, intro 3, python.myst 2, `continuous_time_mcs` 1 | per repo | that repo's repoints landing first |
 | **Y — consumer interface (`qeld`)** | the `qeld` package, Q1–Q7 of `PLAN-QELD-PACKAGE.md` — audit support, the package, pilots, then adoption by win; QEP graduation stays | — | nothing — re-scoped 2026-08-12 (D11): the DNS → custom domain → URL-sweep sequence this row used to carry is retired |
+
+**`graph.txt` was closed out as a non-migration (2026-08-12).** It is synthetic teaching data — `provenance: toy`, null in every real provenance field — and the shortest-path exercise teaches its format by quoting the first line, so the data has to stay visible on the page. Hosting it here would have put a toy in a registry that exists to carry provenance. Instead `lecture-wasm` stopped fetching intro's committed copy over the network and embeds it with `%%file` like every sibling ([QuantEcon/lecture-wasm#63](https://github.com/QuantEcon/lecture-wasm/pull/63)), which retired the last cross-repo read of that blob anywhere in the organisation. `graph.txt` consequently no longer appears as a scanned dataset at all: it is `embedded` in four repos and a shadowed orphan in the rest. Intro's committed copy is now deletable as Track X — but the same blob sits in 8 repos and is regenerated at 17 `%%file` sites, including archived `.rst` ancestors that `gh search code` cannot see, so that deletion needs its own per-repo reader sweep rather than an org-wide sweep.
 
 `lecture-dp`, `lecture-jax` and `continuous_time_mcs` are **not data consumers** — dp's 10 committed files are inherited orphans, jax embeds `graph.txt` via `%%file`, and continuous_time_mcs has one orphan scratch file. They appear only in Track X.
 
