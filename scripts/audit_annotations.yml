@@ -71,14 +71,6 @@ datasets:
     description: Hansen–Jagannathan (1991) asset-returns bundle
     provenance: constructed-lost
     note: lecture documents 3 sources (FRED yields deflated by CPIAUCSL, …); no build script
-  hansen_singleton_1982_data.csv:
-    description: FRED-derived consumption/returns snapshot
-    provenance: constructed-committed
-    note: make_data.py + README beside the data (exact series and sample documented)
-  hansen_singleton_1983_data.csv:
-    description: FRED-derived snapshot
-    provenance: constructed-committed
-    note: make_data.py + README beside the data
   longprices.xls:
     description: Long-run price levels (Sargent–Velde)
     provenance: author-assembled

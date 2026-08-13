@@ -653,6 +653,49 @@ datasets:
         date: 2026-08-13
     cutover: null
 
+  # --------------------------------------------------------------------------
+  # Wave B2' — the lecture-python.myst block, part two (Track B). Two files,
+  # two lectures, one URL form.
+  #
+  # The first wave in this migration to move BUILDERS as well as data. Both
+  # were named make_data.py beside their output and collide in the flat
+  # builders/ tree, so each takes its dataset's stem. That rename is what makes
+  # this wave more coupled than B1' was: each lecture carries FIVE references,
+  # not one — a prose link to the builder, three lines of a concatenated data
+  # URL, and the builder's path named again in a docstring inside the data
+  # cell. Only the URL is a code read; the other two break silently.
+  #
+  # Both carry `prior_pattern: own-repo`. Consumers are recorded at the flip,
+  # and include lecture-python.zh-cn, which is OUTSIDE the audit's SCAN_REPOS
+  # and so is recorded in the manifests or nowhere. lecture-stats holds no
+  # reference to either file (swept 2026-08-13, exit 1) — unlike B1', it is not
+  # a consumer here.
+  #
+  # 1982 is a bitwise strict subset of 1983 on an identical index. Recorded in
+  # both manifests; consolidating them is a rename-class decision, deferred
+  # with the rest under D6.
+  # --------------------------------------------------------------------------
+
+  hansen_singleton_1982_data.csv:
+    pilot: B2
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#82
+      date: 2026-08-13
+    repoints: []
+    cutover: null
+
+  hansen_singleton_1983_data.csv:
+    pilot: B2
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#82
+      date: 2026-08-13
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people

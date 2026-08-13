@@ -11,7 +11,8 @@ The defining property is **un-refetchability**, not size.
 
 The normal case for a builder is to fetch from its third-party upstream at run
 time, and that is what most of them do: `jse.amstat.org`, `earthquake.usgs.gov`,
-`wwwn.cdc.gov`, `stat.go.jp`, `openfootball`. **Six of the seven `committed`
+`wwwn.cdc.gov`, `stat.go.jp`, `openfootball`, `fred.stlouisfed.org`,
+`mba.tuck.dartmouth.edu`. **Eight of the nine `committed`
 builders in this repo fetch at run time and have no committed input**; the
 exception is `NEWQDATA.py`, whose upstream is not published anywhere. So
 `sources/` is not "where builder inputs live" as a general rule — it is the

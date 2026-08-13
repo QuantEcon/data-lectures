@@ -1,0 +1,188 @@
+# Manifest for hansen_singleton_1982_data.csv — migrated out of
+# QuantEcon/lecture-python.myst, where it sat at
+# lectures/_static/lecture_specific/hansen_singleton_1982/ and was read by URL
+# (PLAN Phase 8, wave B2').
+#
+# READ THE `source` NOTE FIRST. These are NOT Hansen and Singleton's data. The
+# paper is the specification being replicated; the bytes are a modern
+# reconstruction from open sources, and the return leg is a deliberate
+# substitute for the CRSP series the authors used. A reader who takes this file
+# for the paper's dataset will misread every number in it.
+#
+# Its two columns are BITWISE IDENTICAL to the same-named columns of
+# hansen_singleton_1983_data.csv on an identical index — that file is a strict
+# superset of this one (verified 2026-08-13, max abs diff 0.0). They are kept
+# as two files because they serve two lectures, which is the status quo this
+# migration preserves; consolidating them is a rename-class decision and is
+# deferred with the rest (D6).
+
+filename: hansen_singleton_1982_data.csv
+title: Hansen-Singleton (1982) replication — monthly US gross real market return and consumption growth, 1959-1978
+description: >
+  The two monthly series the `hansen_singleton_1982` lecture estimates its
+  Euler equation on, over Hansen and Singleton's 1959:2-1978:12 sample: the
+  gross real return on the aggregate stock market, and gross growth of real
+  per-capita nondurable consumption. Both are gross ratios near 1, not
+  percentages. Reconstructed from FRED and the Ken French data library rather
+  than taken from the paper — see the source note.
+
+# Constructed: every value is computed from upstream series by
+# builders/hansen_singleton_1982_data.py. Nothing here is republished as
+# distributed.
+class: constructed
+
+source:
+  name: FRED (BEA and BLS monthly series) and the Ken French data library (F-F_Research_Data_Factors)
+  # The Ken French library is the single downloadable FILE the builder
+  # retrieves; the three FRED inputs are separate series, enumerated below.
+  url: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html
+  doi: null                     # neither provider issues one for these series
+  version: >
+    Ken French research factors, zip header "This file was created using the
+    202606 CRSP database. The 1-month TBill rate data until 202405 are from
+    Ibbotson Associates" — read 2026-08-13. FRED series are unversioned and
+    revisable; the 1959-1978 window used here has been stable across every
+    check so far (see integrity.upstream).
+  series: >
+    FRED CNP16OV (civilian noninstitutional population 16+, thousands of
+    persons, BLS Employment Situation);
+    FRED DNDGRA3M086SBEA (real PCE, nondurable goods, chain-type quantity
+    index, 2017=100, SA, BEA Personal Income and Outlays);
+    FRED DNDGRG3M086SBEA (PCE, nondurable goods, chain-type price index,
+    2017=100, SA, BEA);
+    Ken French F-F_Research_Data_Factors, monthly `Mkt-RF` and `RF`.
+  citation: >
+    Constructed by QuantEcon from U.S. Bureau of Economic Analysis and U.S.
+    Bureau of Labor Statistics series retrieved via FRED (Federal Reserve Bank
+    of St. Louis), and from the Fama-French research factors published by
+    Kenneth R. French, Tuck School of Business, Dartmouth College. Replicates
+    the ND+VWR specification of Hansen, Lars Peter, and Kenneth J. Singleton.
+    1982. "Generalized Instrumental Variables Estimation of Nonlinear Rational
+    Expectations Models." Econometrica 50 (5): 1269-1286.
+    doi:10.2307/1911873.
+  note: >
+    NOT the authors' data, and not a faithful copy of it. Hansen and Singleton
+    used CRSP equally- and value-weighted NYSE returns paired with NIPA
+    nondurables consumption. CRSP is a paid subscription product, so the market
+    leg here substitutes the Ken French value-weighted research factor
+    (`Mkt-RF + RF`), which is close to but not the same series — which is why
+    the lecture states plainly that it matches the paper qualitatively and not
+    exactly. The consumption leg uses FRED's modern BEA chain-type indices, not
+    the 1970s NIPA vintage the authors had. The paper is the specification
+    being replicated; the bytes are ours.
+
+license:
+  name: null
+  url: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution"). Split answer across the two providers, and only one half
+  # has a licence to name.
+  redistribution: permitted
+  verified: 2026-08-13
+  note: >
+    The three FRED inputs are U.S. federal statistics — BEA chain-type indices
+    and the BLS civilian noninstitutional population — which are U.S.
+    Government works in the public domain; FRED is the delivery channel, not the
+    rights holder, and these are not among the third-party series FRED re-serves
+    under restriction. The Ken French data library states NO licence and NO
+    redistribution terms: the page carries only "Copyright (c) Eugene F. Fama
+    and Kenneth R. French" (checked 2026-08-13), and the factors are themselves
+    computed from the proprietary CRSP database with the pre-2024 T-bill leg
+    from Ibbotson Associates. `permitted` therefore rests on what is actually
+    published here rather than on a grant: not the library file, but two of its
+    columns summed, converted to a gross ratio and deflated by a FRED price
+    index over a fixed 1959-1978 window — from which the underlying factor
+    values cannot be recovered without the deflator. An inherited exposure,
+    served publicly from lecture-python.myst since 2026-06-26. No permission has
+    been sought from either provider. Registered for licence review on
+    QuantEcon/data-lectures#35.
+
+retrieved: null                 # the builder fetches live and no retrieval date
+                                # was recorded upstream; not reconstructed from
+                                # git history (AGENTS.md). It costs nothing
+                                # here — a re-run on 2026-08-13 reproduced these
+                                # bytes exactly, so the vintage is pinned by
+                                # content rather than by a date. For context and
+                                # NOT as a retrieval date: the bytes and their
+                                # builder landed in lecture-python.myst together
+                                # in a3e8443 (#926), 2026-06-26.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy the lecture reads today — sha256 3e9d4f37…
+# against lecture-python.myst @ d2a5b21,
+# lectures/_static/lecture_specific/hansen_singleton_1982/. The
+# lecture-python.zh-cn copy carries the identical git blob. Verified
+# 2026-08-13; a repoint to this file therefore cannot change a figure.
+
+integrity:
+  sha256: 3e9d4f37c31dbcab26624418f3eeb630d57cc362bd162fa5501cfd992225609b
+  upstream:
+    # `verified` in the sense AGENTS.md defines for a constructed dataset —
+    # "re-run the builder and compare". Run twice on the date below: once
+    # unmodified as it stood in lecture-python.myst, and once after the
+    # migration edits (rename, new write target, added validate()), both
+    # reproducing this file byte for byte. The second run is what licenses the
+    # `committed` status below rather than `committed-frozen`.
+    status: verified
+    date: 2026-08-13
+    against: builders/hansen_singleton_1982_data.py
+    note: >
+      Both live upstreams answered and neither had revised the 1959-1978
+      window. The builder's own docstring in lecture-python.myst warned that
+      "re-running this script may produce small differences from the committed
+      data"; that is a real risk for a FRED-sourced series and it has not
+      materialised — the migrated builder records what was measured instead of
+      repeating the hedge. A future divergence is what validate() and this
+      sha256 exist to catch.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-13, and asserted by the builder's
+# validate() stage on every run.
+
+schema:
+  format: csv
+  columns:
+    - {name: date, dtype: datetime64, description: "month-end stamp, 1959-02-28 to 1978-12-31 on an unbroken monthly grid — the CSV index column"}
+    - {name: gross_real_return, dtype: float64, description: "gross real monthly return on the aggregate stock market: (1 + (Mkt-RF + RF)/100) divided by the gross monthly inflation of the PCE nondurables price deflator. A ratio near 1 (observed 0.865-1.159), not a percentage and not a net return"}
+    - {name: gross_cons_growth, dtype: float64, description: "gross monthly growth of real per-capita nondurable consumption — the ratio of consecutive months of (DNDGRA3M086SBEA / CNP16OV). Observed 0.967-1.033"}
+  row_count_floor: 239          # exact by design, not a floor with headroom:
+                                # the sample is the paper's 1959:2-1978:12 and
+                                # does not grow. validate() asserts equality.
+  date_range: {start: 1959-02-28, end: 1978-12-31}
+  known_nulls: {}               # genuinely none — a complete monthly panel
+
+# The gross monthly inflation of the nondurables deflator is used to deflate the
+# nominal return but is NOT a column here. hansen_singleton_1983_data.csv
+# carries it, along with the per-capita consumption level and the T-bill leg.
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# Empty at landing and filled at the flip, per the B1' convention: no lecture
+# reads this file from here yet. Two will —
+# lecture-python.myst/lectures/hansen_singleton_1982.md and its
+# lecture-python.zh-cn twin. zh-cn is outside the audit's SCAN_REPOS, so it is
+# recorded here or nowhere. The generated lecture-python.notebooks mirror is a
+# third reference-holder; it self-heals after a publish tag and is not a repo
+# anyone repoints, so it will deliberately not be listed (wave A4 precedent).
+#
+# Both reads build the URL by string concatenation across three source lines and
+# must be COLLAPSED at the repoint rather than patched: editing the stem line
+# alone leaves the filename appended to a path that no longer exists, since the
+# flat published tree has no _static/lecture_specific/<lecture>/ segment.
+# Note for any future sweep: a line-based grep for the whole old URL returns a
+# confident ZERO against the wrapped form. Grep the filename separately.
+#
+# Each lecture ALSO carries two references to the BUILDER — a prose link, and
+# the path named again in a docstring inside the data cell. Neither is a code
+# read; both break silently when the builder moves here.
+consumers: []
+
+builder: builders/hansen_singleton_1982_data.py
+builder_status: committed
