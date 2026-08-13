@@ -67,10 +67,15 @@ here instead of patched — fixing it would mean this file is no longer the thin
 that produced those bytes. The fix belongs in `lecture-python-intro`, which still
 serves that notebook to readers.
 
-**This listing is the coverage report.** The repo has 21 `constructed` datasets
-and 12 builders; the difference is the Phase 9 recovery backlog, carried as
-`builder_status: unrecovered` in each manifest rather than hidden by
-reclassifying the file as `verbatim`.
+**This listing is the coverage report.** The repo has 21 `constructed` datasets.
+Fourteen ship a builder (9 `committed`, 5 `committed-frozen`), carried by **12**
+distinct builder files — fewer than the datasets because `generating_mini.md`
+and `webscrape_forbes.ipynb` each produce two. The remaining **7** have none:
+they carry `builder_status: unrecovered` in their manifests, which is the Phase
+9 recovery backlog, kept visible rather than hidden by reclassifying the file as
+`verbatim`. The table above lists a **13th** builder, `business_cycle.py`, which
+no manifest references — its three outputs are the repo's only unmanifested
+files.
 
 Repo tooling — the audit dashboard and the catalog generator — lives in
 `scripts/` and is not a builder.
