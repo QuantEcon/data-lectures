@@ -224,25 +224,36 @@ schema:
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# Empty at `landed`, populated by the flip PR once the repoints merge.
-# Two reference-holders will be recorded: lecture-python.myst (mle.md:166) and
-# lecture-python.zh-cn (mle.md:178), the latter outside the audit's SCAN_REPOS
-# and so recorded here or nowhere. The generated lecture-python.notebooks
-# mirror self-heals after a publish tag and is deliberately not listed, per the
-# wave A4 precedent.
+# All three repointed 2026-08-13. lecture-python.zh-cn and lecture-stats are
+# both outside the audit's SCAN_REPOS, so they are recorded here or nowhere.
+# The generated lecture-python.notebooks and lecture-stats.notebooks mirrors
+# are further reference-holders; they self-heal after their repo's publish tag
+# and are not repos anyone repoints, so they are deliberately not listed (wave
+# A4 precedent).
 #
-# lecture-stats is NOT listed, and the reason is worth recording because it
-# looks like a consumer: its mle.md code read points at the ARCHIVED
-# QuantEcon/lecture-python blob, a separate byte-identical copy that this
-# migration does not touch. What it DOES share is the prose link — see below.
+# lecture-stats is listed with a caveat, because its relationship is unusual
+# and a future reader will otherwise mis-read it. Its mle.md CODE read points
+# at the ARCHIVED QuantEcon/lecture-python blob — a separate byte-identical
+# copy this migration does not touch — so it does not execute against this
+# file. What it now reads from here is the reader-facing DOWNLOAD LINK. It is
+# recorded because the question `consumers` exists to answer is "what breaks if
+# this file is renamed or deleted", and the answer includes that link.
 #
-# A repoint must also edit PROSE, which no URL rewrite of a code cell touches:
-# mle.md:160 in python.myst, its zh-cn twin at mle.md:172, and the identical
-# line in lecture-stats/lectures/mle.md:132 all link the published-site copy at
+# The prose is the part no code-cell rewrite reaches: mle.md:160 in
+# python.myst, its zh-cn twin at mle.md:172, and lecture-stats mle.md:132 all
+# used to link the published-site copy at
 # python.quantecon.org/_static/lecture_specific/mle/fp.dta. That URL dies when
 # this file is deleted from python.myst and the site republishes, and
-# lecture-stats runs a DAILY sphinx linkcheck that will go red within 24 hours.
-consumers: []
+# lecture-stats runs a DAILY sphinx linkcheck — which is why its repoint landed
+# in this wave rather than being left to break.
+consumers:
+  - repo: QuantEcon/lecture-python.myst
+    file: lectures/mle.md
+  - repo: QuantEcon/lecture-python.zh-cn
+    file: lectures/mle.md
+  # Download link only, not a code read — see the note above.
+  - repo: QuantEcon/lecture-stats
+    file: lectures/mle.md
 
 builder: null
 builder_status: not-applicable      # verbatim — no builder

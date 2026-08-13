@@ -558,37 +558,55 @@ datasets:
 
   maketable1.dta:
     pilot: B1
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#79
       date: 2026-08-13
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#1034
+        date: 2026-08-13
+      - repo: QuantEcon/lecture-python.zh-cn
+        pr: QuantEcon/lecture-python.zh-cn#249
+        date: 2026-08-13
     cutover: null
 
   maketable2.dta:
     pilot: B1
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#79
       date: 2026-08-13
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#1034
+        date: 2026-08-13
+      - repo: QuantEcon/lecture-python.zh-cn
+        pr: QuantEcon/lecture-python.zh-cn#249
+        date: 2026-08-13
     cutover: null
 
   maketable4.dta:
     pilot: B1
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#79
       date: 2026-08-13
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#1034
+        date: 2026-08-13
+      - repo: QuantEcon/lecture-python.zh-cn
+        pr: QuantEcon/lecture-python.zh-cn#249
+        date: 2026-08-13
     cutover: null
 
   fp.dta:
     pilot: B1
-    status: landed
+    status: repointed
     # The one Track B file with a published-SITE prose link
     # (python.quantecon.org/_static/lecture_specific/mle/fp.dta) as well as a
     # code read. That link is also carried by lecture-stats, which runs a daily
@@ -598,12 +616,23 @@ datasets:
     landed:
       pr: QuantEcon/data-lectures#79
       date: 2026-08-13
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#1034
+        date: 2026-08-13
+      - repo: QuantEcon/lecture-python.zh-cn
+        pr: QuantEcon/lecture-python.zh-cn#249
+        date: 2026-08-13
+      # Prose download link only — lecture-stats' code read points at the
+      # archived QuantEcon/lecture-python blob, not at this repo.
+      - repo: QuantEcon/lecture-stats
+        pr: QuantEcon/lecture-stats#61
+        date: 2026-08-13
     cutover: null
 
   NEWQDATA.csv:
     pilot: B1
-    status: landed
+    status: repointed
     # Reclassified at migration from the `verbatim` guess in
     # audit_annotations.yml: it is a container conversion of the authors'
     # NEWQDATA.MAT, and the conversion is recovered and committed at
@@ -615,7 +644,13 @@ datasets:
     landed:
       pr: QuantEcon/data-lectures#79
       date: 2026-08-13
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#1034
+        date: 2026-08-13
+      - repo: QuantEcon/lecture-python.zh-cn
+        pr: QuantEcon/lecture-python.zh-cn#249
+        date: 2026-08-13
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
