@@ -1,0 +1,248 @@
+# Manifest for fp.dta — migrated out of QuantEcon/lecture-python.myst, where it
+# sat at lectures/_static/lecture_specific/mle/ and was read by URL
+# (PLAN Phase 8, wave B1').
+#
+# THE FILENAME IS TWO LETTERS AND SAYS NOTHING — deliberately kept at migration
+# (decision 2026-08-13; a batch rename across the five generic names in
+# .dev/qeld/migration-catalog.md §5.1 is proposed separately, and any rename
+# has to be paired with a prose edit because mle.md names `mle/fp.dta` in
+# text). Until then the title and description below are the only thing that
+# tells a reader what these bytes are.
+#
+# NOT the same dataset as forbes-billionaires.csv in this same tree: that one
+# is a list of PEOPLE (the Forbes person-level ranking, read by heavy_tails in
+# lecture-python-intro); this one is a panel of COUNTRIES. They share neither
+# rows nor columns.
+
+filename: fp.dta
+title: Treisman (2016) Russia's Billionaires — country-year panel of billionaire counts and covariates
+description: >
+  The country-year panel from Daniel Treisman's AER Papers & Proceedings paper
+  "Russia's Billionaires": 219 countries over 1990-2015, pairing Forbes-derived
+  counts and net worth of billionaires per country with World Bank, EFW/KPMG
+  and Worldwide Governance Indicators covariates — GDP, population, market
+  capitalization, top marginal income tax rate, rule of law, natural-resource
+  rents, years in GATT/WTO and privatization proceeds. `mle` uses `numbil0`
+  (billionaires per country, 0 where a country has none in the Forbes list) to
+  motivate a Poisson model, histograms the 2008 cross-section, and replicates
+  the first three columns of the paper's table 1.
+
+# Verbatim: the author's own Stata file, republished exactly as distributed in
+# the AER replication package — same 1,024,085 bytes, same sha256. The package
+# zip was re-downloaded 2026-08-13 and its fp.dta member hashes to the sha256
+# below exactly, so no QuantEcon processing can have been applied.
+class: verbatim
+
+source:
+  name: Replication package for Treisman (2016), "Russia's Billionaires" (AER Papers & Proceedings)
+  url: https://www.aeaweb.org/articles?id=10.1257/aer.p20161068
+  file_url: https://assets.aeaweb.org/asset-server/articles-attachments/aer/data/10605/P2016_1068_data.zip
+  doi: 10.3886/E116312V1           # the replication package, at openICPSR
+  version: >
+    P2016_1068_data — the AEA package id. fp.dta is one of its five files,
+    alongside `aer russian billionaires.do` (5,257 B), billionaires.xlsx
+    (63,880 B), Readme.pdf (313,778 B) and table3data.dta (1,286,094 B).
+  citation: >
+    Treisman, Daniel. 2016. "Russia's Billionaires." American Economic Review
+    106 (5): 236-241. https://doi.org/10.1257/aer.p20161068. Data: Treisman,
+    Daniel. Replication data for: Russia's Billionaires. Nashville, TN:
+    American Economic Association [publisher], 2016. Ann Arbor, MI:
+    Inter-university Consortium for Political and Social Research
+    [distributor], 2019-12-07. https://doi.org/10.3886/E116312V1
+  note: >
+    The package's Readme.pdf documents fp.dta as the "Stata data file
+    containing country year panel", lists every variable, and states "Source of
+    data: Forbes." for the billionaire series; the covariates name their own
+    upstreams in the variable labels (WDI, World Bank Privatization Database,
+    Privatization Barometer, OECD, Boardman and Vining (2012), EFW and KPMG,
+    World Bank Governance Indicators). This file is therefore itself a
+    composite assembled by the author — the citation above is the whole
+    provenance chain there is, and the right one to reproduce.
+
+license:
+  name: null
+  url: https://www.aeaweb.org/journals/data/data-code-policy
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution"). No licence can be named: the artifact actually fetched
+  # and compared — the AEA-hosted package zip — carries no licence file, and
+  # DataCite records an EMPTY rightsList for 10.3886/E116312V1. The openICPSR
+  # deposit does hold a LICENSE.txt (14.6 KB, 2019-12-07, visible in a 2025
+  # Wayback capture of the project page), but www.openicpsr.org answers every
+  # automated request with a Cloudflare 403, so its text was NOT read. That
+  # gap is recorded here rather than papered over.
+  redistribution: permitted
+  verified: 2026-08-13
+  note: >
+    `permitted` on the gate, not on a named licence: the AEA publishes this
+    package openly (the article page links it; the asset server serves the zip
+    with no login), its policy states that authors must permit others to use
+    all files in the deposit for the purpose of replication, and nothing found
+    imposes non-commercial or no-redistribution terms. Two honest caveats: this
+    is a pre-2019 deposit migrated to openICPSR, and the AEA Data Editor's FAQ
+    says such migrated materials stay copyrighted by the original authors
+    unless the deposit's LICENSE file states otherwise — the file that could
+    not be read. Distinct from forbes-billionaires.csv's `restricted`: that is
+    Forbes' own editorial product scraped from their API, this is a scholar's
+    replication deposit derived from published counts. Inherited exposure —
+    served publicly from python.quantecon.org for years. Registered for licence
+    review on QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited from lecture-python.myst with no
+                                # recorded retrieval date; not reconstructed
+                                # from git history (AGENTS.md). It costs
+                                # nothing here — upstream is frozen and was
+                                # re-fetched byte-identical below, so the
+                                # vintage is pinned by the hash, not by a date.
+                                # See the AGENTS.md note on this pairing.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to every copy in play — lecture-python.myst @ 06c784f
+# lectures/_static/lecture_specific/mle/fp.dta, the published copy at
+# python.quantecon.org/_static/lecture_specific/mle/fp.dta, the archived
+# QuantEcon/lecture-python copy that lecture-stats reads, and lecture-dp's and
+# lecture-python.zh-cn's orphan copies. All hash to the sha256 below (verified
+# 2026-08-13), so a repoint cannot change a figure or a coefficient.
+
+integrity:
+  sha256: de99b9c0de6fb08cb732e306971ba87a308c5c4ef8ca3ae23fbbb50eabdecd8d
+  upstream:
+    status: verified
+    date: 2026-08-13
+    against: https://assets.aeaweb.org/asset-server/articles-attachments/aer/data/10605/P2016_1068_data.zip
+    note: >
+      Re-fetched and byte-compared, not assumed: the AEA package zip still
+      resolves on the asset server, and its `P2016_1068_data/fp.dta` member is
+      1,024,085 B hashing to the sha256 above. FINDING THE ARTIFACT IS THE
+      WORK — the article page's "Replication Package" link and the legacy
+      /articles/materials/5536 download both 302 to openICPSR
+      (doi.org/10.3886/E116312V1), which serves a Cloudflare 403 to every
+      automated fetch, and no Wayback capture of the download exists; the
+      asset-server URL above is the one automatable route left. Upstream is
+      frozen — a 2016 deposit migrated to openICPSR 2019-12-07 — so no vintage
+      drift is possible: the bytes carry their own stamp, a Stata header
+      timestamp of " 9 Jan 2016 23:43" and a zip member mtime of 2016-01-10.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-13. 28 columns are Stata `float`
+# and land as float32 under either pandas version, 7 are Stata `double` and
+# land as float64 — that is why `year` and `ccode` are float32 rather than
+# integers. `df["year"] == 2008` is still exact at these magnitudes, but do not
+# assume int. `country` is `object` under pandas 2 and `str` under the
+# anaconda=2026.07 pin (pandas 3), and is declared as the pin will read it.
+# The file declares no value labels, so nothing reads back as a categorical.
+
+schema:
+  format: dta
+  columns:
+    - {name: country, dtype: str, description: "country name — the only string column"}
+    - {name: ccode, dtype: float32, description: "country code (label reads '(mean) ccode' — a Stata collapse artifact)"}
+    - {name: year, dtype: float32, description: "year, 1990-2015 (label reads '(mean) year'); null on 338 rows"}
+    - {name: cyear, dtype: float32, description: "country-year identifier"}
+    - {name: numbil, dtype: float32, description: "number of billionaires, Forbes"}
+    - {name: numbil0, dtype: float32, description: "number of billionaires, 0 if none in the Forbes list — THE LECTURE'S DEPENDENT VARIABLE"}
+    - {name: numbilall, dtype: float32, description: "number of billionaires worldwide"}
+    - {name: netw, dtype: float32, description: "total net worth of billionaires, bn$, Forbes"}
+    - {name: netw0, dtype: float32, description: "net worth of billionaires, 0 if none in the Forbes list"}
+    - {name: netwall, dtype: float32, description: "total net worth of billionaires worldwide, bn$, Forbes"}
+    - {name: gdpcurdol, dtype: float64, description: "GDP in current dollars, WDI"}
+    - {name: gdpbill, dtype: float32, description: "GDP, current bn dollars, WDI"}
+    - {name: pop, dtype: float64, description: "population, WDI"}
+    - {name: lnpop, dtype: float32, description: "ln population, WDI — lecture regressor"}
+    - {name: gdppc, dtype: float32, description: "GDP per capita, current dollars, WDI"}
+    - {name: lngdp, dtype: float32, description: "ln GDP in current dollars, WDI"}
+    - {name: lngdppc, dtype: float32, description: "ln GDP per capita, current dollars, WDI — lecture regressor"}
+    - {name: d7netwall, dtype: float32, description: "change in netwall from 7 years earlier, bn$"}
+    - {name: d7numbilall, dtype: float32, description: "change in number of billionaires from 7 years earlier"}
+    - {name: lowinc08, dtype: float64, description: "World Bank 2008 low-income classification"}
+    - {name: midinc08, dtype: float64, description: "World Bank 2008 middle-income classification"}
+    - {name: totppb9008, dtype: float32, description: "privatization proceeds 1990-2008, bn$, World Bank Privatization Database"}
+    - {name: privprocbarb, dtype: float32, description: "privatization value, bn$, Privatization Barometer"}
+    - {name: fullprivproc, dtype: float32, description: "estimated total privatization proceeds 1990-2008"}
+    - {name: wtoyear, dtype: float64, description: "year joined the WTO"}
+    - {name: gattwto, dtype: float64, description: "first year joined GATT or WTO"}
+    - {name: gattwto08, dtype: float32, description: "years in GATT or WTO as of 2008 — lecture regressor"}
+    - {name: mcapbdol, dtype: float32, description: "market capitalization, bn dollars, WDI"}
+    - {name: mcapbdol08, dtype: float32, description: "market capitalization 2008, WDI with additional sources"}
+    - {name: lnmcap08, dtype: float32, description: "ln market capitalization 2008 — lecture regressor (models 2 and 3)"}
+    - {name: topintaxnew, dtype: float32, description: "top marginal income tax rate, average 1990-2008, EFW and KPMG"}
+    - {name: topint08, dtype: float32, description: "top marginal income tax rate, EFW with additional sources — lecture regressor (models 2 and 3)"}
+    - {name: rintr, dtype: float32, description: "real interest rate, %, average 1988-2007, WDI — lecture regressor (models 2 and 3)"}
+    - {name: noyrs, dtype: float64, description: "number of years of real-interest-rate data available in WDI"}
+    - {name: roflaw, dtype: float32, description: "rule of law index, 2008, World Bank Governance Indicators — lecture regressor (model 3)"}
+    - {name: nrrents, dtype: float32, description: "total natural resources rents (% of GDP), WDI — lecture regressor (model 3)"}
+  row_count_floor: 5432         # frozen replication file — exact row count by design
+  date_range: {start: 1990, end: 2015}
+  # Nulls are extensive and correct. This is an author-assembled panel of 219
+  # countries over 1990-2015 with covariates of very different coverage, and
+  # several columns are 2008-only or period-average constructs, so most cells
+  # of most columns are legitimately empty. `year` itself is null on 338 rows,
+  # and 253 (country, year) pairs repeat — neither reaches the lecture, which
+  # slices `year == 2008` (213 rows, numbil0 complete) and passes
+  # missing="drop" to statsmodels. A blanket no-nulls rule would reject this
+  # file wrongly.
+  known_nulls:
+    year: 338
+    cyear: 3
+    numbil: 4413
+    numbil0: 1316
+    numbilall: 1316
+    netw: 4413
+    netw0: 1316
+    netwall: 1316
+    gdpcurdol: 1735
+    gdpbill: 1735
+    pop: 1618
+    lnpop: 1618
+    gdppc: 1735
+    lngdp: 1735
+    lngdppc: 1735
+    d7netwall: 2807
+    d7numbilall: 2807
+    lowinc08: 1000
+    midinc08: 1000
+    totppb9008: 2180
+    privprocbarb: 4978
+    fullprivproc: 1750
+    wtoyear: 1998
+    gattwto: 1998
+    mcapbdol: 3177
+    mcapbdol08: 1612
+    lnmcap08: 1612
+    topintaxnew: 1783
+    topint08: 1658
+    rintr: 885
+    noyrs: 3
+    roflaw: 252
+    nrrents: 3664
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# Empty at `landed`, populated by the flip PR once the repoints merge.
+# Two reference-holders will be recorded: lecture-python.myst (mle.md:166) and
+# lecture-python.zh-cn (mle.md:178), the latter outside the audit's SCAN_REPOS
+# and so recorded here or nowhere. The generated lecture-python.notebooks
+# mirror self-heals after a publish tag and is deliberately not listed, per the
+# wave A4 precedent.
+#
+# lecture-stats is NOT listed, and the reason is worth recording because it
+# looks like a consumer: its mle.md code read points at the ARCHIVED
+# QuantEcon/lecture-python blob, a separate byte-identical copy that this
+# migration does not touch. What it DOES share is the prose link — see below.
+#
+# A repoint must also edit PROSE, which no URL rewrite of a code cell touches:
+# mle.md:160 in python.myst, its zh-cn twin at mle.md:172, and the identical
+# line in lecture-stats/lectures/mle.md:132 all link the published-site copy at
+# python.quantecon.org/_static/lecture_specific/mle/fp.dta. That URL dies when
+# this file is deleted from python.myst and the site republishes, and
+# lecture-stats runs a DAILY sphinx linkcheck that will go red within 24 hours.
+consumers: []
+
+builder: null
+builder_status: not-applicable      # verbatim — no builder

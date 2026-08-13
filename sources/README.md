@@ -11,10 +11,11 @@ The defining property is **un-refetchability**, not size.
 
 The normal case for a builder is to fetch from its third-party upstream at run
 time, and that is what most of them do: `jse.amstat.org`, `earthquake.usgs.gov`,
-`wwwn.cdc.gov`, `stat.go.jp`, `openfootball`. **None of the six `committed`
-builders in this repo has a committed input.** So `sources/` is not "where
-builder inputs live" as a general rule — it is the exception layer for an input
-that cannot be obtained again.
+`wwwn.cdc.gov`, `stat.go.jp`, `openfootball`. **Six of the seven `committed`
+builders in this repo fetch at run time and have no committed input**; the
+exception is `NEWQDATA.py`, whose upstream is not published anywhere. So
+`sources/` is not "where builder inputs live" as a general rule — it is the
+exception layer for an input that cannot be obtained again.
 
 It is also emphatically **not "the big-file directory"**, even though
 `.gitattributes` LFS-tracks everything under it. A 300 MB file that can be
@@ -117,3 +118,55 @@ frozen builder's corrections belong: **the input is now committed at
 resolve. Do not treat that as a reason to leave the dependency live in any
 builder that does run — and do not delete branches or rewrite history on that
 repo after archiving, which is what actually breaks an external reader.
+
+---
+
+## `NEWQDATA.MAT`
+
+| | |
+| --- | --- |
+| **Origin** | Cogley and Sargent's own MATLAB replication directory for "Drifts and Volatilities". Located in 2026 only as a third-party GitHub mirror (`szokeb87/cs2005_pymc`, `matlab_files_from_cogley/`), whose README states the MATLAB files "were written entirely by Tim Cogley and Thomas Sargent" |
+| **Upstream** | Cogley, Timothy, and Thomas J. Sargent (2005), *Drifts and Volatilities: Monetary Policies and Outcomes in the Post WWII U.S.*, Review of Economic Dynamics 8(2), 262-302 |
+| **Upstream identifier** | DOI [10.1016/j.red.2004.10.009](https://doi.org/10.1016/j.red.2004.10.009) — the **article**. There is no dataset DOI; Crossref registers no dataset component |
+| **Retrieved** | `null` — no retrieval date was recorded upstream, and the mirror's commit dates record when a third party acquired the file, not when it came from the authors. Do not promote one to the other |
+| **Licence** | `null` — no licence statement exists at the journal, the authors' pages, or the mirror. Registered on [#35](https://github.com/QuantEcon/data-lectures/issues/35) |
+| **`sha256`** | `ab760926f37b41e7478c5227454f3d5c142acb4ad27428f0881ad5140dcb8162` |
+| **Size** | 7,104 B |
+| **Consumed by** | `builders/NEWQDATA.py` (`builder_status: committed`) |
+| **Produces** | `lectures/NEWQDATA.csv` |
+
+### Why this file is here rather than fetched at run time
+
+This is the repo's **first committed input to a builder that actually runs**,
+so the exception deserves its reasoning in full.
+
+The file is un-refetchable from any authoritative source. Searched to
+exhaustion on 2026-08-13:
+
+- **tomsargent.com** and Cogley's NYU pages — live and via the Wayback Machine
+  — carry no replication files for this paper;
+- the **Review of Economic Dynamics / SED** site publishes no data archive, and
+  had no data-availability policy in 2005;
+- **RePEc**'s record for the article lists no dataset;
+- **ScienceDirect** returns 403 to an anonymous fetch;
+- **Crossref** registers no dataset component, only Elsevier text-mining
+  licences for the article text.
+
+The single copy located anywhere was the third-party mirror above. A builder
+that fetches from a stranger's repository at run time is precisely the
+fragility this directory exists to remove — the same failure shape as a network
+read from a retired QuantEcon repo, with less recourse. So the input is
+committed here, and `builders/NEWQDATA.py` reads it from disk.
+
+The conversion is value-preserving — four arrays to four columns, no filtering,
+no rescaling, no reordering — and the builder reproduces
+`lectures/NEWQDATA.csv` **byte for byte**, all 13,738 of them. That is what
+earns the manifest's `integrity.upstream.status: verified` under AGENTS.md's
+definition for a `constructed` dataset ("re-run the builder and compare"),
+rather than by analogy to a verbatim re-fetch.
+
+### Size
+
+7,104 B — four orders of magnitude below any limit that matters. It is here on
+the un-refetchability test alone, which is the test, and a useful counterweight
+to reading this directory as "the big-file directory".

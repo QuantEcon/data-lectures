@@ -1,0 +1,161 @@
+# Manifest for maketable4.dta — migrated out of QuantEcon/lecture-python.myst,
+# where it sat at lectures/_static/lecture_specific/ols/ and was read by URL
+# (PLAN Phase 8, wave B1').
+#
+# One of three AJR (2001) replication tables landing together. They share a
+# source, a licence position and an integrity story, and differ only in
+# columns — so the source/license blocks below are deliberately identical in
+# all three manifests. lecture-dp and lecture-python.zh-cn each hold a
+# byte-identical orphan copy that no lecture reads (Track X, not this wave).
+
+filename: maketable4.dta
+title: Acemoglu-Johnson-Robinson (2001) colonial origins — table 4 replication data
+description: >
+  The 163-country frame behind table 4's instrumental-variables estimates: log
+  settler mortality (`logem4`, the AJR instrument), average protection against
+  expropriation risk 1985-95, log GDP per capita in 1995, the continent
+  dummies, absolute latitude, a rich-country indicator and log output per
+  worker. `ols` filters to `baseco == 1` — the 64 countries with complete data
+  — and walks through the two-stage least squares estimate by hand before
+  reproducing it with `IV2SLS`, at ols.md:478 and again at ols.md:606.
+
+# Verbatim: the authors' own replication file as distributed inside
+# maketable4.zip on Daron Acemoglu's data archive. Not merely asserted — the
+# zip was re-downloaded 2026-08-13 and the enclosed .dta hashes to the sha256
+# below exactly, so no QuantEcon processing can have been applied.
+class: verbatim
+
+source:
+  name: Daron Acemoglu data archive — "The Colonial Origins of Comparative Development", table 4 (program and data files)
+  url: https://economics.mit.edu/people/faculty/daron-acemoglu/data-archive
+  file_url: https://www.dropbox.com/s/mntre4yhzothfgq/maketable4.zip?dl=0
+  doi: 10.1257/aer.91.5.1369
+  version: Stata dta format 113, authored 28 Dec 2009 09:35 (from the file's own header)
+  citation: >
+    Acemoglu, Daron, Simon Johnson, and James A. Robinson. 2001. "The Colonial
+    Origins of Comparative Development: An Empirical Investigation." American
+    Economic Review 91 (5): 1369-1401.
+  note: >
+    The table 2 erratum recorded in maketable2.dta.yml does NOT apply to this
+    file — it concerns the table 2 OLS world sample, and `ols` estimates table
+    4 on the 64-country base sample instead. `logem4` is the paper's excluded
+    instrument, and the lecture's first-stage regression of `avexpr` on it is
+    what motivates the whole IV discussion.
+
+license:
+  name: null
+  url: https://economics.mit.edu/people/faculty/daron-acemoglu/data-archive
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution"). There is no licence to name: the archive page states
+  # only that the zipped data and program files are there to download, the
+  # deposit's own readme.TXT states terms nowhere, and the page carries no
+  # notice beyond the department footer. Nor is there an AEA deposit to fall
+  # back on — the AEA article page for 10.1257/aer.91.5.1369 links no
+  # replication package, and the current AEA data and code availability policy
+  # claims no retroactive reach. A 2001 paper predates that regime entirely.
+  redistribution: permitted
+  verified: 2026-08-13
+  note: >
+    An inherited exposure: served publicly by QuantEcon since the
+    lecture-python.rst era, and cached here with attribution rather than left
+    silent. Nothing in the deposit imposes non-commercial or no-redistribution
+    terms — the class that earns `restricted` here — and the authors publish it
+    for open download. One chain deserves naming anyway, and it is shared by
+    all three tables: `avexpr` descends from the Political Risk Services
+    Group's commercial country-risk data, which the lecture links directly.
+    What this file carries is AJR's own 1985-95 average, not a PRS series, and
+    AJR have redistributed it openly for two decades; recorded `permitted` on
+    that basis, with the PRS chain registered for review on
+    QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited from lecture-python.myst with no
+                                # recorded retrieval date; not reconstructed
+                                # from git history (AGENTS.md). It costs
+                                # nothing here — upstream is frozen and was
+                                # re-fetched byte-identical below, so the
+                                # vintage is pinned by the hash, not by a date.
+                                # See the AGENTS.md note on this pairing.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy every consumer reads today — sha256 2b34cce2…
+# against lecture-python.myst @ 06c784f,
+# lectures/_static/lecture_specific/ols/. The lecture-python.zh-cn and
+# lecture-dp copies of the same path carry the identical git blob. Verified
+# 2026-08-13; a repoint to this file therefore cannot change a figure.
+
+integrity:
+  sha256: 2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404
+  upstream:
+    # A genuine `verified`, not an assumed one: maketable4.zip was downloaded
+    # from the archive page on the date below and the .dta inside hashes to
+    # exactly the sha256 above.
+    status: verified
+    date: 2026-08-13
+    against: https://www.dropbox.com/s/mntre4yhzothfgq/maketable4.zip?dl=0
+    note: >
+      Re-fetched 2026-08-13 and byte-identical. MIND THE SHARE ID: the archive
+      page lists a `maketable4.zip` under three different papers — Colonial
+      Origins, Reversal of Fortune, and Volatility/government consumption — at
+      three different Dropbox ids. The id above is the Colonial Origins one;
+      fetching a sibling id returns a different paper's file of the same name,
+      which would compare as a spurious mismatch. Re-derive it from the
+      "Table 4" link in the Colonial Origins section rather than trusting the
+      share id, which will rot before the landing page does.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-13. The float32 columns are pinned
+# by Stata storage types, not by pandas, so they read identically under either
+# version; `shortnam` is `object` under pandas 2 and `str` under the
+# anaconda=2026.07 pin (pandas 3), and is declared as the pin will read it.
+
+schema:
+  format: dta
+  columns:
+    - {name: shortnam, dtype: str, description: "3-letter country code, 163 distinct"}
+    - {name: africa, dtype: float32, description: "Africa dummy"}
+    - {name: lat_abst, dtype: float32, description: "absolute latitude, scaled to [0,1]"}
+    - {name: rich4, dtype: float32, description: "rich-country indicator"}
+    - {name: avexpr, dtype: float32, description: "average protection against expropriation risk 1985-95, 0-10 scale (descends from PRS Group data — see license.note)"}
+    - {name: logpgp95, dtype: float32, description: "log PPP GDP per capita in 1995, World Bank"}
+    - {name: logem4, dtype: float32, description: "log European settler mortality — the paper's excluded instrument"}
+    - {name: asia, dtype: float32, description: "Asia dummy"}
+    - {name: loghjypl, dtype: float32, description: "log GDP per worker 1988, Hall and Jones"}
+    - {name: baseco, dtype: float32, description: "=1 for the 64-country base sample the lecture filters on; missing otherwise, never 0"}
+  row_count_floor: 163          # frozen 2001 replication deposit — exact row
+                                # count by design, one row per country
+  # date_range omitted: a country cross-section, not a time series.
+  #
+  # Nulls are extensive and correct. `logem4` is missing for 76 of 163 rows
+  # because settler mortality exists only for the ex-colonies — that sparsity
+  # is precisely why the lecture filters to `baseco == 1`. A blanket no-nulls
+  # rule would reject this file wrongly.
+  known_nulls:
+    lat_abst: 1
+    avexpr: 42
+    logpgp95: 15
+    logem4: 76
+    loghjypl: 40
+    baseco: 99
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# Empty at `landed`, populated by the flip PR once the repoints merge.
+# Two reference-holders will be recorded: lecture-python.myst (ols.md:478 and
+# ols.md:606) and lecture-python.zh-cn (ols.md:421 and ols.md:526), the latter
+# outside the audit's SCAN_REPOS and so recorded here or nowhere. The generated
+# lecture-python.notebooks mirror self-heals after a publish tag and is
+# deliberately not listed, per the wave A4 precedent. lecture-stats,
+# lecture-econometrics-machine-learning and lecture-mapping all read the copy
+# in the ARCHIVED QuantEcon/lecture-python, not this one, so none of them is a
+# consumer of these bytes.
+consumers: []
+
+builder: null
+builder_status: not-applicable      # verbatim — no builder

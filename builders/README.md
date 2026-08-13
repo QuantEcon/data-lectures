@@ -39,6 +39,7 @@ re-fetched** — see `AGENTS.md`.
 | `japan_earthquakes.py` | `japan_earthquakes.csv` | committed |
 | `japan_population_by_age.py` | `japan_population_by_age.csv` | committed |
 | `us_adult_heights.py` | `us_adult_heights.csv` | committed |
+| `NEWQDATA.py` | `NEWQDATA.csv` | committed — the **only** builder here that reads a committed input (`sources/NEWQDATA.MAT`) instead of fetching. Its upstream is published nowhere; see `sources/README.md`. Reproduces its output byte for byte |
 | `business_cycle.py` | `business_cycle_data.csv`, `business_cycle_info.md`, `business_cycle_metadata.md` | run by hand, no validate stage yet (PLAN Phase 5); its three outputs are the repo's only unmanifested files |
 | `webscrape_forbes.ipynb` | `forbes-global2000.csv`, `forbes-billionaires.csv` | **committed-frozen** — an undocumented Forbes API, a spoofed user-agent and hardcoded GDPR consent cookies. Defects recorded in the two manifests rather than fixed |
 | `generating_mini.md` | `SCF_plus_mini.csv`, `SCF_plus_mini_no_weights.csv` | **committed-frozen** — its `to_csv` calls are commented out upstream and stay that way. As written it still fetches the `high_dim_data` URL; that URL is historical, and the input is now committed at `sources/SCF_plus.dta`. See `sources/README.md` |

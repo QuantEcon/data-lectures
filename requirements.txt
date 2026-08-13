@@ -1,2 +1,4 @@
 wbgapi==1.0.12
 PyYAML==6.0.3        # scripts/build_catalog.py — parse the sidecar manifests
+scipy==1.16.3        # builders/NEWQDATA.py — loadmat, the only way to read a
+                     # MATLAB 5.0 .MAT; pandas cannot
