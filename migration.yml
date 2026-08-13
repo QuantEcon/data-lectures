@@ -678,22 +678,34 @@ datasets:
 
   hansen_singleton_1982_data.csv:
     pilot: B2
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#82
       date: 2026-08-13
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#1036
+        date: 2026-08-13
+      - repo: QuantEcon/lecture-python.zh-cn
+        pr: QuantEcon/lecture-python.zh-cn#250
+        date: 2026-08-13
     cutover: null
 
   hansen_singleton_1983_data.csv:
     pilot: B2
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#82
       date: 2026-08-13
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python.myst
+        pr: QuantEcon/lecture-python.myst#1036
+        date: 2026-08-13
+      - repo: QuantEcon/lecture-python.zh-cn
+        pr: QuantEcon/lecture-python.zh-cn#250
+        date: 2026-08-13
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
