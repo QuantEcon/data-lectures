@@ -40,6 +40,8 @@ re-fetched** — see `AGENTS.md`.
 | `japan_population_by_age.py` | `japan_population_by_age.csv` | committed |
 | `us_adult_heights.py` | `us_adult_heights.csv` | committed |
 | `NEWQDATA.py` | `NEWQDATA.csv` | committed — the **only** builder here that reads a committed input (`sources/NEWQDATA.MAT`) instead of fetching. Its upstream is published nowhere; see `sources/README.md`. Reproduces its output byte for byte |
+| `hansen_singleton_1982_data.py` | `hansen_singleton_1982_data.csv` | committed — fetches FRED and the Ken French factors live. Reproduces its output byte for byte (2026-08-13) |
+| `hansen_singleton_1983_data.py` | `hansen_singleton_1983_data.csv` | committed — the same construction plus a T-bill leg, so its output is a strict superset of the 1982 file's. Reproduces its output byte for byte (2026-08-13) |
 | `business_cycle.py` | `business_cycle_data.csv`, `business_cycle_info.md`, `business_cycle_metadata.md` | run by hand, no validate stage yet (PLAN Phase 5); its three outputs are the repo's only unmanifested files |
 | `webscrape_forbes.ipynb` | `forbes-global2000.csv`, `forbes-billionaires.csv` | **committed-frozen** — an undocumented Forbes API, a spoofed user-agent and hardcoded GDPR consent cookies. Defects recorded in the two manifests rather than fixed |
 | `generating_mini.md` | `SCF_plus_mini.csv`, `SCF_plus_mini_no_weights.csv` | **committed-frozen** — its `to_csv` calls are commented out upstream and stay that way. As written it still fetches the `high_dim_data` URL; that URL is historical, and the input is now committed at `sources/SCF_plus.dta`. See `sources/README.md` |
@@ -52,16 +54,28 @@ asserts is that the path exists. `usa-gini-nwealth-tincome-lincome.ipynb` takes
 the opposite choice deliberately: its upstream name was `data.ipynb`, which is
 meaningless in a flat directory, so it is renamed to its output stem.
 
+The two `hansen_singleton_*` builders are the case that leaves no choice at all.
+Both were called `make_data.py`, sitting beside their own output in separate
+`_static/lecture_specific/<lecture>/` directories where the parent directory
+supplied the meaning. Flattened into one tree they collide outright, so each
+takes its dataset's stem — the rule's default, arrived at by necessity rather
+than by preference.
+
 **A frozen builder is committed verbatim and not edited.** That is what makes it
 provenance rather than code, and it is why the pandas-3 defect above is recorded
 here instead of patched — fixing it would mean this file is no longer the thing
 that produced those bytes. The fix belongs in `lecture-python-intro`, which still
 serves that notebook to readers.
 
-**This listing is the coverage report.** The repo has 18 `constructed` datasets
-and 10 builders; the difference is the Phase 9 recovery backlog, carried as
-`builder_status: unrecovered` in each manifest rather than hidden by
-reclassifying the file as `verbatim`.
+**This listing is the coverage report.** The repo has 21 `constructed` datasets.
+Fourteen ship a builder (9 `committed`, 5 `committed-frozen`), carried by **12**
+distinct builder files — fewer than the datasets because `generating_mini.md`
+and `webscrape_forbes.ipynb` each produce two. The remaining **7** have none:
+they carry `builder_status: unrecovered` in their manifests, which is the Phase
+9 recovery backlog, kept visible rather than hidden by reclassifying the file as
+`verbatim`. The table above lists a **13th** builder, `business_cycle.py`, which
+no manifest references — its three outputs are the repo's only unmanifested
+files.
 
 Repo tooling — the audit dashboard and the catalog generator — lives in
 `scripts/` and is not a builder.
