@@ -144,21 +144,25 @@ schema:
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# Empty at `landed`, populated by the flip PR once the repoints merge.
-# Two reference-holders will be recorded: lecture-python.myst
-# (phillips_drifts_volatilities.md:103-105) and lecture-python.zh-cn
-# (phillips_drifts_volatilities.md:111-113), the latter outside the audit's
-# SCAN_REPOS and so recorded here or nowhere. The generated
-# lecture-python.notebooks mirror self-heals after a publish tag and is
-# deliberately not listed, per the wave A4 precedent.
+# Both repointed 2026-08-13. lecture-python.zh-cn is outside the audit's
+# SCAN_REPOS, so it is recorded here or nowhere. The generated
+# lecture-python.notebooks mirror is a third reference-holder; it self-heals
+# after a publish tag and is not a repo anyone repoints, so it is deliberately
+# not listed (wave A4 precedent).
 #
-# BOTH reads build the URL by string concatenation across three source lines,
-# and this is the only one of the seven Track B files to use the
-# raw.githubusercontent.com form. A repoint must COLLAPSE the continuation, not
-# patch the stem line — patching line 1 of 3 leaves 'NEWQDATA.csv' appended to
-# a path that no longer exists, and the flat published tree has no
-# _static/lecture_specific/<lecture>/ segment to append it to.
-consumers: []
+# BOTH reads previously built the URL by string concatenation across three
+# source lines, and this was the only one of the seven Track B files to use the
+# raw.githubusercontent.com form. Both were COLLAPSED to a single line at the
+# repoint rather than patched: editing the stem line alone would have left
+# 'NEWQDATA.csv' appended to a path that no longer exists, since the flat
+# published tree has no _static/lecture_specific/<lecture>/ segment.
+# Note for any future sweep: a line-based grep for the whole old URL returns a
+# confident ZERO against the wrapped form. Grep the filename separately.
+consumers:
+  - repo: QuantEcon/lecture-python.myst
+    file: lectures/phillips_drifts_volatilities.md
+  - repo: QuantEcon/lecture-python.zh-cn
+    file: lectures/phillips_drifts_volatilities.md
 
 builder: builders/NEWQDATA.py
 builder_status: committed

@@ -146,16 +146,20 @@ schema:
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# Empty at `landed`, populated by the flip PR once the repoints merge.
-# Two reference-holders will be recorded: lecture-python.myst (ols.md:478 and
-# ols.md:606) and lecture-python.zh-cn (ols.md:421 and ols.md:526), the latter
-# outside the audit's SCAN_REPOS and so recorded here or nowhere. The generated
-# lecture-python.notebooks mirror self-heals after a publish tag and is
-# deliberately not listed, per the wave A4 precedent. lecture-stats,
+# Both repointed 2026-08-13. lecture-python.zh-cn is outside the audit's
+# SCAN_REPOS, so it is recorded here or nowhere. Each repo reads this file
+# TWICE in ols.md — the 2SLS walkthrough and the IV2SLS reproduction.
+# The generated lecture-python.notebooks mirror is a third reference-holder; it
+# self-heals after a publish tag and is not a repo anyone repoints, so it is
+# deliberately not listed (wave A4 precedent). lecture-stats,
 # lecture-econometrics-machine-learning and lecture-mapping all read the copy
 # in the ARCHIVED QuantEcon/lecture-python, not this one, so none of them is a
 # consumer of these bytes.
-consumers: []
+consumers:
+  - repo: QuantEcon/lecture-python.myst
+    file: lectures/ols.md
+  - repo: QuantEcon/lecture-python.zh-cn
+    file: lectures/ols.md
 
 builder: null
 builder_status: not-applicable      # verbatim — no builder
