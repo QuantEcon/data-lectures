@@ -540,6 +540,84 @@ datasets:
         date: 2026-08-12
     cutover: null
 
+  # --------------------------------------------------------------------------
+  # Wave B1' — the lecture-python.myst block, part one (Track B).
+  #
+  # Five files, three lectures, all three URL forms. Track B was planned as
+  # three waves and re-cut to two on 2026-08-13: a `publish*` tag rebuilds the
+  # whole book, so wave size does not change publish cost — only the NUMBER of
+  # publishes does, and each wave costs two (python.myst and python.zh-cn).
+  # The hansen_singleton pair follows as B2', separated by its builders, its
+  # READMEs and an open translation-sync PR, not by novelty.
+  #
+  # All five carry `prior_pattern: own-repo` — the lectures fetch their own
+  # repo's committed blobs. Consumers are recorded at the flip, and will
+  # include lecture-python.zh-cn, which is OUTSIDE the audit's SCAN_REPOS and
+  # so is recorded in the manifests or nowhere.
+  # --------------------------------------------------------------------------
+
+  maketable1.dta:
+    pilot: B1
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#79
+      date: 2026-08-13
+    repoints: []
+    cutover: null
+
+  maketable2.dta:
+    pilot: B1
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#79
+      date: 2026-08-13
+    repoints: []
+    cutover: null
+
+  maketable4.dta:
+    pilot: B1
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#79
+      date: 2026-08-13
+    repoints: []
+    cutover: null
+
+  fp.dta:
+    pilot: B1
+    status: landed
+    # The one Track B file with a published-SITE prose link
+    # (python.quantecon.org/_static/lecture_specific/mle/fp.dta) as well as a
+    # code read. That link is also carried by lecture-stats, which runs a daily
+    # linkcheck — so deletion is gated on the lecture-stats repoint, not only
+    # on the two publishes.
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#79
+      date: 2026-08-13
+    repoints: []
+    cutover: null
+
+  NEWQDATA.csv:
+    pilot: B1
+    status: landed
+    # Reclassified at migration from the `verbatim` guess in
+    # audit_annotations.yml: it is a container conversion of the authors'
+    # NEWQDATA.MAT, and the conversion is recovered and committed at
+    # builders/NEWQDATA.py. The only Track B file read via
+    # raw.githubusercontent.com, and its URL is built by string concatenation
+    # across three source lines — the repoint must collapse it, not patch the
+    # stem line.
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#79
+      date: 2026-08-13
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people

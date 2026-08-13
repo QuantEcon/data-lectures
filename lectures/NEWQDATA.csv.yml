@@ -1,0 +1,164 @@
+# Manifest for NEWQDATA.csv — migrated out of QuantEcon/lecture-python.myst,
+# where it sat at lectures/_static/lecture_specific/phillips_drifts_volatilities/
+# and was read by URL (PLAN Phase 8, wave B1').
+#
+# RECLASSIFIED AT MIGRATION. scripts/audit_annotations.yml recorded this file as
+# `verbatim` with no builder. It is not: it is a container conversion of the
+# authors' MATLAB file, and the conversion is now recovered, committed at
+# builders/NEWQDATA.py, and reproduces these bytes exactly. The annotation was
+# an unevidenced guess, and it is deleted by the PR that lands this manifest.
+#
+# The same annotation credited the file to lecture-python.myst#1001. Also wrong:
+# `git log --diff-filter=A` returns exactly one commit, 370a58f (#992).
+
+filename: NEWQDATA.csv
+title: Cogley-Sargent (2005) "Drifts and Volatilities" — quarterly US inflation, unemployment and T-bill rate
+description: >
+  The four quarterly series behind Cogley and Sargent's post-war US evidence,
+  1948Q2-2000Q4: a decimal quarter index, the nominal three-month Treasury bill
+  rate, the seasonally adjusted civilian unemployment rate and CPI inflation,
+  all as fractions rather than percentages. `phillips_drifts_volatilities`
+  reads it to fit the drifting-coefficient, stochastic-volatility VAR, and
+  rebuilds the post-2000Q4 continuation from FRED separately — this file is the
+  frozen half of that pair.
+
+# Constructed, not verbatim: these bytes are a value-preserving conversion of
+# the authors' NEWQDATA.MAT into CSV. No filtering, no rescaling, no
+# reordering — which is exactly why builders/NEWQDATA.py reproduces the file
+# byte for byte from the committed input.
+class: constructed
+
+source:
+  name: Cogley and Sargent (2005), "Drifts and Volatilities" — the authors' NEWQDATA.MAT
+  url: https://doi.org/10.1016/j.red.2004.10.009
+  # The ARTICLE doi. There is no dataset doi: Crossref's record carries no
+  # dataset component, only Elsevier text-mining licences for the article text
+  # (checked 2026-08-13).
+  doi: 10.1016/j.red.2004.10.009
+  version: >
+    MAT-file header "MATLAB 5.0 MAT-file, Platform: PCWIN, Created on:
+    Sun Mar 11 12:15:22 2001" — the vintage of the authors' earlier paper
+    (Cogley and Sargent 2001), whose data the 2005 paper reuses.
+  series: date, y3, ur, dp — quarterly, 1948Q2-2000Q4
+  citation: >
+    Cogley, Timothy, and Thomas J. Sargent. 2005. "Drifts and Volatilities:
+    Monetary Policies and Outcomes in the Post WWII U.S." Review of Economic
+    Dynamics 8 (2): 262-302. doi:10.1016/j.red.2004.10.009. Data as distributed
+    with the authors' MATLAB replication files (NEWQDATA.MAT).
+  note: >
+    NOT hosted by the authors or the journal. The underlying series are US
+    federal statistics — the BLS seasonally adjusted CPI for all urban
+    consumers, the BLS seasonally adjusted civilian unemployment rate, and the
+    three-month Treasury bill rate. The paper's own data section (§3.1) says
+    only: "Inflation is measured by the CPI for all urban consumers,
+    unemployment by the civilian unemployment rate, and the nominal interest
+    rate by the yield on 3-month Treasury bills. Inflation and unemployment
+    data are quarterly and seasonally adjusted, and Treasury bill data are the
+    average of daily rates in the first month of each quarter." Where the
+    MATLAB file itself could and could not be located is recorded in
+    sources/README.md, which is the audit trail for the committed input.
+
+license:
+  name: null
+  url: https://doi.org/10.1016/j.red.2004.10.009
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution"). There is no licence to name and no place that states
+  # one: Review of Economic Dynamics had no data archive or data-availability
+  # policy in 2005 (economicdynamics.org publishes none, and Crossref shows no
+  # dataset component for the article), and the authors' own README.TXT beside
+  # NEWQDATA.MAT lists the files and states no terms. Both checked 2026-08-13.
+  redistribution: permitted
+  verified: 2026-08-13
+  note: >
+    An inherited exposure, served publicly from lecture-python.myst since
+    2026-07-23. `permitted` rests on what the numbers are rather than on a
+    licence grant: every value is a simple transformation of three US federal
+    statistical series (BLS CPI-U, BLS civilian unemployment rate, three-month
+    Treasury bill rate), which are US Government works in the public domain,
+    and the authors' contribution is the assembly, credited in full by the
+    citation above. No author or journal permission has been sought.
+    Registered for licence review on QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited from lecture-python.myst with no
+                                # recorded retrieval date; not reconstructed
+                                # from git history (AGENTS.md). It costs
+                                # nothing here — the builder reproduces these
+                                # bytes exactly from a committed input, so the
+                                # vintage is pinned by the hash, not by a date.
+                                # See the AGENTS.md note on this pairing.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy every consumer reads today — sha256 98fb884b…
+# against lecture-python.myst @ 06c784f,
+# lectures/_static/lecture_specific/phillips_drifts_volatilities/. The
+# lecture-python.zh-cn copy carries the identical git blob. Verified
+# 2026-08-13; a repoint to this file therefore cannot change a figure.
+
+integrity:
+  sha256: 98fb884bf59fbf211a4095c558b210ff8df471f863357803cc3ad88d0066bcaf
+  upstream:
+    # `verified` in the sense AGENTS.md defines for a constructed dataset —
+    # "re-run the builder and compare" — not by analogy. builders/NEWQDATA.py
+    # was run against the committed sources/NEWQDATA.MAT on the date below and
+    # reproduced this file byte for byte, all 13,738 of them.
+    status: verified
+    date: 2026-08-13
+    against: sources/NEWQDATA.MAT
+    note: >
+      The input hashes to
+      ab760926f37b41e7478c5227454f3d5c142acb4ad27428f0881ad5140dcb8162 and
+      holds exactly four 211-element float64 arrays named date, y3, ur, dp; all
+      844 values are bitwise identical to this CSV parsed with
+      float_precision='round_trip'. What could NOT be established is a
+      retrieval date or an authors'-own download: neither tomsargent.com nor
+      Cogley's NYU pages (live or in the Wayback Machine), the RED/SED site,
+      nor the RePEc record carries the replication files today, and
+      ScienceDirect returns 403 to an anonymous fetch while Crossref lists no
+      dataset component. That search is what put the input in sources/ rather
+      than leaving the builder fetching a third-party mirror — see
+      sources/README.md.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-13, and asserted by the builder's
+# validate() stage on every run.
+
+schema:
+  format: csv
+  columns:
+    - {name: date, dtype: float64, description: "quarter as year + (quarter-1)/4 — 1948.25 is 1948Q2, 2000.75 is 2000Q4; an unbroken 0.25 grid with no gaps"}
+    - {name: y3, dtype: float64, description: "nominal three-month Treasury bill rate as a quarterly fraction, first month of the quarter. Reproduces bitwise as 1/(1 - TB3MS/400) - 1 for all 211 quarters — a discount-to-simple conversion, NOT the log the lecture prose describes"}
+    - {name: ur, dtype: float64, description: "seasonally adjusted civilian unemployment rate as a fraction, quarterly mean of the three monthly readings; the lecture applies 0.01*log[u/(1-u)] before estimation"}
+    - {name: dp, dtype: float64, description: "inflation as the log difference of the seasonally adjusted CPI for all urban consumers, point sampled in the third month of the quarter"}
+  row_count_floor: 211          # frozen 2001 vintage — exact row count by
+                                # design, one row per quarter
+  date_range: {start: 1948.25, end: 2000.75}   # decimal quarters, as the
+                                               # `date` column encodes them
+  known_nulls: {}               # genuinely none — a complete quarterly panel
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# Empty at `landed`, populated by the flip PR once the repoints merge.
+# Two reference-holders will be recorded: lecture-python.myst
+# (phillips_drifts_volatilities.md:103-105) and lecture-python.zh-cn
+# (phillips_drifts_volatilities.md:111-113), the latter outside the audit's
+# SCAN_REPOS and so recorded here or nowhere. The generated
+# lecture-python.notebooks mirror self-heals after a publish tag and is
+# deliberately not listed, per the wave A4 precedent.
+#
+# BOTH reads build the URL by string concatenation across three source lines,
+# and this is the only one of the seven Track B files to use the
+# raw.githubusercontent.com form. A repoint must COLLAPSE the continuation, not
+# patch the stem line — patching line 1 of 3 leaves 'NEWQDATA.csv' appended to
+# a path that no longer exists, and the flat published tree has no
+# _static/lecture_specific/<lecture>/ segment to append it to.
+consumers: []
+
+builder: builders/NEWQDATA.py
+builder_status: committed
