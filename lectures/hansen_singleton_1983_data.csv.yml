@@ -169,29 +169,32 @@ schema:
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# Empty at landing and filled at the flip, per the B1' convention: no lecture
-# reads this file from here yet. Two will —
-# lecture-python.myst/lectures/hansen_singleton_1983.md and its
-# lecture-python.zh-cn twin. zh-cn is outside the audit's SCAN_REPOS, so it is
-# recorded here or nowhere. The generated lecture-python.notebooks mirror is a
-# third reference-holder; it self-heals after a publish tag and is not a repo
-# anyone repoints, so it will deliberately not be listed (wave A4 precedent).
+# Both repointed 2026-08-13. lecture-python.zh-cn is outside the audit's
+# SCAN_REPOS, so it is recorded here or nowhere. The generated
+# lecture-python.notebooks mirror is a third reference-holder; it self-heals
+# after a publish tag and is not a repo anyone repoints, so it is deliberately
+# not listed (wave A4 precedent).
 #
-# Both reads build the URL by string concatenation across three source lines and
-# must be COLLAPSED at the repoint rather than patched: editing the stem line
-# alone leaves the filename appended to a path that no longer exists, since the
-# flat published tree has no _static/lecture_specific/<lecture>/ segment.
+# Both reads previously built the URL by string concatenation across three
+# source lines, and both were COLLAPSED at the repoint rather than patched:
+# editing the stem line alone would have left the filename appended to a path
+# that no longer exists, since the flat published tree has no
+# _static/lecture_specific/<lecture>/ segment.
 # Note for any future sweep: a line-based grep for the whole old URL returns a
 # confident ZERO against the wrapped form. Grep the filename separately.
 #
-# Each lecture ALSO carries two references to the BUILDER — a prose link, and
+# Each lecture ALSO carried two references to the BUILDER — a prose link, and
 # the path named again in a docstring inside the data cell. Neither is a code
-# read; both break silently when the builder moves here.
+# read, so neither would have failed a build; both moved with it.
 #
 # A correction to this file must be mirrored into hansen_singleton_1982_data.csv
 # whenever it touches gross_real_return or gross_cons_growth: those two columns
 # are that file, bitwise.
-consumers: []
+consumers:
+  - repo: QuantEcon/lecture-python.myst
+    file: lectures/hansen_singleton_1983.md
+  - repo: QuantEcon/lecture-python.zh-cn
+    file: lectures/hansen_singleton_1983.md
 
 builder: builders/hansen_singleton_1983_data.py
 builder_status: committed
