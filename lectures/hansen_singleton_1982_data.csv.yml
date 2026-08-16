@@ -40,9 +40,12 @@ source:
   version: >
     Ken French research factors, zip header "This file was created using the
     202606 CRSP database. The 1-month TBill rate data until 202405 are from
-    Ibbotson Associates" — read 2026-08-13. FRED series are unversioned and
-    revisable; the 1959-1978 window used here has been stable across every
-    check so far (see integrity.upstream).
+    Ibbotson Associates. Starting from 202406, the 1-month TBill rate is from
+    ICE BofA US 1-Month Treasury Bill Index." — read 2026-08-13, re-read
+    unchanged 2026-08-17. The ICE BofA clause is quoted for completeness and
+    applies to no row here; this file's sample ends in 1978. FRED series are
+    unversioned and revisable; the 1959-1978 window used here has been stable
+    across every check so far (see integrity.upstream).
   series: >
     FRED CNP16OV (civilian noninstitutional population 16+, thousands of
     persons, BLS Employment Situation);

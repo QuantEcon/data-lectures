@@ -41,10 +41,13 @@ source:
   version: >
     Ken French research factors, zip header "This file was created using the
     202606 CRSP database. The 1-month TBill rate data until 202405 are from
-    Ibbotson Associates" — read 2026-08-13. That Ibbotson clause covers the
-    whole of this file's sample, since it ends in 1978. FRED series are
-    unversioned and revisable; the 1959-1978 window used here has been stable
-    across every check so far (see integrity.upstream).
+    Ibbotson Associates. Starting from 202406, the 1-month TBill rate is from
+    ICE BofA US 1-Month Treasury Bill Index." — read 2026-08-13, re-read
+    unchanged 2026-08-17. The Ibbotson clause covers the whole of this file's
+    sample, since it ends in 1978; the ICE BofA clause is quoted for
+    completeness and applies to no row here. FRED series are unversioned and
+    revisable; the 1959-1978 window used here has been stable across every
+    check so far (see integrity.upstream).
   series: >
     FRED CNP16OV (civilian noninstitutional population 16+, thousands of
     persons, BLS Employment Situation);
@@ -158,7 +161,7 @@ schema:
     - {name: gross_real_return, dtype: float64, description: "gross real monthly return on the aggregate stock market: (1 + (Mkt-RF + RF)/100) divided by gross_inflation_cons. A ratio near 1 (observed 0.865-1.159), not a percentage and not a net return"}
     - {name: gross_cons_growth, dtype: float64, description: "gross monthly growth of real per-capita nondurable consumption — the ratio of consecutive months of consumption_per_capita. Observed 0.967-1.033"}
     - {name: gross_inflation_cons, dtype: float64, description: "gross month-over-month inflation of the PCE nondurables price deflator (DNDGRG3M086SBEA); the deflator applied to both nominal return legs. Observed 0.995-1.024"}
-    - {name: consumption_per_capita, dtype: float64, description: "real per-capita nondurable consumption, DNDGRA3M086SBEA / CNP16OV. A LEVEL, and the one column with no interpretable unit: it divides a chain-type index (2017=100) by a population in thousands, so it lands near 2.4e-4 and is meaningful only through its growth rate. Observed 2.14e-4 to 2.66e-4"}
+    - {name: consumption_per_capita, dtype: float64, description: "real per-capita nondurable consumption, DNDGRA3M086SBEA / CNP16OV. A LEVEL, and the one column with no interpretable unit: it divides a chain-type index (2017=100) by a population in thousands, so it lands near 2.4e-4 and is meaningful only through its growth rate. Observed 2.13e-4 (1960-12-31) to 2.66e-4 (1973-02-28)"}
     - {name: gross_real_tbill, dtype: float64, description: "gross real monthly return on one-month Treasury bills: (1 + RF/100) divided by gross_inflation_cons. Observed 0.984-1.008. Exceeded by gross_real_return in only 54% of months, though the mean excess is positive"}
   row_count_floor: 239          # exact by design, not a floor with headroom:
                                 # the sample is the paper's 1959:2-1978:12 and
