@@ -22,9 +22,6 @@ datasets:
     description: ACS occupation summary
     provenance: constructed-lost
     note: construction (ACS filters, grouping, sorting) described in lecture prose only
-  assignat.xlsx:
-    description: Assignat issuance / price data, French Revolution
-    provenance: author-assembled
   bbh_macro_quarterly.csv:
     description: Macro quarterly series (Bhandari et al.)
     provenance: constructed-lost
@@ -33,24 +30,10 @@ datasets:
     description: Michigan survey monthly series (Bhandari et al.)
     provenance: constructed-lost
     note: same Zenodo replication package; extraction not scripted
-  caron.npy:
-    description: French Revolution money balances (Caron)
-    provenance: author-assembled
-    note: hand-prepared NumPy array, no construction record
-  chapter_3.xlsx:
-    description: Hyperinflation tables, Sargent "Ends of Four Big Inflations"
-    provenance: author-assembled
-    note: hand-transcribed by authors
   dataBHS.mat:
     description: US consumption/income series, MATLAB replication bundle
     provenance: verbatim
     flags: [lectures-root]
-  dette.xlsx:
-    description: French government debt series
-    provenance: author-assembled
-  fig_3.xlsx:
-    description: French Revolution fiscal data
-    provenance: author-assembled
   fred_data.csv:
     description: FRED snapshot — GS1, GS5, GS10, DFII5, DFII10, USREC
     provenance: constructed-lost
@@ -71,17 +54,6 @@ datasets:
     description: Hansen–Jagannathan (1991) asset-returns bundle
     provenance: constructed-lost
     note: lecture documents 3 sources (FRED yields deflated by CPIAUCSL, …); no build script
-  longprices.xls:
-    description: Long-run price levels (Sargent–Velde)
-    provenance: author-assembled
-    note: hand-transcribed by authors
-  mpd2020.xlsx:
-    description: Maddison Project Database 2020 (GDP per capita, long run)
-    provenance: verbatim
-  nom_balances.npy:
-    description: Nominal balances, French Revolution
-    provenance: author-assembled
-    note: hand-prepared NumPy array, no construction record
   test_pwt.csv:
     description: Penn World Table 7.0 extract
     provenance: author-assembled

@@ -354,6 +354,15 @@ def scan(repos_dir: Path):
     manifests = load_manifests()
     migration = load_yaml(MIGRATION)
 
+    # A migrated dataset's manifest is its source of truth, so it must NOT also
+    # carry an `audit_annotations.yml` entry (that file's own header states the
+    # rule). Nothing enforced it before: annotations are consulted only as a
+    # fallback when a manifest is absent, so a stale entry is inert at runtime
+    # and a green audit said nothing about the invariant. Computed from the two
+    # static sources rather than from the scan, so it still fires for a dataset
+    # no lecture currently references.
+    dual_recorded = sorted(set(manifests) & set(datasets_ann))
+
     repos, all_refs, all_api, unscanned_nb = {}, [], [], []
     for name in SCAN_REPOS:
         res = scan_repo(name, repos_dir)
@@ -540,6 +549,12 @@ def scan(repos_dir: Path):
             "missing_api_annotations": sorted(api_missing),
             "migration_inconsistencies": mig_problems,
             "unscanned_notebooks": sorted(unscanned_nb),
+            "dual_recorded": [
+                f"{f}: has a lectures/{f}.yml manifest AND an "
+                f"audit_annotations.yml datasets: entry — delete the annotation, "
+                f"the manifest is the source of truth"
+                for f in dual_recorded
+            ],
         },
         "stats": {
             "static_files": len(datasets),
