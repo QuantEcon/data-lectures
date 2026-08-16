@@ -18,6 +18,16 @@
 #
 # The manifests are the source for the generated catalog page (PLAN Phase 2),
 # which doubles as the public dataset registry.
+#
+# COMPLETENESS: this file documents the fields that recur across the corpus. It
+# is not a closed schema and nothing validates against it — a dataset whose
+# provenance needs a field not shown here should add one rather than distort
+# itself to fit, and a field that earns its place in several manifests should
+# then be documented back here. Two such extensions are already in wide use and
+# are described where they apply: `schema.sheets` for multi-sheet workbooks, and
+# `schema.read_as` for the pandas read-kwargs a positional read needs. Adding
+# the four `source`/`license` fields below closed the last known gap between
+# this file and practice (QuantEcon/data-lectures#85).
 
 # ---------------------------------------------------------------------------
 # Identity
@@ -43,9 +53,23 @@ source:
   name: World Bank national accounts data, and OECD National Accounts data files
   series: NY.GDP.MKTP.KD.ZG
   url: https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+  # Dataset DOI where the source issues one, else null. Prefer a DOI that
+  # resolves to the DATA deposit; an article DOI is better than nothing, but say
+  # which it is. In use by 16 of 33 manifests.
+  doi: null
+  # The upstream's own version identifier, quoted as the source states it — an
+  # edition ("Maddison Project Database 2020"), a vintage stamp, or a file
+  # header. Null where the source is genuinely unversioned; say so rather than
+  # inventing a version. In use by 10.
+  version: null
   citation: >
     World Bank, World Development Indicators, series NY.GDP.MKTP.KD.ZG
     (GDP growth, annual %).
+  # Anything a reader must know before trusting these bytes that the fields
+  # above cannot carry — most often that the file is NOT what its name or its
+  # cited paper implies. Where that is the case, say it here AND at the top of
+  # the manifest. In use by 20.
+  note: null
 
 license:
   name: CC BY-4.0
@@ -61,6 +85,12 @@ license:
                                         # date is not evidence. P1 found the
                                         # authority is often not the project
                                         # homepage but its Zenodo/DOI record.
+  # What `redistribution` rests on, whenever that is anything less obvious than
+  # a named public licence: a split answer across providers, an inherited
+  # exposure, a term found only in prose, or a reasoned judgement about what is
+  # actually published here. A bare `permitted` beside a `name: null` is the
+  # case that most needs this field. In use by 16.
+  note: null
 
 retrieved: 2024-04-10                   # ISO date the bytes were obtained, or
                                         # null for inherited-undated files —
