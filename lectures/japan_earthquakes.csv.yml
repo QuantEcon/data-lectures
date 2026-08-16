@@ -74,6 +74,8 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/fitting_distributions.md
 
 builder: builders/japan_earthquakes.py
 builder_status: committed

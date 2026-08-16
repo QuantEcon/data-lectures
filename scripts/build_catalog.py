@@ -67,6 +67,13 @@ def load_manifests():
 
 
 def fmt_consumers(consumers) -> str:
+    """Render the "Used by" cell.
+
+    A consumer may carry a `note` — it is listed because a correction to these
+    bytes must reach it, but it does not necessarily read THIS repo yet. Without
+    surfacing the note, the column reads as "these lectures fetch this file",
+    which is exactly the wrong inference for a consumer still on a local copy.
+    """
     if not consumers:
         return "—"
     parts = []
@@ -76,9 +83,16 @@ def fmt_consumers(consumers) -> str:
         file = c.get("file", "")
         stem = file.split("/")[-1] if file else ""
         if repo and file:
-            parts.append(f"[{short} · {stem}](https://github.com/{repo}/blob/main/{file})")
+            label = f"[{short} · {stem}](https://github.com/{repo}/blob/main/{file})"
         else:
-            parts.append(f"{short} · {stem}".strip(" ·"))
+            label = f"{short} · {stem}".strip(" ·")
+        note = " ".join((c.get("note") or "").split())
+        if note:
+            # First sentence only: enough to stop the wrong inference, short
+            # enough not to blow out a table cell. The manifest holds the rest.
+            head = note.split(". ")[0].rstrip(".")
+            label += f"<br><sub>⚠️ {head}</sub>"
+        parts.append(label)
     return "<br>".join(parts)
 
 

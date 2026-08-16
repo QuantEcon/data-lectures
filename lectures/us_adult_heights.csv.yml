@@ -81,6 +81,17 @@ consumers:
     file: lectures/observed_distributions.md
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/fitting_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/observed_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/prob_dist.md
+    note: >
+      Reads a local `_static/lecture_specific/prob_dist/` copy, not this file,
+      under a comment that still says to switch once the datasets repo exists.
+      The same repo's other two reads of this dataset WERE repointed. The copy
+      is byte-identical. Tracked in QuantEcon/workspace-lectures#46.
 
 builder: builders/us_adult_heights.py
 builder_status: committed

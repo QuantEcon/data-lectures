@@ -192,6 +192,24 @@ schema:
 consumers: []
   # - repo: QuantEcon/lecture-python-intro
   #   file: lectures/business_cycle.md
+  #
+  # A consumer that does NOT yet read this repo — one still pointing at a local
+  # copy — is listed anyway, because the question this field answers is "what
+  # must be rebuilt if these bytes change", not "who is repointed". Say so in a
+  # `note`, which is what makes the divergence machine-readable rather than a
+  # YAML comment nobody can check, and cite the issue tracking the repoint with
+  # a FULLY QUALIFIED reference, since a bare `#N` or a workspace shorthand
+  # means nothing when read from this repo:
+  #
+  # - repo: QuantEcon/test-actions-lecture-intro
+  #   file: lectures/french_rev.md
+  #   note: >
+  #     Reads a local `datasets/` copy, not this file.
+  #     Tracked in QuantEcon/workspace-lectures#46.
+  #
+  # The generated catalog surfaces `note` beside the consumer, so a reader of
+  # CATALOG.md's "Used by" column cannot mistake a local-copy reader for a
+  # repointed one.
 
 # ---------------------------------------------------------------------------
 # Builder — required for constructed and dynamic-snapshot; omit for verbatim
