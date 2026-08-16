@@ -144,6 +144,10 @@ consumers:
     file: lectures/long_run_growth.md
   - repo: QuantEcon/lecture-wasm
     file: lectures/long_run_growth.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/long_run_growth.md
+  - repo: QuantEcon/test-actions-lecture-intro
+    file: lectures/long_run_growth.md
 
 # ---------------------------------------------------------------------------
 # Builder

@@ -99,6 +99,10 @@ consumers:
     file: lectures/inflation_history.md
   - repo: QuantEcon/lecture-wasm
     file: lectures/inflation_history.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/inflation_history.md
+  - repo: QuantEcon/test-actions-lecture-intro
+    file: lectures/inflation_history.md
 
 # ---------------------------------------------------------------------------
 # Builder

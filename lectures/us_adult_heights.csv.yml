@@ -81,6 +81,13 @@ consumers:
     file: lectures/observed_distributions.md
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/fitting_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/observed_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/prob_dist.md
+    # reads a local _static copy, not this file — see ws#46
 
 builder: builders/us_adult_heights.py
 builder_status: committed

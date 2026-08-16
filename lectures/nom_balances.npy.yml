@@ -94,6 +94,11 @@ consumers:
     file: lectures/french_rev.md
   - repo: QuantEcon/lecture-wasm
     file: lectures/french_rev.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/french_rev.md
+  - repo: QuantEcon/test-actions-lecture-intro
+    file: lectures/french_rev.md
+    # reads a local datasets/ copy, not this file — see ws#46
 
 # ---------------------------------------------------------------------------
 # Builder

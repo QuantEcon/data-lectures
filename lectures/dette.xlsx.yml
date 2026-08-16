@@ -117,6 +117,10 @@ consumers:
     file: lectures/french_rev.md
   - repo: QuantEcon/lecture-wasm
     file: lectures/french_rev.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/french_rev.md
+  - repo: QuantEcon/test-actions-lecture-intro
+    file: lectures/french_rev.md
 
 builder: null
 builder_status: not-applicable    # verbatim republication -- nothing to build

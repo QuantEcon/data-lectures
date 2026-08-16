@@ -89,6 +89,8 @@ consumers:
     file: lectures/pandas_panel.md
   - repo: QuantEcon/lecture-python.myst
     file: lectures/pandas_panel.md
+  - repo: QuantEcon/lecture-python.zh-cn
+    file: lectures/pandas_panel.md
 
 # verbatim — no builder
 builder_status: not-applicable

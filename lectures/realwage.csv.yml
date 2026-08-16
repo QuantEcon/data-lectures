@@ -67,6 +67,8 @@ consumers:
     file: lectures/pandas_panel.md
   - repo: QuantEcon/lecture-python.myst
     file: lectures/pandas_panel.md
+  - repo: QuantEcon/lecture-python.zh-cn
+    file: lectures/pandas_panel.md
 
 builder: null
 builder_status: unrecovered      # inherited constructed file (PLAN Phase 9)

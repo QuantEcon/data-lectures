@@ -64,6 +64,8 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/fitting_distributions.md
+  - repo: QuantEcon/lecture-intro.zh-cn
+    file: lectures/fitting_distributions.md
 
 builder: builders/epl_match_goals.py
 builder_status: committed
