@@ -85,10 +85,12 @@ schema:
     (late 1789 through 1790) exist to extend the circulation series before the
     price series begins, and must not be trimmed.
 
-# Every lecture that reads this file FROM THIS REPO. Empty does not mean the
-# file is unused -- it may still be consumed from a lecture repo's own copy,
-# which is exactly what a repoint moves. Populated in the repoint PR, at the
-# same time migration.yml flips to `repointed` (PLAN, "Repoint rules").
+# Every lecture that CONSUMES this dataset. The list answers "what must be
+# rebuilt if these bytes change", so it also names a consumer that still reads
+# a local copy rather than this repo -- such an entry carries a `note` saying
+# so, and is the only machine-readable trace of that divergence. Empty means
+# nothing consumes it yet. Populated in the repoint PR, at the same time
+# migration.yml flips to `repointed` (PLAN, "Repoint rules").
 consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/french_rev.md
@@ -98,7 +100,11 @@ consumers:
     file: lectures/french_rev.md
   - repo: QuantEcon/test-actions-lecture-intro
     file: lectures/french_rev.md
-    # reads a local datasets/ copy, not this file — see ws#46
+    note: >
+      Reads a local `datasets/` copy, not this file. A PARTIAL repoint: the
+      three .xlsx reads in the same lecture were repointed and these two .npy
+      reads were not, and the lecture is outside the canary's build set so
+      nothing fails. Tracked in QuantEcon/workspace-lectures#46.
 
 # ---------------------------------------------------------------------------
 # Builder

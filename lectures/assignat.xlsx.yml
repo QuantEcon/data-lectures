@@ -103,10 +103,12 @@ schema:
   row_count_floor: null           # per-range, declared above
   known_nulls: {}
 
-# Every lecture that reads this file FROM THIS REPO. Empty does not mean the
-# file is unused -- it may still be consumed from a lecture repo's own copy,
-# which is exactly what a repoint moves. Populated in the repoint PR, at the
-# same time migration.yml flips to `repointed` (PLAN, "Repoint rules").
+# Every lecture that CONSUMES this dataset. The list answers "what must be
+# rebuilt if these bytes change", so it also names a consumer that still reads
+# a local copy rather than this repo -- such an entry carries a `note` saying
+# so, and is the only machine-readable trace of that divergence. Empty means
+# nothing consumes it yet. Populated in the repoint PR, at the same time
+# migration.yml flips to `repointed` (PLAN, "Repoint rules").
 consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/french_rev.md
