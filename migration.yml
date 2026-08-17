@@ -718,7 +718,7 @@ datasets:
     status: landed
     prior_pattern: local-path
     landed:
-      pr: QuantEcon/data-lectures#PR
+      pr: QuantEcon/data-lectures#92
       date: 2026-08-17
     repoints: []
     cutover: null
@@ -728,7 +728,7 @@ datasets:
     status: landed
     prior_pattern: local-path
     landed:
-      pr: QuantEcon/data-lectures#PR
+      pr: QuantEcon/data-lectures#92
       date: 2026-08-17
     repoints: []
     cutover: null
@@ -741,7 +741,7 @@ datasets:
     status: landed
     prior_pattern: own-repo
     landed:
-      pr: QuantEcon/data-lectures#PR
+      pr: QuantEcon/data-lectures#92
       date: 2026-08-17
     repoints: []
     cutover: null
