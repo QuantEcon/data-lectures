@@ -22,14 +22,6 @@ datasets:
     description: ACS occupation summary
     provenance: constructed-lost
     note: construction (ACS filters, grouping, sorting) described in lecture prose only
-  bbh_macro_quarterly.csv:
-    description: Macro quarterly series (Bhandari et al.)
-    provenance: constructed-lost
-    note: extracted from the paper's replication package (Zenodo DOI, CC BY 4.0); extraction not scripted
-  bbh_michigan_monthly.csv:
-    description: Michigan survey monthly series (Bhandari et al.)
-    provenance: constructed-lost
-    note: same Zenodo replication package; extraction not scripted
   dataBHS.mat:
     description: US consumption/income series, MATLAB replication bundle
     provenance: verbatim
@@ -50,10 +42,6 @@ datasets:
       all. Two of the four repos also commit a copy the %%file cell overwrites
       before reading (intro, dp) — those are shadowed; jax and wasm commit no
       copy at all, which is the cleaner shape
-  hansen_jagannathan_1991_data.json:
-    description: Hansen–Jagannathan (1991) asset-returns bundle
-    provenance: constructed-lost
-    note: lecture documents 3 sources (FRED yields deflated by CPIAUCSL, …); no build script
   test_pwt.csv:
     description: Penn World Table 7.0 extract
     provenance: author-assembled

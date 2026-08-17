@@ -1,0 +1,367 @@
+# Manifest for hansen_jagannathan_1991_data.json — migrated out of
+# QuantEcon/lecture-python-advanced.myst, where it sat at
+# lectures/_static/lecture_specific/hansen_jagannathan_1991/ and was already
+# read over that repo's own raw URL (PLAN Phase 8, wave C1).
+#
+# READ THE `source` NOTE FIRST. These are NOT Hansen and Jagannathan's data.
+# The paper is the specification being replicated; every number here is a
+# modern reconstruction from Robert Shiller's public workbooks and from FRED,
+# standing in for the CRSP/Fama return and bill files the authors used. The
+# lecture says so itself ("our FRED proxy differs from the original CRSP bill
+# data", "FRED proxy data"). A reader who takes this file for the paper's
+# dataset will misread every number in it.
+#
+# THE `monthly.cons_ratio` COLUMN IS MISLABELLED AND IS NOT CONSUMPTION. It is
+# the growth rate of (DNDGRG3M086SBEA + DSERRG3M086SBEA) / POPTHM — the sum of
+# two chain-type PRICE indices divided by population, i.e. roughly PCE
+# inflation minus population growth. No lecture reads it (verified by grep:
+# the only reads of the monthly table are `stock` and `bill`), so nothing
+# published today is wrong because of it — but it must not be adopted by a new
+# consumer as written. See `schema.tables[monthly]` and the open item at the
+# foot of this file.
+#
+# FIRST .json in the published tree. `schema.format` is free-form and
+# unvalidated — nothing in scripts/ or .github/scripts/ reads `format`,
+# `columns` or `tables` — and build_audit.py's DATA_EXT already admits
+# ".json", so this file needs no tooling change. The `tables:` block below is
+# a three-table analogue of the `sheets:` structure the Excel manifests use
+# (dette.xlsx.yml, mpd2020.xlsx.yml): `schema.columns` models one flat table
+# and cannot express a bundle.
+
+filename: hansen_jagannathan_1991_data.json
+title: Hansen-Jagannathan (1991) replication — US asset returns 1891-1986, with annual consumption (three-table bundle)
+description: >
+  A three-table bundle serving the `hansen_jagannathan_1991` lecture: `annual`
+  (gross real stock and one-year bond returns plus a real per-capita
+  consumption level, 1891-1985), `monthly` (gross real stock and Treasury-bill
+  returns, 1959:3-1986:12), and `quarterly` (gross real three-month
+  holding-period returns on 3-, 6-, 9- and 12-month bills, observed monthly
+  1964:7-1986:12). Every column is a gross ratio near 1, not a percentage and
+  not a net return — except `annual.consumption`, which is a level, and
+  `annual.year`. Reconstructed from Shiller's workbooks and FRED rather than
+  taken from the paper — see the source note.
+
+# Constructed: every value is computed from upstream series by our processing.
+# Nothing here is republished as distributed — with the single exception noted
+# under `license`, that `annual.bond` reproduces 95 values of one Shiller
+# column unchanged.
+class: constructed
+
+source:
+  name: Robert J. Shiller's public data workbooks (chapt26.xlsx, ie_data.xls) and FRED
+  url: http://www.econ.yale.edu/~shiller/data.htm
+  doi: null                     # neither provider issues one for these series
+  version: >
+    Shiller's workbooks are undated, unversioned and updated in place. As read
+    on 2026-08-17: chapt26.xlsx, 108,566 B, sha256
+    d255bb1230a9a94c450ee4738d914ec8c6c79ceae58f1cc89559c7f40fa7c9c0;
+    ie_data.xls, 1,628,672 B, sha256
+    0df9392b7dacf91f756e92c8db508ad903c4588b43f3253680eec3dd8b40db68. FRED
+    series are unversioned and revisable; the 1891-1986 windows used here
+    reproduced exactly on that date (see integrity.upstream).
+  series: >
+    Shiller chapt26.xlsx, sheet `Data`: column P "Return on S&P Composite"
+    (annual real total return), column H "RealR" (real one-year interest
+    rate, gross), column I "C" (real per-capita consumption, chained 2005
+    dollars);
+    Shiller ie_data.xls, sheet `Data`: column J "Real Total Return Price"
+    (monthly);
+    FRED TB3MS (3-month Treasury bill secondary market rate, monthly);
+    FRED TB6MS (6-month Treasury bill secondary market rate, monthly);
+    FRED GS1 (1-year Treasury constant maturity rate, monthly);
+    FRED CPIAUCSL (CPI-U all items, SA, 1982-84=100);
+    FRED DNDGRG3M086SBEA and DSERRG3M086SBEA (PCE chain-type PRICE indices,
+    nondurable goods and services, 2017=100, SA, BEA);
+    FRED POPTHM (US population, monthly, thousands).
+  citation: >
+    Constructed by QuantEcon from Robert J. Shiller's public stock-market and
+    consumption workbooks (Yale University) and from Board of Governors, BLS,
+    BEA and Census series retrieved via FRED (Federal Reserve Bank of St.
+    Louis). Replicates the empirical exhibits of Hansen, Lars Peter, and Ravi
+    Jagannathan. 1991. "Implications of Security Market Data for Models of
+    Dynamic Economies." Journal of Political Economy 99 (2): 225-262.
+    doi:10.1086/261749.
+  note: >
+    NOT the authors' data, and not a faithful copy of it. Hansen and
+    Jagannathan used CRSP value-weighted NYSE returns, the Fama Treasury bill
+    term-structure files, and NIPA consumption; CRSP is a paid subscription
+    product, so every leg here is a public substitute. The annual stock leg is
+    Shiller's S&P Composite real total return, the annual bond leg is his real
+    one-year rate, the monthly stock leg is his Irrational Exuberance real
+    total-return index, and the bill legs are built from FRED yields deflated
+    by CPIAUCSL. The quarterly table has no 9-month upstream at all: its 9-month
+    yield is the arithmetic mean of TB6MS and GS1 — an interpolation of ours,
+    not a published series. The lecture states the consequence plainly at two
+    places ("Because our FRED proxy differs from the original CRSP bill data,
+    the levels differ slightly, but the qualitative features match"; "Here we
+    use just the 2 base payoffs (stock and bill returns) from FRED proxy
+    data"). The paper is the specification; the bytes are ours.
+
+license:
+  name: null
+  url: http://www.econ.yale.edu/~shiller/data.htm
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution"). Split answer across the two providers, and neither half
+  # has a licence to name.
+  redistribution: permitted
+  verified: 2026-08-17
+  note: >
+    The seven FRED inputs are U.S. federal statistics — Board of Governors
+    H.15 Treasury rates, the BLS consumer price index, BEA PCE price indices
+    and the BEA/Census population series — which are U.S. Government works in
+    the public domain; FRED is the delivery channel, not the rights holder,
+    and none is among the third-party series FRED re-serves under restriction.
+    Shiller's data page states NO licence, NO redistribution terms and carries
+    no copyright notice (checked 2026-08-17); ie_data.xls ships a `Disclaimer`
+    sheet whose only content is an accuracy disclaimer ("developed by Robert
+    J. Shiller using various public sources. Neither Robert J. Shiller nor any
+    affiliates or consultants ... guarantee the accuracy or completeness"), not
+    a grant. `permitted` therefore rests on what is actually published here.
+    The six FRED-derived columns are transformed past recovery, and
+    `monthly.stock` publishes only ratios of a level index. The four `annual`
+    columns are the exposure, and it is worth naming precisely: `annual.bond`
+    reproduces 95 values of Shiller's chapt26 `RealR` column unchanged
+    (bit-identical, measured 2026-08-17), `annual.stock` is one addition away
+    from his `Return` column, `annual.year` is his year column, and
+    `annual.consumption` is his `C` column times a constant. An inherited exposure,
+    served publicly from lecture-python-advanced.myst since 2026-04-10. No
+    permission has been sought from Yale or from Professor Shiller.
+    Registered for licence review on QuantEcon/data-lectures#35.
+
+retrieved: null                 # no upstream-retrieval date was recorded, and
+                                # none is reconstructed from git history
+                                # (AGENTS.md, "Two inherited-file states"). The
+                                # gap is answered by content instead: a
+                                # from-scratch re-derivation from the live
+                                # upstreams on 2026-08-17 reproduced every one
+                                # of the 2,462 data cells to within 4 ULP, so the
+                                # vintage is pinned by value rather than by a
+                                # date. For context and NOT as a retrieval
+                                # date: the bytes landed in
+                                # lecture-python-advanced.myst in 95d83cd
+                                # (#320), 2026-04-10.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy the lecture reads today — sha256 c81333f3...,
+# 63,456 B, against lecture-python-advanced.myst @ 00057ba, and against a live
+# GET of the raw URL the lecture's data cell uses (HTTP 200, 63,456 B, same
+# digest, 2026-08-17). No translation of advanced exists, so there is no second
+# committed copy to reconcile. A repoint to this file therefore cannot change a
+# figure.
+
+integrity:
+  sha256: c81333f372a23465a593db592b04070b7b5732b4919348423d9534942f610029
+  upstream:
+    # `verified` in the sense AGENTS.md defines for a constructed dataset —
+    # re-derive and compare. There is no committed builder to re-run, so the
+    # construction was recovered first (recorded in full under `builder` below)
+    # and then evaluated against the live upstreams.
+    status: verified
+    date: 2026-08-17
+    against: >
+      http://www.econ.yale.edu/~shiller/data/chapt26.xlsx;
+      http://www.econ.yale.edu/~shiller/data/ie_data.xls;
+      https://fred.stlouisfed.org/graph/fredgraph.csv?id={TB3MS,TB6MS,GS1,
+      CPIAUCSL,DNDGRG3M086SBEA,DSERRG3M086SBEA,POPTHM}
+    note: >
+      All eleven columns reproduce from the live upstreams. The ten gross-ratio
+      columns are near 1 and reproduce to a maximum absolute difference of
+      4.44e-16 (1-4 ULP); annual.consumption is a level running 2412.16 to
+      17039.72 and reproduces to 3.64e-12, which is 1 ULP at its top end, so the
+      whole-file maximum absolute difference is 3.64e-12 rather than 4.44e-16.
+      Six columns are bitwise identical end to
+      end: annual.year (95/95), annual.bond (95/95), monthly.bill (334/334),
+      monthly.cons_ratio (334/334), quarterly.r3 (270/270), quarterly.r6
+      (270/270); quarterly.r9 and quarterly.r12 are bitwise identical in
+      269/270 rows. The two stock legs agree everywhere to <=4 ULP (annual.stock <=2,
+      monthly.stock <=4) but are
+      bitwise identical in only about half their rows (annual.stock 46/95,
+      monthly.stock 154/334), which is why the recovered builder is recorded
+      rather than committed — see `builder`. One element is NOT verified: the
+      level of annual.consumption carries a constant factor of
+      0.8938191876245914 relative to Shiller's published series, recovered by
+      division rather than derived, and of unknown origin. It reproduces the
+      column to <=2 ULP (43 of 95 values bitwise identical, max abs diff
+      3.64e-12); the observed per-row ratios span six distinct doubles,
+      0.8938191876245912 to 0.8938191876245918. It changes nothing the lecture prints —
+      consumption enters only as the ratio c[t+1]/c[t], and those ratios are
+      agree with Shiller's to <=3 ULP (max abs diff 4.44e-16, bitwise identical
+      in 49 of 94 rows) — but the units
+      of the column as published cannot be stated with confidence. Two
+      candidate explanations remain live (a rescale applied by the original
+      construction, or an older Shiller vintage on a different dollar base);
+      web.archive.org returned HTTP 503 on both its replay and CDX endpoints on
+      this date, so no archived vintage could be checked and the snapshot test
+      that would settle it is still to be run.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-17.
+#
+# This is a BUNDLE, not a table: the top-level JSON object has three keys, each
+# holding a pandas `orient='split'` dict {columns, index, data}. The consuming
+# lecture rebuilds each with
+#   pd.DataFrame(raw[k]["data"], columns=raw[k]["columns"], index=raw[k]["index"])
+# so BOTH the column order and the index are load-bearing — a consumer that
+# reorders either silently changes what it reads. Note that every index entry is
+# a STRING, including the monthly and quarterly date stamps ("1959-03-31
+# 00:00:00"): the frames come back with an object index, not a DatetimeIndex.
+# The whole file is one line with no trailing newline.
+#
+# `tables:` is the bundle analogue of the `sheets:` block in dette.xlsx.yml and
+# mpd2020.xlsx.yml — same intent (one entry per readable sub-table, each with
+# its own shape, columns and nulls), same standing as an undocumented but
+# established local extension. No tooling reads it.
+
+schema:
+  format: json
+  bundle_orient: split          # each top-level value is {columns, index, data}
+  table_count: 3
+  tables:
+    - name: annual
+      shape: [95, 4]
+      index: >
+        positional strings "0"-"94" — a RangeIndex serialised as text, carrying
+        no information; the calendar year is the `year` COLUMN
+      columns:
+        - {name: year, dtype: float64, description: "calendar year, 1891-1985, stored as a float (1891.0). Unpacked by the lecture but never used"}
+        - {name: stock, dtype: float64, description: "gross real annual total return on the S&P Composite — Shiller chapt26 `Data` column P plus 1. Observed 0.635-1.514"}
+        - {name: bond, dtype: float64, description: "gross real annual one-year interest rate — Shiller chapt26 `Data` column H (`RealR`), reproduced unchanged. Observed 0.853-1.251"}
+        - {name: consumption, dtype: float64, description: "real per-capita consumption LEVEL, not a ratio: 0.8938191876245914 x Shiller chapt26 `Data` column C. Observed 2412.2-17039.7; the unit is nominally chained 2005 dollars but the constant factor is unexplained (see integrity.upstream). Only its growth ratio is ever used"}
+      known_nulls: {}
+      date_range: {start: 1891, end: 1985}
+      description: >
+        The lecture's headline exhibit. `stock` and `bond` are the two payoffs
+        of the annual HJ frontier; `consumption` drives the CRRA IMRS points
+        m = 0.95 (c[t+1]/c[t])^g for g = 0,-1,...,-30.
+    - name: monthly
+      shape: [334, 3]
+      index: >
+        month-end timestamps as STRINGS, "1959-03-31 00:00:00" to "1986-12-31
+        00:00:00" — an unbroken 334-month grid
+      columns:
+        - {name: stock, dtype: float64, description: "gross real monthly total return on the S&P Composite — the ratio of consecutive months of Shiller ie_data.xls `Real Total Return Price`. Observed 0.879-1.119"}
+        - {name: bill, dtype: float64, description: "gross real monthly Treasury-bill return, (1 + TB3MS/100/12) deflated by the realised CPIAUCSL inflation of the SAME month. Observed 0.989-1.011"}
+        - {name: cons_ratio, dtype: float64, description: "MISLABELLED — not consumption. The growth rate of (DNDGRG3M086SBEA + DSERRG3M086SBEA)/POPTHM, i.e. a sum of two chain-type PRICE indices per head; economically it is PCE inflation net of population growth. Observed 0.991-1.016. Read by nothing"}
+      known_nulls: {}
+      date_range: {start: 1959-03-31, end: 1986-12-31}
+      description: >
+        Base payoffs for the monthly frontier in the time-nonseparable
+        section. Only `stock` and `bill` are consumed.
+    - name: quarterly
+      shape: [270, 4]
+      index: >
+        month-end timestamps as STRINGS, "1964-07-31 00:00:00" to "1986-12-31
+        00:00:00" — MONTHLY stamps on an unbroken 270-month grid. "Quarterly"
+        names the three-month HOLDING PERIOD, not the observation frequency:
+        the returns overlap, and consecutive rows share two months
+      columns:
+        - {name: r3, dtype: float64, description: "gross real three-month holding-period return on a 3-month bill (held to maturity), from TB3MS deflated by CPIAUCSL over t..t+3. Observed 0.985-1.029"}
+        - {name: r6, dtype: float64, description: "same, 6-month bill sold at t+3 as a 3-month bill (TB6MS -> TB3MS). Observed 0.980-1.035"}
+        - {name: r9, dtype: float64, description: "same, 9-month bill sold at t+3 as a 6-month bill. The 9-month yield is OURS — the arithmetic mean of TB6MS and GS1, not a published series. Observed 0.973-1.046"}
+        - {name: r12, dtype: float64, description: "same, 12-month bill (GS1) sold at t+3 as a 9-month bill (interpolated as above). Observed 0.964-1.063"}
+      known_nulls: {}
+      date_range: {start: 1964-07-31, end: 1986-12-31}
+      description: >
+        The four-asset menu behind the duality figures and the replication of
+        the paper's Figure 6. All four columns are consumed. The 1964:7 start
+        is NOT forced by data availability (TB6MS begins 1958-12, GS1
+        1953-04) and no reason for it is recorded anywhere.
+  row_count_floor: null         # per-table, declared above; the file is a
+                                # frozen historical extract and does not grow
+  date_range: {start: 1891, end: 1986}
+  known_nulls: {}               # genuinely none — 2,462 data cells, zero
+                                # nulls across all three tables
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# Every lecture that CONSUMES this dataset. The list answers "what must be
+# rebuilt if these bytes change", so it also names a consumer that still reads a
+# local copy rather than this repo — such an entry carries a `note` saying so,
+# and is the only machine-readable trace of that divergence. Empty means nothing
+# consumes it yet. The one consumer below reads advanced.myst's own raw URL
+# today; migration.yml flips to `repointed` when the repoint PR merges (PLAN,
+# "Repoint rules").
+#
+# That consumer is QuantEcon/lecture-python-advanced.myst,
+# lectures/hansen_jagannathan_1991.md — one file, one read, established by
+# BASENAME grep across all nine lecture clones (the URL is split across three
+# adjacent Python string literals at :183-185, so a whole-URL grep returns a
+# confident zero). Two other lectures name `hansen_jagannathan_1991`, but only
+# as {doc} cross-references: doubts_or_variability.md:200 and
+# risk_aversion_or_mistaken_beliefs.md:1673,1838.
+#
+# A third reference-holder that is NOT a repoint target: the generated mirror
+# QuantEcon/lecture-python-advanced.notebooks bakes the same URL into
+# hansen_jagannathan_1991.ipynb (HTTP 200, verified 2026-08-17). It self-heals
+# after a publish tag while the lecture still exists in the source repo, so it
+# is deliberately not listed (wave A4 precedent).
+consumers:
+  - repo: QuantEcon/lecture-python-advanced.myst
+    file: lectures/hansen_jagannathan_1991.md
+    note: >
+      Reads its own copy over an own-repo raw URL
+      (`lecture-python-advanced.myst/.../hansen_jagannathan_1991/`), not this
+      file — the repoint PR follows this one, and migration.yml records the
+      dataset as `landed` until it merges. Listed now because a correction to
+      these bytes must reach the lecture regardless of where it currently reads
+      them from (QuantEcon/data-lectures#91).
+
+# ---------------------------------------------------------------------------
+# Builder
+# ---------------------------------------------------------------------------
+# `unrecovered`, but unusually for that state the construction is FULLY
+# SPECIFIED rather than lost — recovered by re-derivation on 2026-08-17 and
+# recorded here so Phase 9 is a finishing job, not an investigation. The reason
+# it is not `committed` is precise: a builder written to this specification
+# reproduces the file to within 4 ULP but NOT byte for byte (63,457 B against
+# 63,456 B; 2,179 of 2,462 data cells bitwise identical), so committing it
+# would name a builder that does not produce the bytes beside it. Two residues
+# block byte-exactness — the arithmetic form used for the two Shiller-derived
+# stock legs, which agree to <=4 ULP but match bitwise only about half the
+# time under every form tried (1+Return, exp(ln(1+ret)), the RealP/RealD
+# quotient, and the pandas ratio/pct_change variants), and the unexplained
+# 0.8938191876245914 factor on annual.consumption. Everything else is exact.
+#
+# The recovered specification, verbatim enough to re-implement:
+#
+#   annual (95 rows, Shiller chapt26.xlsx sheet `Data`, header rows 0-7):
+#     year        = column A, 1891..1985, as float
+#     stock       = 1 + column P ("Return on S&P Composite")
+#     bond        = column H ("RealR")
+#     consumption = 0.8938191876245914 * column I ("C")
+#     index       = str(i) for a 0-based RangeIndex
+#
+#   monthly (334 rows, 1959-03..1986-12):
+#     stock       = RTRP[t]/RTRP[t-1], RTRP = ie_data.xls sheet `Data`
+#                   column J ("Real Total Return Price")
+#     bill        = (1 + TB3MS[t]/100/12) / (CPIAUCSL[t]/CPIAUCSL[t-1])
+#                   — note the BACKWARD deflator
+#     cons_ratio  = x[t]/x[t-1] with
+#                   x = (DNDGRG3M086SBEA + DSERRG3M086SBEA)/POPTHM
+#     index       = str(month-end Timestamp)
+#
+#   quarterly (270 rows, 1964-07..1986-12, monthly stamps):
+#     y3 = TB3MS, y6 = TB6MS, y12 = GS1, y9 = (TB6MS + GS1)/2
+#     P(n,t) = 1 / (1 + (y_n[t]/100) * (n/12))      # simple discount, P(0,.) = 1
+#     r_n[t] = [P(n-3, t+3) / P(n, t)] / (CPIAUCSL[t+3]/CPIAUCSL[t])
+#                   — note the FORWARD deflator, opposite to `monthly.bill`
+#     index       = str(month-end Timestamp)
+#
+#   serialisation: json.dumps of
+#     {name: {"columns": [...], "index": [str(i) ...], "data": df.values.tolist()}}
+#   with default separators, one line, no trailing newline.
+#
+# Anyone completing this should also settle the two open items recorded above
+# (the consumption scale factor, and the mislabelled `monthly.cons_ratio`);
+# both are data questions for the lecture's author, not infrastructure calls,
+# and per AGENTS.md "a migration moves bytes; it does not update them" neither
+# is fixed here.
+builder: null
+builder_status: unrecovered

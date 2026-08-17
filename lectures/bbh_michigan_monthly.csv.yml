@@ -1,0 +1,256 @@
+# Manifest for bbh_michigan_monthly.csv — migrated out of
+# QuantEcon/lecture-python-advanced.myst, where it sat at
+# lectures/_static/lecture_specific/subjective_beliefs_business_cycles/ and was
+# read by RELATIVE PATH, not by URL (PLAN Phase 8, wave C1).
+#
+# "BBH" is Bhandari, Borovička and Ho. Established from the lecture's own
+# citation key `bhandari2025survey` (quant-econ.bib:3135-3144 in
+# lecture-python-advanced.myst) and confirmed by the Zenodo deposit's creator
+# list, not inferred from the filename.
+#
+# THE EXTRACTION WAS RECOVERABLE. scripts/audit_annotations.yml carried this
+# file as `provenance: constructed-lost`, note "same Zenodo replication package;
+# extraction not scripted". That was right about the source and wrong about the
+# loss: all five columns are copied unchanged from three members of the deposit,
+# and builders/bbh_michigan_monthly.py — written during this migration, not
+# inherited — reproduces the committed bytes exactly. Delete the stale
+# annotation when this manifest lands (AGENTS.md, "The audit dashboard stays
+# truthful").
+#
+# READ THE LICENCE NOTE. Four of the five columns are University of Michigan
+# Surveys of Consumers aggregates, and Michigan's usage agreement forbids
+# redistribution without its express written consent. The CC BY 4.0 grant on the
+# manifest below is the depositors', not Michigan's. `redistribution: restricted`.
+#
+# bbh_macro_quarterly.csv is the sibling extract from the same deposit, read by
+# the same lecture and migrating in the same wave; it carries its own manifest.
+
+filename: bbh_michigan_monthly.csv
+title: Michigan Surveys of Consumers monthly aggregates and the US unemployment rate, 1978-01 to 2020-03 (BBH replication extract)
+description: >
+  Five monthly series the `subjective_beliefs_business_cycles` lecture uses to
+  build household belief wedges: the mean one-year-ahead inflation expectation
+  from the University of Michigan Surveys of Consumers, the three response
+  shares to Michigan's one-year-ahead unemployment question ("more", "about the
+  same", "less"), and the US civilian unemployment rate. All five are
+  percentages or percentage points. Extracted unchanged from the Bhandari,
+  Borovička and Ho (2025) replication package on Zenodo — the extraction picks
+  five columns out of the 375 those three members carry (273 + 81 + 21)
+  and performs no arithmetic.
+
+# Constructed, not verbatim: no member of the upstream deposit looks like this
+# file. It is a five-column selection out of three separate members (two CSVs
+# and one sheet of an .xlsx), renamed, restricted to the all-households
+# demographic cell and windowed. Every value is copied bit for bit; the
+# construction is entirely selection and join.
+class: constructed
+
+source:
+  name: >
+    Bhandari, Borovička and Ho replication package (Zenodo), carrying University
+    of Michigan Surveys of Consumers published aggregates and a US Bureau of
+    Labor Statistics series retrieved via FRED
+  url: https://doi.org/10.5281/zenodo.10194324
+  doi: 10.5281/zenodo.10194324
+  version: >
+    Zenodo record 10194324, published 2023-11-22, a single 198,817,944-byte
+    archive "replication package.zip", md5 6e33f9b9e70135cbf3304275d1c5d604
+    (read from the Zenodo API 2026-08-17; the builder asserts both). Within it
+    the two Michigan members are stamped 2021-12-17 and the FRED workbook
+    2023-11-20 — so this file is a 2021 vintage of the survey aggregates and a
+    2023 vintage of the unemployment rate, not today's.
+  series: >
+    px1_mean   <- "data input/Michigan/PX1_M.csv", column px1_mean_all;
+    share_more <- "data input/Michigan/UMEX_M.csv", column umex_u_all;
+    share_same <- "data input/Michigan/UMEX_M.csv", column umex_s_all;
+    share_less <- "data input/Michigan/UMEX_M.csv", column umex_f_all;
+    unrate     <- "data input/FRED/data_FRED.xlsx", sheet FRED_M, column UNRATE
+                  (FRED series UNRATE, BLS Current Population Survey).
+    The Michigan members are downloads from data.sca.isr.umich.edu (named as the
+    source by the deposit's own "data input/Michigan/data source.txt"): PX1_M is
+    Michigan table 32, "Expected Change in Prices During the Next Year", and
+    UMEX_M is table 30, "Expected Change in Unemployment During the Next Year",
+    both in Michigan's time-series-demographics export format.
+  citation: >
+    Extracted by QuantEcon from Bhandari, Anmol, Jaroslav Borovička, and Paul
+    Ho. 2023. "Replication package for: Survey data and subjective beliefs in
+    business cycle models." Zenodo. doi:10.5281/zenodo.10194324. Underlying
+    data: University of Michigan, Surveys of Consumers (Ann Arbor, MI), and
+    U.S. Bureau of Labor Statistics, Unemployment Rate [UNRATE], retrieved from
+    FRED, Federal Reserve Bank of St. Louis. Accompanies Bhandari, Anmol,
+    Jaroslav Borovička, and Paul Ho. 2025. "Survey Data and Subjective Beliefs
+    in Business Cycle Models." Review of Economic Studies 92 (3): 1375-1437.
+    doi:10.1093/restud/rdae054.
+  note: >
+    Two hops, and the second one matters. QuantEcon's bytes come from the Zenodo
+    deposit, not from Michigan or FRED directly, and that is deliberate: the
+    deposit is DOI-pinned and immutable, so it fixes the vintage the paper used.
+    Refetching live would silently adopt a newer one — measurably so for the
+    unemployment column, where today's FRED UNRATE differs from these bytes on 3
+    of 507 months (2019-04, 2019-08, 2020-01, each by 0.1pp, seasonal-factor
+    revisions). That is a new-vintage question, not a correction, and per
+    AGENTS.md it would need a new filename; the builder therefore reads the
+    deposit and not the live sources.
+    Corroboration that the Michigan members really are Michigan's published
+    tables rather than the authors' own aggregation of the microdata (the
+    deposit also ships a 105 MB cross-section extract): PX1_M.csv's px1_med_all
+    column matches FRED series MICH — "University of Michigan: Inflation
+    Expectation", the published MEDIAN — on all 507 months of this window with
+    max abs diff 0. The column published here is the MEAN, which FRED does not
+    mirror, and which differs from MICH on 504 of those 507 months.
+
+license:
+  name: CC-BY-4.0
+  url: https://zenodo.org/records/10194324
+  # Recorded as found on the immediate source, per the record-and-track policy
+  # (AGENTS.md, "Licensing and attribution"). The gate answer is `restricted`
+  # because the layer beneath the deposit says so — see the note.
+  redistribution: restricted
+  verified: 2026-08-17
+  note: >
+    Split answer, and the halves disagree. The Zenodo record declares
+    "cc-by-4.0" (Zenodo API, metadata.license.id, read 2026-08-17), and the
+    lecture repeats that claim at subjective_beliefs_business_cycles.md:133-136.
+    But four of the five columns are University of Michigan Surveys of Consumers
+    aggregates, and Michigan's usage agreement
+    (https://data.sca.isr.umich.edu/agreement.php, read 2026-08-17) states: "The
+    data and other materials available through the Surveys of Consumers website
+    are the property of the University of Michigan and are protected by
+    copyright and other intellectual property laws. The data and materials
+    obtained from the website may be displayed, reformatted, and printed for
+    your organization's use. You agree not to reproduce, retransmit, distribute,
+    sell, publish, or broadcast the data and materials from the Surveys of
+    Consumers website without the express written consent of the University of
+    Michigan." The CC BY 4.0 grant is the depositors', who are not the rights
+    holder for that material; whether they obtained Michigan's written consent
+    is not stated anywhere in the deposit and was not established. The fifth
+    column is different and clean: UNRATE is a U.S. Bureau of Labor Statistics
+    series, a U.S. Government work in the public domain, with FRED as the
+    delivery channel and not the rights holder.
+    Two facts that bear on how much is at stake, recorded so the review does not
+    have to re-derive them: what is published here is four aggregate columns for
+    the all-households cell only — not the demographic breakdowns the deposit
+    ships, and not the microdata — and these are the same published aggregates
+    Michigan puts on its own tables pages. Michigan's terms bind someone who
+    obtains the data from its website; QuantEcon obtained them from a CC BY 4.0
+    deposit. That argument is not obviously wrong and is not obviously enough.
+    Inherited exposure: served publicly from lecture-python-advanced.myst since
+    2026-06-12, and reachable today at
+    https://python-advanced.quantecon.org/_static/lecture_specific/subjective_beliefs_business_cycles/bbh_michigan_monthly.csv
+    (HTTP 200, byte-identical). No permission has been sought from the
+    University of Michigan. Licensing does not gate migration for an inherited
+    file (AGENTS.md); registered for licence review on
+    QuantEcon/data-lectures#35, where it is the strongest candidate in the
+    corpus for a genuine redistribution restriction.
+
+retrieved: null                 # no upstream-retrieval date was recorded when
+                                # these bytes entered the lecture repo, and
+                                # AGENTS.md forbids reconstructing one from git
+                                # history. It costs nothing here: the upstream
+                                # is an immutable DOI deposit and a builder
+                                # re-run on 2026-08-17 reproduced this file byte
+                                # for byte, so the vintage is pinned by content
+                                # rather than by a date. For context and NOT as
+                                # a retrieval date, the bytes landed in
+                                # lecture-python-advanced.myst in a192fbf (#343),
+                                # 2026-06-12.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy the lecture reads today — sha256 567efe5a…
+# against lecture-python-advanced.myst @ 00057ba,
+# lectures/_static/lecture_specific/subjective_beliefs_business_cycles/, and
+# against the live published copy at python-advanced.quantecon.org. Verified
+# 2026-08-17; a repoint to this file therefore cannot change a figure.
+
+integrity:
+  sha256: 567efe5a009a30bcfa32c30746bdaa97ce82ba611a98c03d127a662792319426
+  upstream:
+    # `verified` in the sense AGENTS.md defines for a constructed dataset —
+    # "re-run the builder and compare". Run twice on the date below against the
+    # live Zenodo deposit, both runs reproducing this file byte for byte
+    # (sha256 unchanged, cmp exit 0). That run is what licenses `committed`
+    # rather than `committed-frozen` on the builder below.
+    status: verified
+    date: 2026-08-17
+    against: builders/bbh_michigan_monthly.py
+    note: >
+      The deposit is DOI-pinned and immutable, so `verified` here is a stronger
+      claim than for a live-API source. Deliberately NOT `diverged`: the 3-month
+      0.1pp gap against today's FRED UNRATE (documented in source.note) is a
+      difference from a source this builder does not read, not from the upstream
+      it does. If a future decision adopts a live-FRED vintage, that is a new
+      filename, not an edit here.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-17 with pandas 2.3.3, and asserted
+# by the builder's validate() stage on every run.
+
+schema:
+  format: csv
+  columns:
+    - {name: yyyymm, dtype: int64, description: "month stamp as the integer YYYYMM, 197801 to 202003 on an unbroken monthly grid — the CSV index column"}
+    - {name: px1_mean, dtype: float64, description: "mean expected change in prices over the next 12 months, percent per year, all households (Michigan table 32 / PX1). Observed 1.0-13.8. This is the MEAN; FRED's MICH series is the median and is a different series"}
+    - {name: share_more, dtype: int64, description: "percent of households expecting MORE unemployment over the next year, all households (Michigan table 30 / UMEX). Whole percents, observed 13-72"}
+    - {name: share_same, dtype: int64, description: "percent expecting ABOUT THE SAME unemployment. Whole percents, observed 20-67"}
+    - {name: share_less, dtype: int64, description: "percent expecting LESS unemployment. Whole percents, observed 3-42"}
+    - {name: unrate, dtype: float64, description: "US civilian unemployment rate, percent, seasonally adjusted, monthly (FRED UNRATE / BLS). Observed 3.5-10.8"}
+  row_count_floor: 507          # exact by design, not a floor with headroom: the
+                                # window is frozen at 1978-01..2020-03 and does
+                                # not grow. validate() asserts equality.
+  date_range: {start: 197801, end: 202003}   # in the file's own YYYYMM integers
+  known_nulls: {}               # genuinely none — 507 complete rows, 0 nulls in
+                                # every column
+  # The three shares are the answer distribution NET of "don't know", so they sum
+  # to at most 100 and not to exactly 100: observed totals run 94-100, equal to
+  # 100 on only 99 of 507 months. The lecture depends on this — it renormalises
+  # by their sum before applying Carlson-Parkin — so it is a property of the data,
+  # not a defect. The deposit's umex_dk_all column carries the residual and is
+  # not published here.
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# One consuming repo, one lecture file, established by an authenticated Trees-API
+# sweep of all 278 QuantEcon repos on 2026-08-17 (276 scanned, 2 empty, 0 errors)
+# plus a content grep of every local clone. `gh repo list` shows no translation
+# of lecture-python-advanced.myst.
+#
+# The read is a RELATIVE PATH, not a URL — `data_path + 'bbh_michigan_monthly.csv'`
+# joined at subjective_beliefs_business_cycles.md:152 (`data_path` is assigned
+# at md:149; the call wraps onto md:153). The full path string never appears in
+# the source, so a literal-path grep returns a confident ZERO — sweep by basename.
+# It must be COLLAPSED at the repoint, not patched on the stem line: the flat
+# published tree has no _static/lecture_specific/<lecture>/ segment, so editing
+# the filename alone would leave it appended to a path that no longer exists.
+# The same lecture reads bbh_macro_quarterly.csv from the same `data_path` two
+# lines earlier; both go together. A line-based grep for the whole read returns a
+# confident ZERO against the wrapped form — sweep by basename.
+#
+# There are no {download} roles and no prose references to this filename anywhere
+# in lecture-python-advanced.myst; md:152 is the only reference in the repo.
+#
+# QuantEcon/lecture-python-advanced.notebooks/subjective_beliefs_business_cycles.ipynb
+# carries the same two-line read. It is a generated mirror that self-heals after a
+# publish tag and is not a repo anyone repoints, so it is deliberately not listed
+# (wave A4 precedent) — but note the caveat recorded on workspace-lectures#45:
+# a mirror entry orphaned by a lecture's removal never self-heals.
+consumers:
+  - repo: QuantEcon/lecture-python-advanced.myst
+    file: lectures/subjective_beliefs_business_cycles.md
+    note: >
+      Reads its own copy at
+      `lectures/_static/lecture_specific/subjective_beliefs_business_cycles/`,
+      not this file — the repoint PR in lecture-python-advanced.myst follows
+      this one, and migration.yml records the dataset as `landed` until it
+      merges. Listed now because a correction to these bytes must reach the
+      lecture regardless of where it currently reads them from
+      (QuantEcon/data-lectures#91).
+
+builder: builders/bbh_michigan_monthly.py
+builder_status: committed
