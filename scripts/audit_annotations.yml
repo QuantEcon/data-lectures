@@ -74,6 +74,13 @@ api:
     series: SI.POV.GINI, NY.GDP.PCAP.KD
     pedagogy: mixed
     note: demonstrates searching for the Gini series ID with wbgapi
+  lecture-python-intro:bivariate_dist:yfinance:
+    series: AMZN, COST
+    pedagogy: incidental
+    note: >
+      two downloads in a solved exercise, fitting a bivariate normal to monthly
+      returns; the lecture points at observed_distributions for the same
+      workflow, so the fetch is the illustration's input rather than its lesson
   lecture-python-intro:fitting_distributions:yfinance:
     series: AMZN
     pedagogy: incidental
