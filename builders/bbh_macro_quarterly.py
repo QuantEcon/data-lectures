@@ -138,7 +138,12 @@ def _open_archive():
 
 def fetch():
     """Pull data_FRED.xlsx out of the Zenodo package, pinned by hash."""
-    payload = _open_archive().read(MEMBER)
+    # ZipFile owns the BufferedReader wrapping the HTTP range reader, so closing
+    # it closes the connection too. Without this the socket is left to the
+    # garbage collector, which matters because this builder is meant to be
+    # re-run -- the byte-identity check reruns it on every verification pass.
+    with _open_archive() as archive:
+        payload = archive.read(MEMBER)
     digest = hashlib.sha256(payload).hexdigest()
     if digest != MEMBER_SHA256:
         raise ValueError(

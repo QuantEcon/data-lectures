@@ -281,12 +281,15 @@ schema:
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# Every lecture that reads this file FROM THIS REPO. Empty does not mean the
-# file is unused — it is read today from lecture-python-advanced.myst's own raw
-# URL, which is exactly what the repoint moves. Populated in the repoint PR, at
-# the same time migration.yml flips to `repointed` (PLAN, "Repoint rules").
+# Every lecture that CONSUMES this dataset. The list answers "what must be
+# rebuilt if these bytes change", so it also names a consumer that still reads a
+# local copy rather than this repo — such an entry carries a `note` saying so,
+# and is the only machine-readable trace of that divergence. Empty means nothing
+# consumes it yet. The one consumer below reads advanced.myst's own raw URL
+# today; migration.yml flips to `repointed` when the repoint PR merges (PLAN,
+# "Repoint rules").
 #
-# The pending consumer is QuantEcon/lecture-python-advanced.myst,
+# That consumer is QuantEcon/lecture-python-advanced.myst,
 # lectures/hansen_jagannathan_1991.md — one file, one read, established by
 # BASENAME grep across all nine lecture clones (the URL is split across three
 # adjacent Python string literals at :183-185, so a whole-URL grep returns a
@@ -302,6 +305,13 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-advanced.myst
     file: lectures/hansen_jagannathan_1991.md
+    note: >
+      Reads its own copy over an own-repo raw URL
+      (`lecture-python-advanced.myst/.../hansen_jagannathan_1991/`), not this
+      file — the repoint PR follows this one, and migration.yml records the
+      dataset as `landed` until it merges. Listed now because a correction to
+      these bytes must reach the lecture regardless of where it currently reads
+      them from (QuantEcon/data-lectures#91).
 
 # ---------------------------------------------------------------------------
 # Builder

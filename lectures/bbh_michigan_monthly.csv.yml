@@ -243,6 +243,14 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-advanced.myst
     file: lectures/subjective_beliefs_business_cycles.md
+    note: >
+      Reads its own copy at
+      `lectures/_static/lecture_specific/subjective_beliefs_business_cycles/`,
+      not this file — the repoint PR in lecture-python-advanced.myst follows
+      this one, and migration.yml records the dataset as `landed` until it
+      merges. Listed now because a correction to these bytes must reach the
+      lecture regardless of where it currently reads them from
+      (QuantEcon/data-lectures#91).
 
 builder: builders/bbh_michigan_monthly.py
 builder_status: committed
