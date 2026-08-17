@@ -715,22 +715,28 @@ datasets:
   # whatever is on this repo's main at that moment — data first, always).
   bbh_macro_quarterly.csv:
     pilot: C1
-    status: landed
+    status: repointed
     prior_pattern: local-path
     landed:
       pr: QuantEcon/data-lectures#92
       date: 2026-08-17
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-advanced.myst
+        pr: QuantEcon/lecture-python-advanced.myst#372
+        date: 2026-08-17
     cutover: null
 
   bbh_michigan_monthly.csv:
     pilot: C1
-    status: landed
+    status: repointed
     prior_pattern: local-path
     landed:
       pr: QuantEcon/data-lectures#92
       date: 2026-08-17
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-advanced.myst
+        pr: QuantEcon/lecture-python-advanced.myst#372
+        date: 2026-08-17
     cutover: null
 
   # Already read over an own-repo raw URL rather than a local path, so deleting
@@ -738,12 +744,15 @@ datasets:
   # period. Repoint and publish before any deletion.
   hansen_jagannathan_1991_data.json:
     pilot: C1
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#92
       date: 2026-08-17
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-advanced.myst
+        pr: QuantEcon/lecture-python-advanced.myst#372
+        date: 2026-08-17
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the

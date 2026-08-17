@@ -305,13 +305,6 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-advanced.myst
     file: lectures/hansen_jagannathan_1991.md
-    note: >
-      Reads its own copy over an own-repo raw URL
-      (`lecture-python-advanced.myst/.../hansen_jagannathan_1991/`), not this
-      file — the repoint PR follows this one, and migration.yml records the
-      dataset as `landed` until it merges. Listed now because a correction to
-      these bytes must reach the lecture regardless of where it currently reads
-      them from (QuantEcon/data-lectures#91).
 
 # ---------------------------------------------------------------------------
 # Builder
