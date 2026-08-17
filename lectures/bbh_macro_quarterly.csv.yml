@@ -1,0 +1,236 @@
+# Manifest for bbh_macro_quarterly.csv — migrated out of
+# QuantEcon/lecture-python-advanced.myst, where it sat at
+# lectures/_static/lecture_specific/subjective_beliefs_business_cycles/ and was
+# read by relative path (PLAN Phase 8, wave C1).
+#
+# "BBH" is Bhandari, Borovička and Ho. These bytes are NOT FRED as FRED
+# publishes it today: they are the authors' 2022-vintage FRED snapshot, archived
+# inside their replication package, subset to fourteen series and 1955Q1-2019Q4
+# and averaged to quarterly. The builder must read the immutable Zenodo record
+# and must NOT read live FRED — but note carefully WHY, because the obvious
+# reason is wrong. These columns are on a 2012 base and FRED has since rebased
+# to 2017, yet the lecture takes log first differences and ratios, which are
+# rebasing-invariant: under a pure rebasing 8 of the 9 VAR inputs are bit-identical
+# and `output_gap` is invariant to 2.3e-14. The operative risk is upstream
+# REVISIONS to the national accounts, not the rebasing.
+#
+# The builder below is a RECONSTRUCTION, not a recovered original: no build
+# script for this file has ever existed in the lecture repo. It was written from
+# the committed bytes plus the replication package, and it reproduces the
+# committed file byte for byte (sha256 below; three end-to-end runs, 2026-08-17). It therefore
+# takes `committed`, not `unrecovered`. This supersedes the previous entry in
+# scripts/audit_annotations.yml, which said "extraction not scripted"
+# (provenance: constructed-lost) — right when it was written, wrong now; delete
+# that entry in the same PR that lands this manifest.
+
+filename: bbh_macro_quarterly.csv
+title: Bhandari-Borovička-Ho replication — quarterly US macro series for the belief-wedge VAR, 1955Q1-2019Q4
+description: >
+  Fourteen quarterly US macro series, 1955Q1-2019Q4, indexed by an integer
+  YYYYQ key (19551 = 1955Q1). Thirteen of them are the inputs to the nine-variable VAR(2)
+  that the `subjective_beliefs_business_cycles` lecture uses as the
+  data-generating benchmark forecast against which household survey
+  expectations are differenced. Extracted from the FRED snapshot archived in
+  Bhandari, Borovička and Ho's replication package; column names are the FRED
+  series IDs. Levels only — every transformation (year-over-year inflation, log
+  growth rates, ratios to GDP) is done in the lecture.
+
+# Constructed: fourteen of the thirty series in the source workbook (17 monthly in
+# FRED_M, 13 quarterly in FRED_Q), taken
+# from its two sheets, with the monthly block averaged to quarterly, the window
+# cut to 1955Q1-2019Q4 and values rounded to four decimals. Nothing here is
+# republished as distributed, so it is not verbatim.
+class: constructed
+
+source:
+  name: >
+    Replication package for "Survey data and subjective beliefs in business
+    cycle models" (Bhandari, Borovička and Ho), file
+    `data input/FRED/data_FRED.xlsx`
+  url: https://doi.org/10.5281/zenodo.10194324
+  doi: 10.5281/zenodo.10194324     # versioned record; concept DOI is
+                                   # 10.5281/zenodo.10194323
+  version: >
+    Zenodo record 10194324, published 2023-11-22; Zenodo declares no
+    version string (`metadata.version` is null) and the record has exactly one
+    version (`/versions` returns 1 hit), one 198,817,944-byte
+    member `replication package.zip` (md5 6e33f9b9e70135cbf3304275d1c5d604).
+    The workbook this builder extracts is 169,348 B, sha256 f2d330ea…65ba5d,
+    zip-entry mtime 2023-11-20 23:18 — recorded as an artifact fact, NOT as a
+    retrieval date. Its FRED_M/FRED_Q sheets run 1945M1-2022M12 / 1945Q1-2022Q4
+    because the package's `load_replication_parameters.m` sets
+    `M_macro_end = 202212; Q_macro_end = 20224`, not because FRED stopped there.
+    The identical values also appear in the package's
+    `data output/data_processed.xlsx` (sheets macro_M / macro_Q), verified max
+    abs diff 0.0 on all fourteen columns, so either workbook is a valid input;
+    the builder reads the `data input` one because it is the raw snapshot.
+  series: >
+    FRED IDs, quarterly at source — GDP (Gross Domestic Product, $bn SAAR, BEA);
+    GDPC1 (Real GDP, $bn chained, SAAR, BEA); GDPPOT (Real Potential GDP, $bn
+    chained, CBO); PCESV (PCE: Services, $bn SAAR, BEA); GPDI (Gross Private
+    Domestic Investment, $bn SAAR, BEA); PIRIC (Relative Price of Investment
+    Goods, index, SA — contributed to FRED by Riccardo DiCecio, not a federal
+    statistical release); PRS85006023 (Nonfarm Business Sector: Average Weekly
+    Hours for All Workers, index, SA, BLS).
+    FRED IDs, monthly at source and averaged over each quarter's three months —
+    CPIAUCSL (CPI-U All Items, 1982-84=100, SA, BLS); PCEND (PCE: Nondurable
+    Goods, $bn SAAR, BEA); UNRATE (Unemployment Rate, %, SA, BLS); CUMFNS
+    (Capacity Utilization: Manufacturing (SIC), %, SA, Federal Reserve Board
+    G.17); FEDFUNDS (Federal Funds Effective Rate, %, NSA, Federal Reserve Board
+    H.15); CE16OV (Employment Level, thousands, SA, BLS); CNP16OV (Population
+    Level, thousands, NSA, BLS).
+  citation: >
+    Bhandari, Anmol, Jaroslav Borovička, and Paul Ho. 2023. "Replication package
+    for: Survey data and subjective beliefs in business cycle models." Zenodo.
+    doi:10.5281/zenodo.10194324. Underlying series retrieved by the authors from
+    FRED (Federal Reserve Bank of St. Louis). Accompanies Bhandari, Anmol,
+    Jaroslav Borovička, and Paul Ho. 2025. "Survey Data and Subjective Beliefs in
+    Business Cycle Models." Review of Economic Studies 92 (3): 1375-1437.
+    doi:10.1093/restud/rdae054 (Crossref records first online 2024-05-27; the
+    lecture cites this as `bhandari2025survey`).
+  note: >
+    A FRED SNAPSHOT, NOT LIVE FRED, and the distinction is load-bearing. The
+    package pulled these series when its authors ran `read_data_FRED.m` (and
+    ships with `import_FRED = 0` so a replicator reads the archived copy rather
+    than re-pulling). The real-quantity columns are in chained 2012 dollars —
+    GDP/GDPC1 = 1.0000 across 2012 in these bytes — and PIRIC and PRS85006023
+    are based at 2012 (2012 annual means 1.00005 and 99.99975). FRED has since rebased
+    all three to 2017 and revised the national accounts repeatedly. CPIAUCSL is
+    unaffected (1982-84=100 in both; the 1982-84 mean here is 100.017).
+    Consequently the builder must read the immutable Zenodo record and must not
+    read FRED; a live re-fetch is a different dataset, not a refresh.
+
+license:
+  name: CC-BY-4.0
+  url: https://doi.org/10.5281/zenodo.10194324
+  redistribution: permitted
+  verified: 2026-08-17
+  note: >
+    Stated by the Zenodo record itself (`metadata.license.id = cc-by-4.0`, read
+    from the Zenodo API 2026-08-17), and repeated in the consuming lecture's
+    prose. Attribution is carried by `source.citation` above, which is the whole
+    of the CC-BY obligation for a cache like this one. The underlying layer is
+    consistent: thirteen of the fourteen series are US federal statistics (BEA,
+    BLS, CBO, Federal Reserve Board) delivered through FRED and are US
+    Government works; the fourteenth, PIRIC, is a series contributed to FRED by
+    Riccardo DiCecio; the FRED page states only "Source: DiCecio, Riccardo",
+    names no affiliation, tags the series "public domain: citation requested",
+    and defines it as INVDEF/CONSDEF. None of the fourteen
+    FRED series pages carries a copyright or no-redistribution block — checked
+    2026-08-17 against a positive control (FRED's SP500 page, which does carry
+    S&P Dow Jones Indices' "Reproduction … is prohibited" notice), so the zero is
+    a real zero and not a broken check. Nothing to register on
+    QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited-undated: the bytes arrived in
+                                # lecture-python-advanced.myst with no recorded
+                                # retrieval date, and none was reconstructed
+                                # from git history (AGENTS.md). It costs
+                                # nothing — the source is an immutable versioned
+                                # DOI and the builder reproduces these bytes
+                                # from it exactly, so the vintage is pinned by
+                                # content rather than by a date. For context and
+                                # NOT as a retrieval date: the CSV first landed
+                                # in the lecture repo in a192fbf (#343),
+                                # 2026-06-12, with no build script.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy the lecture reads today — sha256 f14f4256…
+# against lecture-python-advanced.myst @ 00057ba,
+# lectures/_static/lecture_specific/subjective_beliefs_business_cycles/. An
+# org-wide tree sweep of all 278 QuantEcon repos on 2026-08-17 found that path
+# and no other copy anywhere, so there is no sibling to keep in step. A repoint
+# to this file therefore cannot change a figure.
+
+integrity:
+  sha256: f14f4256434371877f28da520f1e8b7950187dc23fff78dcc27912e89c0a8d5c
+  upstream:
+    # `verified` in the sense AGENTS.md defines for a constructed dataset —
+    # "re-run the builder and compare". Run three times on the date below
+    # against the live Zenodo record, each run reproducing this file byte for
+    # byte. That
+    # is also what licenses `builder_status: committed` below.
+    status: verified
+    date: 2026-08-17
+    against: builders/bbh_macro_quarterly.py
+    note: >
+      Reproduced exactly from Zenodo record 10194324, whose versioned DOI is
+      immutable, so there is no vintage drift to accept. The FRED-vintage gap is
+      a property of the source, not a divergence from it, and is deliberately
+      NOT recorded as `diverged`: the declared upstream matched. Measured
+      A quantified comparison against a live FRED pull was attempted and is
+      deliberately NOT recorded here: FRED's bulk endpoints (fredgraph.csv,
+      fredgraph.xls, /data/<ID>.txt, /series/<ID>/downloaddata/) did not answer
+      from the authoring environment on this date, so any delta table would be a
+      number no future validator could re-derive. What IS checkable from primary
+      sources and worth stating: FRED today publishes GDPC1 and GDPPOT in chained
+      2017 dollars, PIRIC as Index 2017=1 and PRS85006023 as Index 2017=100,
+      while these bytes are on the 2012 base; CPIAUCSL is unaffected (1982-84=100
+      in both). Adopting a live vintage is an author's call and would be a NEW
+      filename, per "Corrections vs vintages".
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-17 (pandas 2.3.3), and asserted by
+# the builder's validate() stage on every run. All fourteen data columns are
+# float64 levels in the units FRED publishes them in; the lecture does every
+# transformation itself.
+
+schema:
+  format: csv
+  columns:
+    - {name: YYYYQ, dtype: int64, description: "integer quarter key, year*10 + quarter — 19551 (1955Q1) to 20194 (2019Q4), 260 rows on an unbroken quarterly grid. The CSV index column"}
+    - {name: GDP, dtype: float64, description: "FRED GDP — nominal GDP, billions of dollars, SAAR. Observed 413.073-21694.458. Lecture denominator for the consumption and investment rates"}
+    - {name: GDPC1, dtype: float64, description: "FRED GDPC1 — real GDP, billions of CHAINED 2012 dollars (not 2017; see source.note), SAAR. Observed 2815.134-19202.31. Lecture: annualized log growth, and the numerator of the output gap"}
+    - {name: GDPPOT, dtype: float64, description: "FRED GDPPOT — CBO real potential GDP, billions of chained 2012 dollars. Observed 2757.5375-19225.5991. Lecture: denominator of `output_gap` only"}
+    - {name: PCESV, dtype: float64, description: "FRED PCESV — PCE on services, billions of dollars, SAAR. Observed 108.459-10113.165. Lecture: added to PCEND for the consumption rate"}
+    - {name: GPDI, dtype: float64, description: "FRED GPDI — gross private domestic investment, billions of dollars, SAAR. Observed 65.065-3858.192. Lecture: the investment rate"}
+    - {name: PIRIC, dtype: float64, description: "FRED PIRIC — relative price of investment goods, index based 2012=1 in this vintage (FRED now publishes 2017=1), SA. Observed 0.8418-3.8553. Lecture: 100*log first difference"}
+    - {name: PRS85006023, dtype: float64, description: "FRED PRS85006023 — nonfarm business sector average weekly hours, all workers, index based 2012=100 in this vintage (FRED now publishes 2017=100), SA. Observed 97.982-116.693. Lecture: combined with CE16OV/CNP16OV into log hours per capita"}
+    - {name: CPIAUCSL, dtype: float64, description: "FRED CPIAUCSL — CPI-U all items, 1982-84=100, SA, quarterly average of the three monthly values. Observed 26.7567-257.7853. Lecture: year-over-year inflation"}
+    - {name: PCEND, dtype: float64, description: "FRED PCEND — PCE on nondurable goods, billions of dollars, SAAR, quarterly average of the three monthly values. Observed 126.0667-3001.6, and EMPTY before 1959Q1 — see known_nulls"}
+    - {name: UNRATE, dtype: float64, description: "FRED UNRATE — civilian unemployment rate, percent, SA, quarterly average. Observed 3.4-10.6667. Enters the VAR in levels and is the variable the unemployment belief wedge is measured against"}
+    - {name: CUMFNS, dtype: float64, description: "FRED CUMFNS — capacity utilization, manufacturing (SIC), percent, SA, quarterly average. Observed 63.7623-91.5667"}
+    - {name: FEDFUNDS, dtype: float64, description: "FRED FEDFUNDS — effective federal funds rate, percent, NSA, quarterly average of monthly averages of daily figures. Observed 0.0733-17.78"}
+    - {name: CE16OV, dtype: float64, description: "FRED CE16OV — civilian employment level, thousands of persons, SA, quarterly average. Observed 60814.6667-158544.0"}
+    - {name: CNP16OV, dtype: float64, description: "FRED CNP16OV — civilian noninstitutional population 16+, thousands of persons, NSA, quarterly average. Observed 109130.3333-260015.3333. Steps DOWN in 2008Q1, 2017Q1 and 2019Q1 on the BLS January population controls, so it is not monotonic"}
+  row_count_floor: 260          # exact by design, not a floor with headroom:
+                                # the window is fixed at 1955Q1-2019Q4 and does
+                                # not grow. validate() asserts equality.
+  date_range: {start: 19551, end: 20194}   # in the file's own YYYYQ key, i.e.
+                                           # 1955Q1 to 2019Q4 inclusive
+
+  # The only nulls in the file, and they are structural: FRED publishes PCEND
+  # from 1959-01, so 1955Q1-1958Q4 is empty in that column and complete in every
+  # other. The lecture's `cons_r` is therefore NaN for those 16 quarters, which
+  # is harmless — its VAR is estimated from 1960Q1. validate() asserts these
+  # exact 16 and no others, so a new hole fails instead of shipping.
+  known_nulls: {PCEND: 16}
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# One consumer, established by a tree sweep of all 278 QuantEcon repos on
+# 2026-08-17 (two returned no default branch: numfocus, quantecon-book-dp).
+# lecture-python-advanced.myst has no translation repo, and the generated
+# lecture-python-advanced.notebooks mirror holds the lecture's .ipynb but not the
+# CSV; it self-heals after a publish tag and is not a repo anyone repoints, so it
+# is deliberately not listed (wave A4 precedent).
+#
+# Note for whoever repoints: the read is SPLIT ACROSS LINES and shares a
+# `data_path` variable with bbh_michigan_monthly.csv (lectures/
+# subjective_beliefs_business_cycles.md:149-153), so a filename-only grep finds
+# it but a whole-path grep does not, and editing one file's line alone leaves the
+# other appended to a path that no longer exists in the flat published tree. The
+# two C1 files in this lecture repoint together.
+consumers:
+  - repo: QuantEcon/lecture-python-advanced.myst
+    file: lectures/subjective_beliefs_business_cycles.md
+
+builder: builders/bbh_macro_quarterly.py
+builder_status: committed
