@@ -18,18 +18,15 @@
 #   toy                   invented in-lecture teaching table
 
 datasets:
-  acs_data_summary.csv:
-    description: ACS occupation summary
-    provenance: constructed-lost
-    note: construction (ACS filters, grouping, sorting) described in lecture prose only
   dataBHS.mat:
     description: US consumption/income series, MATLAB replication bundle
     provenance: verbatim
     flags: [lectures-root]
-  fred_data.csv:
-    description: FRED snapshot — GS1, GS5, GS10, DFII5, DFII10, USREC
-    provenance: constructed-lost
-    note: lecture names the FRED series; no build script anywhere
+    note: >
+      Successor manifest landed as lectures/dataBHS.csv.yml (wave C2 format
+      conversion); this entry covers the lecture's remaining loadmat read of
+      the .mat and is deleted by the flip PR once the repoint removes that
+      read. The basenames differ, so dual_recorded cannot fire meanwhile.
   graph.txt:
     description: 100-node weighted digraph for the shortest-path problem
     provenance: toy
@@ -42,9 +39,6 @@ datasets:
       all. Two of the four repos also commit a copy the %%file cell overwrites
       before reading (intro, dp) — those are shadowed; jax and wasm commit no
       copy at all, which is the cleaner shape
-  test_pwt.csv:
-    description: Penn World Table 7.0 extract
-    provenance: author-assembled
 
 # ---------------------------------------------------------------------------
 # Live-API uses, keyed repo:lecture:access. `pedagogy` says WHY the call is

@@ -39,7 +39,11 @@ re-fetched** — see `AGENTS.md`.
 | `japan_earthquakes.py` | `japan_earthquakes.csv` | committed |
 | `japan_population_by_age.py` | `japan_population_by_age.csv` | committed |
 | `us_adult_heights.py` | `us_adult_heights.csv` | committed |
-| `NEWQDATA.py` | `NEWQDATA.csv` | committed — the **only** builder here that reads a committed input (`sources/NEWQDATA.MAT`) instead of fetching. Its upstream is published nowhere; see `sources/README.md`. Reproduces its output byte for byte |
+| `NEWQDATA.py` | `NEWQDATA.csv` | committed — reads a committed input (`sources/NEWQDATA.MAT`) instead of fetching. Its upstream is published nowhere; see `sources/README.md`. Reproduces its output byte for byte |
+| `dataBHS.py` | `dataBHS.csv` | committed — the second `sources/` reader (`sources/dataBHS.mat`, un-refetchable; see `sources/README.md`). A value-preserving MATLAB-to-CSV conversion; validates the consuming lecture's hardcoded moments on every run |
+| `bbh_macro_quarterly.py` | `bbh_macro_quarterly.csv` | committed — range-reads one workbook out of the 198.8 MB Zenodo replication package. Reproduces its output byte for byte (2026-08-17) |
+| `bbh_michigan_monthly.py` | `bbh_michigan_monthly.csv` | committed — same Zenodo package, different workbook. Reproduces its output byte for byte (2026-08-17) |
+| `fred_data.py` | `fred_data.csv` | committed — fetches six FRED series live over a pinned 1953-04..2024-12 window (yields and the recession dummy are stable history, unlike the BBH national-accounts snapshot). Reproduces its output byte for byte (2026-08-18) |
 | `hansen_singleton_1982_data.py` | `hansen_singleton_1982_data.csv` | committed — fetches FRED and the Ken French factors live. Reproduces its output byte for byte (2026-08-13) |
 | `hansen_singleton_1983_data.py` | `hansen_singleton_1983_data.csv` | committed — the same construction plus a T-bill leg, so its output is a strict superset of the 1982 file's. Reproduces its output byte for byte (2026-08-13) |
 | `business_cycle.py` | `business_cycle_data.csv`, `business_cycle_info.md`, `business_cycle_metadata.md` | run by hand, no validate stage yet (PLAN Phase 5); its three outputs are the repo's only unmanifested files |
@@ -67,13 +71,14 @@ here instead of patched — fixing it would mean this file is no longer the thin
 that produced those bytes. The fix belongs in `lecture-python-intro`, which still
 serves that notebook to readers.
 
-**This listing is the coverage report.** The repo has 21 `constructed` datasets.
-Fourteen ship a builder (9 `committed`, 5 `committed-frozen`), carried by **12**
-distinct builder files — fewer than the datasets because `generating_mini.md`
-and `webscrape_forbes.ipynb` each produce two. The remaining **7** have none:
-they carry `builder_status: unrecovered` in their manifests, which is the Phase
-9 recovery backlog, kept visible rather than hidden by reclassifying the file as
-`verbatim`. The table above lists a **13th** builder, `business_cycle.py`, which
+**This listing is the coverage report.** The repo has 28 `constructed` datasets
+(re-derived from the parsed manifests, 2026-08-18). Eighteen ship a builder (13
+`committed`, 5 `committed-frozen`), carried by **16** distinct builder files —
+fewer than the datasets because `generating_mini.md` and
+`webscrape_forbes.ipynb` each produce two. The remaining **10** have none: they
+carry `builder_status: unrecovered` in their manifests, which is the Phase 9
+recovery backlog, kept visible rather than hidden by reclassifying the file as
+`verbatim`. The table above lists a **17th** builder, `business_cycle.py`, which
 no manifest references — its three outputs are the repo's only unmanifested
 files.
 

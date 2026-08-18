@@ -1,0 +1,196 @@
+# Manifest for dataBHS.csv — the format-converted successor to
+# lecture-python-advanced.myst's lectures/dataBHS.mat (PLAN Phase 8, wave C2;
+# conversion decided 2026-08-17 on QuantEcon/workspace-lectures#45).
+#
+# THE CONVERSION IS A BUG FIX, NOT TIDYING. The .mat sat at lectures/ — outside
+# html_static_path — so Sphinx never copied it into the published tree:
+# python-advanced.quantecon.org/dataBHS.mat is 404 while the published
+# five_preferences.ipynb is 200 and calls loadmat('dataBHS.mat'). The
+# downloadable notebook could not run. Serving the data from this repo as CSV
+# removes the 404 and the scipy dependency at once. The stem is preserved so
+# the real rename rides the phase-2 review (QuantEcon/data-lectures#87) with
+# its wave-mates.
+#
+# Because the extension changes, this file is NOT a byte-identical migration
+# and cannot claim the usual repoint gate ("a migration moves bytes"). The
+# gate it claims instead, measured 2026-08-17 and re-run 2026-08-18: the CSV
+# parses back bit-exactly under pandas' correctly-rounded reader, and the
+# consuming lecture's histogram of consumption growth has identical counts and
+# bin edges under pandas' DEFAULT parser, so the lecture keeps a plain
+# read_csv. The lecture's hardcoded moments (mu_c = 0.004952, sigma_c =
+# 0.005050) reproduce from the c series to printed precision, and the
+# QuantEcon/data-lectures#96 validation reproduced the paper's Tables 1 and 2
+# from these arrays to printed precision.
+#
+# NOTE the old basename: scripts/audit_annotations.yml keeps its dataBHS.mat
+# entry until the repoint lands — the lecture still reads the .mat, that
+# annotation is the only record covering the read, and the basenames differ so
+# the dual_recorded check does not fire. The flip PR deletes it.
+
+filename: dataBHS.csv
+title: Barillas-Hansen-Sargent "Doubts or variability?" — quarterly US log consumption and real returns, 1948Q1-2006Q4
+description: >
+  The three quarterly US series behind Barillas, Hansen and Sargent's (JET,
+  2009) detection-error calibration, 1948Q1-2006Q4 (236 quarters): log real
+  per-capita consumption (c) and gross real returns on bonds (rb) and stocks
+  (rs). The file carries no date column — the sample is stated in the paper
+  and in the consuming lecture's prose ("1948.I-2006.IV"). `five_preferences`
+  reads only c, differencing it into the consumption-growth histogram it plots
+  against the approximating and worst-case densities; rb and rs are carried so
+  the conversion preserves the authors' file whole.
+
+# Constructed, not verbatim: these bytes are a value-preserving container
+# conversion of the authors' dataBHS.mat into CSV. No filtering, no rescaling,
+# no reordering — which is exactly why builders/dataBHS.py reproduces the file
+# from the committed input.
+class: constructed
+
+source:
+  name: Barillas, Hansen and Sargent (2009), "Doubts or variability?" — the authors' dataBHS.mat
+  url: https://doi.org/10.1016/j.jet.2008.11.014
+  # The ARTICLE doi. There is no dataset doi: the Journal of Economic Theory
+  # article carries no data supplement (checked 2026-08-18).
+  doi: 10.1016/j.jet.2008.11.014
+  version: >
+    MAT-file header "MATLAB 5.0 MAT-file, Platform: PCWIN, Created on: Fri May
+    11 10:34:23 2007" — a working file from the paper's drafting period
+    (published 2009, sample ends 2006Q4).
+  series: c, rb, rs — quarterly, 1948Q1-2006Q4, 236 observations each
+  citation: >
+    Barillas, Francisco, Lars Peter Hansen, and Thomas J. Sargent. 2009.
+    "Doubts or variability?" Journal of Economic Theory 144 (6): 2388-2418.
+    doi:10.1016/j.jet.2008.11.014. Data as distributed with the authors' MATLAB
+    replication files (dataBHS.mat).
+  note: >
+    NOT hosted by the authors or the journal. The underlying series are
+    standard US aggregates (real per-capita consumption and real asset
+    returns), assembled by the authors; the paper states the sample but ships
+    no data appendix. Where the MATLAB file itself could and could not be
+    located is recorded in sources/README.md, which is the audit trail for the
+    committed input. The consuming lecture treats the c series as canonical:
+    its hardcoded mu_c and sigma_c are moments of THIS vintage, frozen in
+    prose, so any substitute vintage would silently mis-plot the densities
+    against the histogram — the builder asserts both moments on every run.
+
+license:
+  name: null
+  url: https://doi.org/10.1016/j.jet.2008.11.014
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution"). There is no licence to name and no place that states
+  # one: the article has no data supplement, and no author-hosted distribution
+  # of the file exists to carry terms (searched 2026-08-18, sources/README.md).
+  redistribution: permitted
+  verified: 2026-08-18
+  note: >
+    An inherited exposure — the .mat has been served publicly from
+    lecture-python-advanced.myst, and a byte-identical copy from
+    lecture-tools-techniques, since before this repo existed. `permitted`
+    rests on what the numbers are rather than on a licence grant: three
+    standard US aggregate series (consumption, bond and stock returns) of the
+    kind built from federal statistics, and the authors' contribution is the
+    assembly, credited in full by the citation above. No author or journal
+    permission has been sought. Registered for licence review on
+    QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited from lecture-python-advanced.myst
+                                # with no recorded retrieval date; not
+                                # reconstructed from git history (AGENTS.md).
+                                # It costs nothing here — the builder
+                                # reproduces these bytes from a committed,
+                                # hash-pinned input, so the vintage is pinned
+                                # by content rather than by a date.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): NOT byte identity —
+# the format changes, deliberately (see header). The gate is value identity
+# under the lecture's own read: all 708 values parse back bit-exactly under
+# float_precision='round_trip', and the lecture's histogram (30 bins on
+# c[1:]-c[:-1]) has identical counts and bin edges under the DEFAULT parser,
+# both measured against the .mat via scipy.io.loadmat. The repoint swaps
+# loadmat for read_csv, and because the .mat arrays are (236,1) while a CSV
+# column parses 1-D, the repointed cell must go through .to_numpy() — a pandas
+# Series would silently misalign the c[1:]-c[:-1] difference on index
+# alignment. Recorded here because the repoint PR must carry that exact edit.
+
+integrity:
+  sha256: 13116a3d90ddc7f8b272b3ca903a136552147b21b8e9b3829472daa3d0d09c63
+  upstream:
+    # `verified` in the sense AGENTS.md defines for a constructed dataset —
+    # "re-run the builder and compare". builders/dataBHS.py was run against
+    # the committed sources/dataBHS.mat on the date below and reproduced this
+    # file exactly, and its validate() stage asserts the round-trip and both
+    # lecture moments on every run.
+    status: verified
+    date: 2026-08-18
+    against: sources/dataBHS.mat
+    note: >
+      The input hashes to
+      28c5f85286718e70b205f6a3fb269ebb49bd635194e2d0d488409b017be5e890 and
+      holds exactly three (236,1) float64 arrays c, rb, rs (MATLAB 5.0,
+      PCWIN, created 2007-05-11). What could NOT be established is an authors'
+      own download to compare against: tomsargent.com's source-code page 404s,
+      larspeterhansen.org lists no code or data for the paper, the JET article
+      has no supplement, and a GitHub-wide code search (with a positive
+      control) finds only QuantEcon's own inherited copies of this blob. That
+      search is what put the input in sources/ rather than leaving the builder
+      fetching a copy of ourselves — see sources/README.md.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-18 (pandas 2.3.3), and asserted by
+# the builder's validate() stage on every run.
+
+schema:
+  format: csv
+  columns:
+    - {name: c, dtype: float64, description: "log real per-capita US consumption, quarterly. Observed -4.6556 to -3.4918. The only column the lecture reads: it differences c into quarterly consumption growth (mean 0.004952, std 0.005050 — the lecture's hardcoded mu_c and sigma_c)"}
+    - {name: rb, dtype: float64, description: "gross real quarterly bond return. Observed 0.9711-1.0217. Carried from the authors' file; read by nothing today"}
+    - {name: rs, dtype: float64, description: "gross real quarterly stock return. Observed 0.7302-1.2196. Carried from the authors' file; read by nothing today"}
+  row_count_floor: 236          # exact by design, not a floor with headroom:
+                                # 1948Q1-2006Q4 inclusive, 59 years x 4. The
+                                # file has no date column; validate() asserts
+                                # the count and the growth moments instead.
+  date_range: {start: 1948, end: 2006}   # stated by the paper and the lecture
+                                         # prose ("1948.I-2006.IV"), not by any
+                                         # column in the file
+  known_nulls: {}               # genuinely none — 708 cells, zero nulls
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# Two consumers of these VALUES, established by the org-wide blob-SHA sweep
+# (2026-08-17, QuantEcon/data-lectures#96): the migrating lecture, and a second
+# published lecture series that carries a byte-identical .mat and reads its own
+# copy. Byte-identical copies also sit in python-lecture-sandpit.myst and
+# lecture-mapping, but nothing published reads them (orphans/sandboxes — not
+# consumers). lecture-tools-techniques is OUTSIDE the audit's scan set, so it
+# is recorded here or nowhere (NEWQDATA zh-cn precedent). The generated
+# lecture-python-advanced.notebooks mirror self-heals after a publish tag and
+# is deliberately not listed (wave A4 precedent).
+consumers:
+  - repo: QuantEcon/lecture-python-advanced.myst
+    file: lectures/five_preferences.md
+    note: >
+      Reads its own copy — loadmat('dataBHS.mat') on a bare local filename at
+      lectures/dataBHS.mat, resolved against the notebook working directory —
+      not this file. The repoint PR in lecture-python-advanced.myst follows
+      this one (read_csv of this file plus .to_numpy(), dropping the
+      scipy.io import), and migration.yml records the dataset as `landed`
+      until it merges. Listed now because a correction to these bytes must
+      reach the lecture regardless of where it currently reads them from
+      (QuantEcon/data-lectures#91).
+  - repo: QuantEcon/lecture-tools-techniques
+    file: lectures/five_preferences.md
+    note: >
+      Reads its own byte-identical dataBHS.mat copy (five_preferences.md:1882),
+      not this file — same dataset, same lecture, second published series, with
+      the same downloadable-notebook 404. Mirroring the repoint there is
+      tracked in QuantEcon/lecture-tools-techniques#11; until it lands, a
+      correction to these values must be applied to that repo's .mat by hand.
+
+builder: builders/dataBHS.py
+builder_status: committed

@@ -1,0 +1,204 @@
+# Manifest for test_pwt.csv — migrated out of
+# QuantEcon/lecture-python-programming, where it sat at
+# lectures/_static/lecture_specific/pandas/data/ and was read over the repo's
+# OWN raw URL from two lectures and three synced translation repos (PLAN
+# Phase 8, Track D).
+#
+# The name is on the phase-2 rename review (QuantEcon/data-lectures#87,
+# decision of 2026-08-17): it migrates under its current name.
+#
+# PROVENANCE IS WRONG IN THE CONSUMING LECTURE, measurably. pandas.md's prose
+# says the file "is taken from the Penn World Tables" and links PWT 7.0 — but
+# the committed values match NO downloadable PWT vintage. Checked 2026-08-18
+# against four archives from rug.nl/ggdc: PWT 7.0 (pwt70_06032011version.zip,
+# member pwt70_w_country_names.csv sha256 4623b92a…) has different tcgdp/cc/cg
+# for every row and renamed the isocode column; PWT 6.3
+# (pwt63_nov182009version.zip, member sha256 f9609c42…) matches Argentina and
+# Australia POP but nothing else and has no tcgdp column; PWT 6.2
+# (pwt62_data.xlsx, sha256 a3293337…) and PWT 6.1 (pwt61_data.xlsx, sha256
+# 1477a118…) match nothing. The committed
+# header uses the 6.x-era column name `country isocode` while `tcgdp` appears
+# only in the 7.x releases checked — so the extract mixes or predates the
+# vintages still downloadable. Hence `unrecovered`, with this paragraph as the
+# recovery-attempt record.
+
+filename: test_pwt.csv
+title: Penn World Table teaching extract — eight countries, year 2000
+description: >
+  An eight-row teaching extract in Penn World Table layout: eight countries
+  (Argentina, Australia, India, Israel, Malawi, South Africa, United States,
+  Uruguay), year 2000, with population (POP, thousands), the exchange rate
+  (XRAT), total PPP-converted GDP (tcgdp, millions of international dollars),
+  and the consumption and government shares of GDP (cc, cg). The pandas and
+  polars lectures in lecture-python-programming use it as their first
+  read_csv example and as the small dataset in a timing comparison. Every
+  field in the file is quoted (csv QUOTE_ALL style) — any rewrite must
+  preserve that to keep byte identity.
+
+# Constructed: an eight-row, eight-column extract of a PWT release (vintage
+# unestablished — see header), assembled by hand for teaching.
+class: constructed
+
+source:
+  name: Penn World Table (Heston, Summers and Aten; PWT 6.x/7.x era) — exact vintage unestablished
+  url: https://www.rug.nl/ggdc/productivity/pwt/pwt-releases/pwt-7.0
+  # The URL the lecture prose cites — kept as the recorded-as-found claim even
+  # though the bytes measurably do not come from that release (see header).
+  doi: null
+  version: >
+    Unestablished. The lecture prose cites PWT 7.0; the committed values match
+    neither PWT 7.0 nor any of 6.3/6.2/6.1 (comparison measured 2026-08-18,
+    archive hashes in the header comment). The header naming (`country
+    isocode`) is 6.x-era; `tcgdp` exists in the 7.x layout.
+  series: country, country isocode, year, POP, XRAT, tcgdp, cc, cg
+  citation: >
+    Heston, Alan, Robert Summers, and Bettina Aten. Penn World Table (Center
+    for International Comparisons of Production, Income and Prices, University
+    of Pennsylvania; now maintained by the Groningen Growth and Development
+    Centre). Exact version unrecorded; extract assembled for the QuantEcon
+    pandas lecture.
+  note: >
+    A TEACHING extract: its job is to be a small, familiar CSV, not to carry
+    a defensible vintage. The value mismatch matters only if someone treats
+    the numbers as citable PWT data — which the lectures do not; they compute
+    illustrative transformations. Recorded so nobody spends another afternoon
+    hunting the vintage: the four downloadable candidates are eliminated
+    above.
+
+license:
+  name: null
+  url: https://www.rug.nl/ggdc/productivity/pwt/
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution").
+  redistribution: permitted
+  verified: 2026-08-18
+  note: >
+    An inherited exposure, served publicly from lecture-python-programming
+    (and its three translation repos) for years. The Penn World Table is
+    distributed for free academic use and its current releases carry CC BY
+    4.0; what is republished here is an eight-row extract with full credit.
+    No permission has been sought. Nothing to register on
+    QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited-undated: no retrieval date was
+                                # recorded and none is reconstructed from git
+                                # history (AGENTS.md). Paired, as the rule
+                                # requires, with the resolved `unverifiable`
+                                # below and the vintage-elimination record in
+                                # the header.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy every consumer reads today — sha256 229316b3…
+# against lecture-python-programming @ 81d9734,
+# lectures/_static/lecture_specific/pandas/data/. The three translation-repo
+# copies carry the identical file and their lectures read the SOURCE repo's
+# raw URL, not their local copies. A repoint to this file therefore cannot
+# change a figure.
+
+integrity:
+  sha256: 229316b32902ded0231bcdae576da34d3113255e5d51265e72a7f3ee5e964fc2
+  upstream:
+    # No downloadable PWT release reproduces these values, so there is nothing
+    # to verify against — recorded as the honest terminal state, with the
+    # elimination measurements in the header comment as evidence.
+    status: unverifiable
+    date: 2026-08-18
+    against: null
+    note: >
+      Four candidate vintages fetched and eliminated 2026-08-18 (PWT 7.0,
+      6.3, 6.2, 6.1 — hashes in the header comment). The values are
+      PWT-shaped but match no release still downloadable; the extract likely
+      predates the rug.nl re-hosting or was hand-edited. Any future
+      re-derivation from a current PWT would be a NEW dataset under a new
+      name ("Corrections vs vintages", AGENTS.md).
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-18 (pandas 2.3.3).
+
+schema:
+  format: csv
+  columns:
+    - {name: country, dtype: object, description: "country name, 8 unique — Argentina, Australia, India, Israel, Malawi, South Africa, United States, Uruguay"}
+    - {name: country isocode, dtype: object, description: "ISO 3166-1 alpha-3 code. The SPACE in this column name is load-bearing for the lectures, which demonstrate column selection on it"}
+    - {name: year, dtype: int64, description: "2000 in every row"}
+    - {name: POP, dtype: float64, description: "population, thousands. Observed 3219.793-1006300.297"}
+    - {name: XRAT, dtype: float64, description: "exchange rate, national currency per US dollar. Observed 0.9995-59.543808"}
+    - {name: tcgdp, dtype: float64, description: "total PPP-converted GDP, millions of international dollars. Observed 5026.22-9898700.0"}
+    - {name: cc, dtype: float64, description: "consumption share of PPP-converted GDP per capita, percent. Observed 64.44-78.98"}
+    - {name: cg, dtype: float64, description: "government share of PPP-converted GDP per capita, percent. Observed 5.11-14.07"}
+  row_count_floor: 8            # exact by design: a frozen teaching extract
+  date_range: {start: 2000, end: 2000}
+  known_nulls: {}               # genuinely none
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# EIGHT consuming lecture files across four repos, all reading the SOURCE
+# repo's raw URL (raw.githubusercontent.com/QuantEcon/lecture-python-programming/
+# main/...) — so deleting the source copy breaks all of them AT RUNTIME with no
+# stale-serving grace period, translations included. Established 2026-08-18 by
+# basename grep with size controls against the live default branches of all
+# four repos. Three of polars.md's four reads build the URL across THREE
+# adjacent string literals; a whole-URL grep returns a confident zero — sweep
+# by basename.
+#
+# The translation repos are OUTSIDE the audit's scan set, so they are recorded
+# here or nowhere. They are not direct repoint targets: their .md files are
+# overwritten wholesale by lecture-python-programming's sync-translations-*
+# workflows, so the repoint propagates by sync after the source repoint
+# merges — but the DELETION gate must wait until all three have synced,
+# rebuilt and republished, or their live sites break at cell execution.
+consumers:
+  - repo: QuantEcon/lecture-python-programming
+    file: lectures/pandas.md
+    note: >
+      Reads the repo's own raw URL (one unsplit literal, pandas.md:172), not
+      this file — the repoint PR follows this one, and migration.yml records
+      the dataset as `landed` until it merges. The prose at pandas.md:156-176
+      names the file and tabulates its columns, and must move with the read
+      (QuantEcon/data-lectures#91).
+  - repo: QuantEcon/lecture-python-programming
+    file: lectures/polars.md
+    note: >
+      Reads the repo's own raw URL three times (polars.md:161-163, 347-349,
+      425-427), each split across three adjacent string literals — collapse
+      at the repoint, do not patch the stem (NEWQDATA precedent). One `url`
+      binding at 425 feeds two readers (pandas and polars timing comparison).
+  - repo: QuantEcon/lecture-python-programming.zh-cn
+    file: lectures/pandas.md
+    note: >
+      Synced translation; reads lecture-python-programming's raw URL, not this
+      file. Repointed indirectly when the source repoint syncs; do not delete
+      the source copy until this repo has synced and republished. Tracked with
+      the Track D record in QuantEcon/data-lectures migration.yml.
+  - repo: QuantEcon/lecture-python-programming.zh-cn
+    file: lectures/polars.md
+    note: >
+      Synced translation; same URL, same sync dependency as pandas.md above.
+  - repo: QuantEcon/lecture-python-programming.fr
+    file: lectures/pandas.md
+    note: >
+      Synced translation; reads lecture-python-programming's raw URL, not this
+      file. Same sync dependency as the zh-cn entries.
+  - repo: QuantEcon/lecture-python-programming.fr
+    file: lectures/polars.md
+    note: >
+      Synced translation; same URL, same sync dependency.
+  - repo: QuantEcon/lecture-python-programming.fa
+    file: lectures/pandas.md
+    note: >
+      Synced translation; reads lecture-python-programming's raw URL, not this
+      file. Same sync dependency as the zh-cn entries.
+  - repo: QuantEcon/lecture-python-programming.fa
+    file: lectures/polars.md
+    note: >
+      Synced translation; same URL, same sync dependency.
+
+builder: null
+builder_status: unrecovered

@@ -171,3 +171,53 @@ rather than by analogy to a verbatim re-fetch.
 7,104 B — four orders of magnitude below any limit that matters. It is here on
 the un-refetchability test alone, which is the test, and a useful counterweight
 to reading this directory as "the big-file directory".
+
+---
+
+## `dataBHS.mat`
+
+| | |
+| --- | --- |
+| **Origin** | The authors' MATLAB data file for "Doubts or variability?", inherited as `lectures/dataBHS.mat` in `QuantEcon/lecture-python-advanced.myst` (where it sat at the lectures root, outside `html_static_path`, and was never served by the published site). Byte-identical copies exist in `lecture-tools-techniques` (which reads its own), `python-lecture-sandpit.myst` and `lecture-mapping` — all QuantEcon-internal descendants of the same inheritance, not an upstream |
+| **Upstream** | Barillas, Francisco, Lars Peter Hansen, and Thomas J. Sargent (2009), *Doubts or variability?*, Journal of Economic Theory 144(6), 2388-2418 |
+| **Upstream identifier** | DOI [10.1016/j.jet.2008.11.014](https://doi.org/10.1016/j.jet.2008.11.014) — the **article**. The JET article carries no data supplement |
+| **Retrieved** | `null` — no retrieval date was recorded upstream; the lecture-repo commit dates record when QuantEcon acquired it, not when it came from the authors. Do not promote one to the other |
+| **Licence** | `null` — no licence statement exists at the journal or the authors' pages. Registered on [#35](https://github.com/QuantEcon/data-lectures/issues/35) |
+| **`sha256`** | `28c5f85286718e70b205f6a3fb269ebb49bd635194e2d0d488409b017be5e890` |
+| **Size** | 5,588 B |
+| **Consumed by** | `builders/dataBHS.py` (`builder_status: committed`) |
+| **Produces** | `lectures/dataBHS.csv` |
+
+### Why this file is here rather than fetched at run time
+
+Un-refetchable from any authoritative source, on the NEWQDATA precedent.
+Searched 2026-08-18, each zero beside a passing control:
+
+- **tomsargent.com**'s source-code page returns 404 (and the site's https
+  endpoint does not answer);
+- **larspeterhansen.org** hosts the paper's PDF but lists no code or data for
+  it on the research pages;
+- the **Journal of Economic Theory** article (ScienceDirect) shows no
+  supplementary material;
+- a **GitHub-wide code search** for `dataBHS` returns only QuantEcon's own
+  inherited copies of this blob (plus token-collision noise in unrelated
+  JavaScript), with the same search finding `NEWQDATA` in five QuantEcon
+  files as the positive control.
+
+Unlike NEWQDATA there is not even a third-party mirror of an authors'
+directory — every locatable copy descends from the QuantEcon inheritance. So
+the input is committed here, and `builders/dataBHS.py` reads it from disk.
+
+The file is MATLAB 5.0 (PCWIN, created 2007-05-11) holding exactly three
+(236,1) float64 arrays `c`, `rb`, `rs` — 1948Q1-2006Q4, the paper's sample.
+The conversion is value-preserving (three arrays to three columns, no
+filtering, no rescaling, no reordering); the CSV parses back **bit-exactly**
+under `float_precision='round_trip'`, and the consuming lecture's histogram is
+identical under pandas' default parser (PLAN-QELD-PACKAGE.md §4.3 measured why
+those are different claims). That is what earns the manifest's
+`integrity.upstream.status: verified` under AGENTS.md's definition for a
+`constructed` dataset.
+
+### Size
+
+5,588 B — here on the un-refetchability test alone, like NEWQDATA above.
