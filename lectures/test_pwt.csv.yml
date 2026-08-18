@@ -139,21 +139,23 @@ schema:
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# EIGHT consuming lecture files across four repos, all reading the SOURCE
-# repo's raw URL (raw.githubusercontent.com/QuantEcon/lecture-python-programming/
-# main/...) — so deleting the source copy breaks all of them AT RUNTIME with no
-# stale-serving grace period, translations included. Established 2026-08-18 by
-# basename grep with size controls against the live default branches of all
-# four repos. Three of polars.md's four reads build the URL across THREE
-# adjacent string literals; a whole-URL grep returns a confident zero — sweep
-# by basename.
+# EIGHT consuming lecture files across four repos, ALL repointed to this file
+# as of 2026-08-18 — certified by a basename sweep with size controls against
+# the live default branches of all four repos (1 read in each pandas.md, 3 in
+# each polars.md, zero old-URL residue). The translation repos are OUTSIDE the
+# audit's scan set, so they are recorded here or nowhere.
 #
-# The translation repos are OUTSIDE the audit's scan set, so they are recorded
-# here or nowhere. They are not direct repoint targets: their .md files are
-# overwritten wholesale by lecture-python-programming's sync-translations-*
-# workflows, so the repoint propagates by sync after the source repoint
-# merges — but the DELETION gate must wait until all three have synced,
-# rebuilt and republished, or their live sites break at cell execution.
+# The DELETION gate on the source copy is now only republish lag: each of the
+# four sites' published notebooks bakes whatever URL its last publish saw, so
+# the old copy must stay until all four have republished from repointed
+# source. Two propagation traps hit on the way here and are worth knowing
+# before trusting a future sync: the sync workflows open PRs (they do not
+# commit), and a \translate-resync regenerates from the SOURCE PR's merge-time
+# snapshot, which can silently revert later source edits — it did exactly that
+# to two of these reads once (restored same day; the defect is
+# QuantEcon/action-translation#276). A fifth translation repo
+# (lecture-python-programming.ml) holds an orphan copy of this file but has no
+# pandas/polars lectures, so it is not a consumer.
 consumers:
   - repo: QuantEcon/lecture-python-programming
     file: lectures/pandas.md
@@ -161,33 +163,16 @@ consumers:
     file: lectures/polars.md
   - repo: QuantEcon/lecture-python-programming.zh-cn
     file: lectures/pandas.md
-    note: >
-      Synced translation; reads lecture-python-programming's raw URL, not this
-      file. Repointed indirectly when the source repoint syncs; do not delete
-      the source copy until this repo has synced and republished. Tracked with
-      the Track D record in QuantEcon/data-lectures migration.yml.
   - repo: QuantEcon/lecture-python-programming.zh-cn
     file: lectures/polars.md
-    note: >
-      Synced translation; same URL, same sync dependency as pandas.md above.
   - repo: QuantEcon/lecture-python-programming.fr
     file: lectures/pandas.md
-    note: >
-      Synced translation; reads lecture-python-programming's raw URL, not this
-      file. Same sync dependency as the zh-cn entries.
   - repo: QuantEcon/lecture-python-programming.fr
     file: lectures/polars.md
-    note: >
-      Synced translation; same URL, same sync dependency.
   - repo: QuantEcon/lecture-python-programming.fa
     file: lectures/pandas.md
-    note: >
-      Synced translation; reads lecture-python-programming's raw URL, not this
-      file. Same sync dependency as the zh-cn entries.
   - repo: QuantEcon/lecture-python-programming.fa
     file: lectures/polars.md
-    note: >
-      Synced translation; same URL, same sync dependency.
 
 builder: null
 builder_status: unrecovered
