@@ -13,10 +13,12 @@
 # against four archives from rug.nl/ggdc: PWT 7.0 (pwt70_06032011version.zip,
 # member pwt70_w_country_names.csv sha256 4623b92a…) has different tcgdp/cc/cg
 # for every row and renamed the isocode column; PWT 6.3
-# (pwt63_nov182009version.zip, member sha256 f9609c42…) matches Argentina and
-# Australia POP but nothing else and has no tcgdp column; PWT 6.2
-# (pwt62_data.xlsx, sha256 a3293337…) and PWT 6.1 (pwt61_data.xlsx, sha256
-# 1477a118…) match nothing. The committed
+# (pwt63_nov182009version.zip, member sha256 f9609c42…) matches, at exact
+# float equality, four of eight POP values (ARG, AUS, ISR, ZAF) and four of
+# eight XRAT values (ARG, MWI, USA, URY), but no cc or cg value, and has no
+# tcgdp column; PWT 6.2 (pwt62_data.xlsx, sha256
+# a3293337…) and PWT 6.1 (pwt61_data.xlsx, sha256 1477a118…) match no POP, cc
+# or cg value (XRAT agrees only on ARG+USA in 6.2 and USA in 6.1). The committed
 # header uses the 6.x-era column name `country isocode` while `tcgdp` appears
 # only in the 7.x releases checked — so the extract mixes or predates the
 # vintages still downloadable. Hence `unrecovered`, with this paragraph as the
