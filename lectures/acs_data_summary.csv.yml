@@ -142,14 +142,6 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-advanced.myst
     file: lectures/match_transport.md
-    note: >
-      Reads its own copy at
-      `lectures/_static/lecture_specific/match_transport/`, not this file —
-      the repoint PR in lecture-python-advanced.myst follows this one, and
-      migration.yml records the dataset as `landed` until it merges. Listed
-      now because a correction to these bytes must reach the lecture
-      regardless of where it currently reads them from
-      (QuantEcon/data-lectures#91).
 
 builder: null
 builder_status: unrecovered

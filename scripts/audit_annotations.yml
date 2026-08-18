@@ -18,15 +18,6 @@
 #   toy                   invented in-lecture teaching table
 
 datasets:
-  dataBHS.mat:
-    description: US consumption/income series, MATLAB replication bundle
-    provenance: verbatim
-    flags: [lectures-root]
-    note: >
-      Successor manifest landed as lectures/dataBHS.csv.yml (wave C2 format
-      conversion); this entry covers the lecture's remaining loadmat read of
-      the .mat and is deleted by the flip PR once the repoint removes that
-      read. The basenames differ, so dual_recorded cannot fire meanwhile.
   graph.txt:
     description: 100-node weighted digraph for the shortest-path problem
     provenance: toy

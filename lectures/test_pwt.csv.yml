@@ -157,19 +157,8 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-programming
     file: lectures/pandas.md
-    note: >
-      Reads the repo's own raw URL (one unsplit literal, pandas.md:172), not
-      this file — the repoint PR follows this one, and migration.yml records
-      the dataset as `landed` until it merges. The prose at pandas.md:156-176
-      names the file and tabulates its columns, and must move with the read
-      (QuantEcon/data-lectures#91).
   - repo: QuantEcon/lecture-python-programming
     file: lectures/polars.md
-    note: >
-      Reads the repo's own raw URL three times (polars.md:161-163, 347-349,
-      425-427), each split across three adjacent string literals — collapse
-      at the repoint, do not patch the stem (NEWQDATA precedent). One `url`
-      binding at 425 feeds two readers (pandas and polars timing comparison).
   - repo: QuantEcon/lecture-python-programming.zh-cn
     file: lectures/pandas.md
     note: >

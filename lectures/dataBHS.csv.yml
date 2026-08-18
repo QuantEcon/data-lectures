@@ -174,15 +174,6 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-advanced.myst
     file: lectures/five_preferences.md
-    note: >
-      Reads its own copy — loadmat('dataBHS.mat') on a bare local filename at
-      lectures/dataBHS.mat, resolved against the notebook working directory —
-      not this file. The repoint PR in lecture-python-advanced.myst follows
-      this one (read_csv of this file plus .to_numpy(), dropping the
-      scipy.io import), and migration.yml records the dataset as `landed`
-      until it merges. Listed now because a correction to these bytes must
-      reach the lecture regardless of where it currently reads them from
-      (QuantEcon/data-lectures#91).
   - repo: QuantEcon/lecture-tools-techniques
     file: lectures/five_preferences.md
     note: >
