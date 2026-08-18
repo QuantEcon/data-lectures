@@ -810,14 +810,13 @@ datasets:
     cutover: null
 
   # Track D — the one lecture-python-programming dataset, riding with C2 (its
-  # rename is on the same phase-2 review). Read over the SOURCE repo's raw URL
-  # from pandas.md, polars.md AND the three synced translation repos
-  # (.zh-cn/.fr/.fa), so the deletion gate is wider than usual: repoint the
-  # source, wait for the sync-translations workflows to propagate it, and
-  # verify all four repos have rebuilt and republished before deleting —
-  # otherwise the translations break at cell execution with no grace period.
-  # Three of polars.md's four reads split the URL across three string
-  # literals; sweep by basename.
+  # rename is on the same phase-2 review). Was read over the SOURCE repo's raw
+  # URL from pandas.md, polars.md AND the three synced translation repos
+  # (.zh-cn/.fr/.fa); all four repos repointed 2026-08-18 (translations via
+  # sync PRs, certified by basename sweep). The deletion gate that remains:
+  # all four sites' PUBLISHED notebooks must be rebuilt from repointed source
+  # before the source copy is deleted — published notebooks bake the URL of
+  # their last publish, and the read is a live fetch at cell execution.
   test_pwt.csv:
     pilot: D
     status: repointed
