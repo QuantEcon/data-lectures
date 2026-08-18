@@ -1,0 +1,191 @@
+# Manifest for fred_data.csv — migrated out of
+# QuantEcon/lecture-python-advanced.myst, where it sat at
+# lectures/_static/lecture_specific/risk_aversion_or_mistaken_beliefs/ and was
+# read over the repo's OWN raw URL (PLAN Phase 8, wave C2).
+#
+# The name is on the phase-2 rename review (QuantEcon/data-lectures#87,
+# decision of 2026-08-17): it migrates under its current name, and the org-wide
+# Trees sweep of 2026-08-17 (re-derived in the QuantEcon/data-lectures#96
+# validation) found no other file of this name anywhere in the org, so the
+# deferral introduces no ambiguity.
+#
+# The builder below is a RECONSTRUCTION, not a recovered original: no build
+# script for this file has ever existed in the lecture repo. Unlike the BBH
+# snapshot files it reads LIVE FRED, deliberately — none of these six series is
+# revised the way the national accounts are — and it reproduced the committed
+# file byte for byte on 2026-08-18, three end-to-end runs. It therefore takes
+# `committed`, not `unrecovered`. This supersedes the previous entry in
+# scripts/audit_annotations.yml (provenance: constructed-lost, "no build script
+# anywhere") — right when it was written, wrong now; delete that entry in the
+# same PR that lands this manifest.
+
+filename: fred_data.csv
+title: US Treasury yields and NBER recessions — GS1/GS5/GS10, DFII5/DFII10 and USREC, monthly 1953-04 to 2024-12
+description: >
+  Six monthly FRED series on one date index: three nominal Treasury
+  constant-maturity yields (GS1, GS5, GS10), two real (TIPS) constant-maturity
+  yields (DFII5, DFII10) and the NBER recession indicator (USREC), 1953-04 to
+  2024-12. The `risk_aversion_or_mistaken_beliefs` lecture plots the yields
+  with recession shading in its opening figure; every series is a level in the
+  units FRED publishes.
+
+# Constructed: a six-series extract on a fixed window, with the two daily TIPS
+# series averaged to monthly. Nothing here is republished as distributed
+# (fredgraph serves one series per file), so it is not verbatim.
+class: constructed
+
+source:
+  name: FRED (Federal Reserve Bank of St. Louis) — series GS1, GS5, GS10, DFII5, DFII10, USREC
+  url: https://fred.stlouisfed.org
+  doi: null
+  version: >
+    Live FRED as of 2026-08-18, and the distinction that matters for the BBH
+    files does not bite here: constant-maturity yields are historical market
+    rates from the Board of Governors' H.15 release and USREC is a dummy built
+    from NBER's published turning points, none of which is revised or rebased
+    the way the national accounts are. A fresh fetch on 2026-08-18 reproduced
+    the committed bytes exactly (see integrity).
+  series: >
+    GS1, GS5, GS10 — market yield on US Treasury securities at 1-, 5- and
+    10-year constant maturity, percent per annum, monthly, NSA (Board of
+    Governors H.15). DFII5, DFII10 — market yield on US Treasury
+    inflation-indexed securities at 5- and 10-year constant maturity, percent
+    per annum, DAILY at source, here the monthly average (fredgraph
+    `fq=Monthly&fam=avg`), published from 2003-01. USREC — NBER-based recession
+    indicator, monthly 0/1, from the NBER's published peak/trough chronology.
+  citation: >
+    Board of Governors of the Federal Reserve System, "Selected Interest Rates
+    (H.15)", retrieved from FRED, Federal Reserve Bank of St. Louis (series
+    GS1, GS5, GS10, DFII5, DFII10); Federal Reserve Bank of St. Louis, "NBER
+    based Recession Indicators for the United States" (USREC), from the
+    National Bureau of Economic Research's business cycle chronology.
+  note: >
+    The lecture's prose names exactly these six series and FRED as the source,
+    and for once the prose survives measurement: the committed file reproduces
+    from live FRED byte for byte. One served-format drift worth recording:
+    fredgraph.csv now titles its date column `observation_date` where this file
+    (and fredgraph at the time it was cut) says `DATE` — the builder renames on
+    read, and a naive re-fetch that trusted the served header would produce a
+    file whose first cell differs.
+
+license:
+  name: null
+  url: https://fred.stlouisfed.org/series/USREC
+  redistribution: permitted
+  verified: 2026-08-18
+  note: >
+    Five of the six series are the Board of Governors' H.15 release delivered
+    through FRED — US Government works. The sixth, USREC, is constructed by the
+    St. Louis Fed from the NBER's published business-cycle dates, which are
+    facts. The BBH macro manifest's systematic check of 2026-08-17 (fourteen
+    FRED series pages against FRED's SP500 page as a positive control, which
+    does carry S&P's reproduction-prohibited block) found no restriction on any
+    federal series page; the same check could not be re-run for this manifest
+    on 2026-08-18 because fred.stlouisfed.org returned 403 to both the target
+    pages and the control from the authoring environment, so `permitted` rests
+    on the series' federal provenance plus that dated precedent. Nothing to
+    register on QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited-undated: the bytes arrived in
+                                # lecture-python-advanced.myst with no recorded
+                                # retrieval date, and none was reconstructed
+                                # from git history (AGENTS.md). It costs
+                                # nothing — the builder reproduces these bytes
+                                # from live FRED exactly, so the content is
+                                # pinned by reproduction rather than by a date.
+                                # The window end (2024-12-01) is the only
+                                # vintage fact, and it is pinned in the builder.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy the lecture reads today — sha256 45a4fd41…
+# against lecture-python-advanced.myst @ 6ff5ab3,
+# lectures/_static/lecture_specific/risk_aversion_or_mistaken_beliefs/. The
+# org-wide Trees sweep (2026-08-17, re-derived in QuantEcon/data-lectures#96)
+# found that path and no other copy anywhere, so there is no sibling to keep in
+# step. A repoint to this file therefore cannot change a figure.
+
+integrity:
+  sha256: 45a4fd41aeadf55072ea8e753c12dcb50ccb89bc34fb7eeb5e451ea0796811bc
+  upstream:
+    # `verified` in the sense AGENTS.md defines for a constructed dataset —
+    # "re-run the builder and compare". Run three times on the date below
+    # against live FRED, each run reproducing this file byte for byte. That is
+    # also what licenses `builder_status: committed` below.
+    status: verified
+    date: 2026-08-18
+    against: builders/fred_data.py
+    note: >
+      Reproduced exactly from live FRED — which is possible, where it is not
+      for the BBH snapshot files, because constant-maturity yields and the
+      recession dummy are stable history rather than revised aggregates. The
+      reproduction pins the DFII pair to fredgraph's Monthly/avg aggregation of
+      the daily series; a fetch of the daily series aggregated any other way
+      does not match.
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-18 (pandas 2.3.3), and asserted by
+# the builder's validate() stage on every run.
+
+schema:
+  format: csv
+  columns:
+    - {name: DATE, dtype: datetime, description: "first-of-month date stamp, 1953-04-01 to 2024-12-01, 861 rows on an unbroken monthly grid. The CSV index column; the lecture reads it with parse_dates and index_col"}
+    - {name: GS1, dtype: float64, description: "1-year Treasury constant-maturity yield, percent per annum, monthly, NSA. Observed 0.05-16.72"}
+    - {name: GS5, dtype: float64, description: "5-year Treasury constant-maturity yield, percent per annum. Observed 0.27-15.93"}
+    - {name: GS10, dtype: float64, description: "10-year Treasury constant-maturity yield, percent per annum. Observed 0.62-15.32"}
+    - {name: DFII5, dtype: float64, description: "5-year Treasury inflation-indexed (TIPS) constant-maturity yield, percent per annum, monthly average of daily. Observed -1.83-3.69, and EMPTY before 2003-01 — see known_nulls"}
+    - {name: DFII10, dtype: float64, description: "10-year TIPS constant-maturity yield, percent per annum, monthly average of daily. Observed -1.07-2.89, and EMPTY before 2003-01 — see known_nulls"}
+    - {name: USREC, dtype: int64, description: "NBER recession indicator, 1 in recession months and 0 otherwise. The lecture uses it for the figure's shaded bands"}
+  row_count_floor: 861          # exact by design, not a floor with headroom:
+                                # the window is fixed at 1953-04..2024-12 and
+                                # does not grow. validate() asserts equality.
+  date_range: {start: 1953-04-01, end: 2024-12-01}
+
+  # The only nulls in the file, and they are structural: FRED publishes the
+  # TIPS yields from 2003-01, so 1953-04..2002-12 (597 months) is empty in both
+  # DFII columns and complete in every other. validate() asserts these exact
+  # holes and no others, so a new hole fails instead of shipping.
+  known_nulls: {DFII5: 597, DFII10: 597}
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# One consumer, established by basename grep across all nine lecture clones
+# plus the org-wide Trees sweep (2026-08-17, re-derived in
+# QuantEcon/data-lectures#96: exactly one org-wide hit for this basename).
+# lecture-python-advanced.myst has no translation repo; the generated
+# lecture-python-advanced.notebooks mirror bakes the same URL into
+# risk_aversion_or_mistaken_beliefs.ipynb, self-heals after a publish tag, and
+# is not a repo anyone repoints, so it is deliberately not listed (wave A4
+# precedent).
+#
+# Note for whoever repoints: the read is ALREADY an HTTP read of the lecture
+# repo's own raw URL, SPLIT ACROSS TWO ADJACENT STRING LITERALS
+# (risk_aversion_or_mistaken_beliefs.md:1613-1617) with the split falling
+# mid-path inside `refs/heads/`, so a whole-URL grep returns a confident zero —
+# sweep by basename. The in-repo spelling is `refs/heads/main`, which this
+# repo's audit REJECTS for data-lectures reads (ref must be exactly `main`), so
+# the repoint must not copy the spelling. Deleting the lecture-repo copy before
+# the repoint publishes breaks every notebook and Colab run AT RUNTIME with no
+# stale-serving grace period — this file and the published notebooks fetch it
+# live at cell execution.
+consumers:
+  - repo: QuantEcon/lecture-python-advanced.myst
+    file: lectures/risk_aversion_or_mistaken_beliefs.md
+    note: >
+      Reads its own copy over an own-repo raw URL
+      (`lecture-python-advanced.myst/.../risk_aversion_or_mistaken_beliefs/`),
+      not this file — the repoint PR in lecture-python-advanced.myst follows
+      this one, and migration.yml records the dataset as `landed` until it
+      merges. Listed now because a correction to these bytes must reach the
+      lecture regardless of where it currently reads them from
+      (QuantEcon/data-lectures#91).
+
+builder: builders/fred_data.py
+builder_status: committed

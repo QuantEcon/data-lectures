@@ -1,0 +1,155 @@
+# Manifest for acs_data_summary.csv — migrated out of
+# QuantEcon/lecture-python-advanced.myst, where it sat at
+# lectures/_static/lecture_specific/match_transport/ and was read by relative
+# path (PLAN Phase 8, wave C2).
+#
+# The name is on the phase-2 rename review (QuantEcon/data-lectures#87,
+# decision of 2026-08-17): it migrates under its current name. The org-wide
+# Trees sweep (2026-08-17, re-derived in QuantEcon/data-lectures#96) found
+# four copies of this basename org-wide and all four are THE SAME BLOB
+# (29a0e219…) — inherited duplicates in lecture-dp, lecture-dp.monorepo and
+# 2026-tom-course, none with a consuming lecture — so there is no collision
+# and no sibling consumer to keep in step. The lecture-dp copy is already
+# annotated as an orphan under committed_unreferenced in
+# scripts/audit_annotations.yml; that entry stays.
+#
+# This file is the corpus's least documented: 351 rows of (count, mean, std)
+# for unnamed occupation cells — no occupation identifiers, no year, no
+# extraction script. The `unrecovered` below is honest and inherited-only
+# (AGENTS.md, "Two inherited-file states"); recovery would mean re-running an
+# ACS extraction whose filters, vintage and occupation coding are recorded
+# nowhere.
+
+filename: acs_data_summary.csv
+title: American Community Survey — earnings count, mean and dispersion by occupation cell
+description: >
+  351 occupation cells from the American Community Survey, each carrying the
+  number of individual observations (count) and the mean and standard
+  deviation of earnings (mean_Earnings, std_Earnings). The rows carry NO
+  occupation identifiers — order is the only key — and no survey year is
+  recorded anywhere. `match_transport` reads it to plot the mean-dispersion
+  scatter of earnings across occupations that motivates its composite-sorting
+  application, citing Boerma, Tsyvinski and Zimin's composite-matching paper.
+
+# Constructed: an aggregation (count/mean/std by occupation) of ACS microdata,
+# performed by whoever assembled the lecture. Not verbatim — the ACS
+# distributes microdata, not this summary.
+class: constructed
+
+source:
+  name: American Community Survey (US Census Bureau) — occupation-level summary, assembly unrecorded
+  url: https://www.census.gov/programs-surveys/acs
+  doi: null
+  version: >
+    Unknown — the file records no survey year and no ACS vintage, and the
+    consuming lecture's prose says only that the data "is obtained from the
+    American Community Survey and contains individual level data on income,
+    age and occupation" before this summary was formed.
+  series: count, mean_Earnings, std_Earnings — by unnamed occupation cell
+  citation: >
+    US Census Bureau, American Community Survey (microdata; vintage
+    unrecorded). Aggregation to occupation cells by the lecture authors,
+    accompanying the treatment of Boerma, Joel, Aleh Tsyvinski, and Alexander
+    P. Zimin's composite-sorting framework in the `match_transport` lecture.
+  note: >
+    The construction (ACS filters, the occupation grouping, the earnings
+    definition, the vintage) is described nowhere beyond the lecture's
+    one-sentence prose. The rows are position-keyed only: a consumer that
+    sorts or filters silently changes which occupation is which. Treat the
+    file as frozen — there is no documented way to rebuild or extend it.
+
+license:
+  name: null
+  url: https://www.census.gov/programs-surveys/acs
+  # Recorded as found, per the record-and-track policy (AGENTS.md, "Licensing
+  # and attribution").
+  redistribution: permitted
+  verified: 2026-08-18
+  note: >
+    An inherited exposure, served publicly from lecture-python-advanced.myst.
+    `permitted` rests on what the numbers are: ACS data is a US Census Bureau
+    product (a US Government work in the public domain), and what is published
+    here is not even the microdata but a 351-cell statistical summary of it.
+    No permission has been sought and none is required for census-derived
+    aggregates. Nothing to register on QuantEcon/data-lectures#35.
+
+retrieved: null                 # inherited-undated: no retrieval date was
+                                # recorded and none is reconstructed from git
+                                # history (AGENTS.md). Paired, as the rule
+                                # requires, with the honest `unverifiable`
+                                # below — for this file the vintage is pinned
+                                # by nothing at all, which is exactly what the
+                                # integrity note records.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# Migration check (repoint gate, not a manifest field): the bytes landing here
+# are byte-identical to the copy the lecture reads today — sha256 719a3353…
+# against lecture-python-advanced.myst @ 6ff5ab3,
+# lectures/_static/lecture_specific/match_transport/. The three other org
+# copies are the identical git blob (29a0e219…) and none has a consuming
+# lecture. A repoint to this file therefore cannot change a figure.
+
+integrity:
+  sha256: 719a3353a1308d00c03a93aa70d71ac5f279f9e0122175c750459b0e1fe20d90
+  upstream:
+    # There is nothing to verify AGAINST: no vintage, no extraction script,
+    # and no occupation identifiers to line the rows up with a fresh ACS pull.
+    # An honest `unverifiable` with the reason recorded beats a silence or a
+    # guessed `verified`.
+    status: unverifiable
+    date: 2026-08-18
+    against: null
+    note: >
+      Unverifiable by construction, not by neglect: the file has no occupation
+      key, no year, and no recorded filters, so no ACS extraction can be
+      compared cell-for-cell against it. Any future re-derivation would be a
+      NEW dataset under a new name ("Corrections vs vintages", AGENTS.md).
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-08-18 (pandas 2.3.3).
+
+schema:
+  format: csv
+  columns:
+    - {name: count, dtype: int64, description: "number of individual ACS observations in the occupation cell. Observed 16-30711"}
+    - {name: mean_Earnings, dtype: float64, description: "mean earnings in the cell, dollars (vintage-year dollars, year unrecorded). Observed 14900.41-231459.68. Rows are sorted ascending on this column, which is the file's only ordering"}
+    - {name: std_Earnings, dtype: float64, description: "standard deviation of earnings in the cell. Observed 11427.22-166980.91"}
+  row_count_floor: 351          # exact by design: a frozen summary with no
+                                # documented way to grow
+  date_range: null              # the file records no dates at all
+  known_nulls: {}               # genuinely none — 1,053 cells, zero nulls
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# One consumer, established by basename grep across all nine lecture clones
+# plus the org-wide Trees sweep (the four org-wide basename hits are one blob;
+# the lecture-dp, lecture-dp.monorepo and 2026-tom-course copies have no
+# consuming lecture — verified in QuantEcon/data-lectures#96). The generated
+# lecture-python-advanced.notebooks mirror self-heals after a publish tag and
+# is deliberately not listed (wave A4 precedent).
+#
+# Note for whoever repoints: the read assembles its path from a `data_path`
+# variable (match_transport.md:2234-2235), so the repoint edits the PREFIX
+# line, not the read line — and the prose sentence naming the dataset sits
+# three lines above (match_transport.md:2231), the only prose pairing in the
+# whole track.
+consumers:
+  - repo: QuantEcon/lecture-python-advanced.myst
+    file: lectures/match_transport.md
+    note: >
+      Reads its own copy at
+      `lectures/_static/lecture_specific/match_transport/`, not this file —
+      the repoint PR in lecture-python-advanced.myst follows this one, and
+      migration.yml records the dataset as `landed` until it merges. Listed
+      now because a correction to these bytes must reach the lecture
+      regardless of where it currently reads them from
+      (QuantEcon/data-lectures#91).
+
+builder: null
+builder_status: unrecovered

@@ -709,10 +709,9 @@ datasets:
     cutover: null
 
   # Wave C1 — the three lecture-python-advanced.myst datasets that needed no
-  # rename decision. `landed` here and NOT yet `repointed`: the lecture still
-  # reads its own copies, and the repoint PR follows this one (advanced.myst
-  # caches notebook execution, so the repointed cells re-execute against
-  # whatever is on this repo's main at that moment — data first, always).
+  # rename decision. Landed and repointed 2026-08-17 (data first, always:
+  # advanced.myst caches notebook execution, so the repointed cells re-execute
+  # against whatever is on this repo's main at that moment).
   bbh_macro_quarterly.csv:
     pilot: C1
     status: repointed
@@ -753,6 +752,71 @@ datasets:
       - repo: QuantEcon/lecture-python-advanced.myst
         pr: QuantEcon/lecture-python-advanced.myst#372
         date: 2026-08-17
+    cutover: null
+
+  # Wave C2 — the three lecture-python-advanced.myst datasets that needed
+  # decisions, all settled 2026-08-17 on QuantEcon/workspace-lectures#45:
+  # renames deferred to the phase-2 review (QuantEcon/data-lectures#87), and
+  # dataBHS.mat converts to dataBHS.csv (stem preserved).
+
+  # Already read over an own-repo raw URL rather than a local path, so deleting
+  # it from advanced.myst breaks readers at RUNTIME with no stale-serving grace
+  # period. Repoint and publish before any deletion. The in-repo URL is split
+  # across adjacent string literals with the `refs/heads/main` spelling —
+  # sweep by basename, and do not copy the spelling into the repoint.
+  fred_data.csv:
+    pilot: C2
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#98
+      date: 2026-08-18
+    repoints: []
+    cutover: null
+
+  acs_data_summary.csv:
+    pilot: C2
+    status: landed
+    prior_pattern: local-path
+    landed:
+      pr: QuantEcon/data-lectures#98
+      date: 2026-08-18
+    repoints: []
+    cutover: null
+
+  # Lands as a FORMAT CONVERSION of advanced.myst's lectures/dataBHS.mat — a
+  # bug fix, not tidying: the .mat sat outside html_static_path, so the
+  # published site 404s it while the published notebook calls loadmat on it.
+  # The audit keys on basenames, so until the repoint removes the .mat read,
+  # scripts/audit_annotations.yml keeps its dataBHS.mat entry (the basenames
+  # differ — dual_recorded cannot fire); the flip PR deletes it.
+  dataBHS.csv:
+    pilot: C2
+    status: landed
+    prior_pattern: local-path
+    landed:
+      pr: QuantEcon/data-lectures#98
+      date: 2026-08-18
+    repoints: []
+    cutover: null
+
+  # Track D — the one lecture-python-programming dataset, riding with C2 (its
+  # rename is on the same phase-2 review). Read over the SOURCE repo's raw URL
+  # from pandas.md, polars.md AND the three synced translation repos
+  # (.zh-cn/.fr/.fa), so the deletion gate is wider than usual: repoint the
+  # source, wait for the sync-translations workflows to propagate it, and
+  # verify all four repos have rebuilt and republished before deleting —
+  # otherwise the translations break at cell execution with no grace period.
+  # Three of polars.md's four reads split the URL across three string
+  # literals; sweep by basename.
+  test_pwt.csv:
+    pilot: D
+    status: landed
+    prior_pattern: own-repo
+    landed:
+      pr: QuantEcon/data-lectures#98
+      date: 2026-08-18
+    repoints: []
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the

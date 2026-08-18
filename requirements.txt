@@ -14,5 +14,5 @@ openpyxl==3.1.5      # the .xlsx reader pandas defers to — builders/
                      # need it. The last two have needed it since they landed;
                      # it was never declared because CI does not run builders.
 PyYAML==6.0.3        # scripts/build_catalog.py — parse the sidecar manifests
-scipy==1.16.3        # builders/NEWQDATA.py — loadmat, the only way to read a
-                     # MATLAB 5.0 .MAT; pandas cannot
+scipy==1.16.3        # builders/NEWQDATA.py and builders/dataBHS.py — loadmat,
+                     # the only way to read a MATLAB 5.0 .MAT; pandas cannot
