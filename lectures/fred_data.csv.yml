@@ -178,14 +178,6 @@ schema:
 consumers:
   - repo: QuantEcon/lecture-python-advanced.myst
     file: lectures/risk_aversion_or_mistaken_beliefs.md
-    note: >
-      Reads its own copy over an own-repo raw URL
-      (`lecture-python-advanced.myst/.../risk_aversion_or_mistaken_beliefs/`),
-      not this file — the repoint PR in lecture-python-advanced.myst follows
-      this one, and migration.yml records the dataset as `landed` until it
-      merges. Listed now because a correction to these bytes must reach the
-      lecture regardless of where it currently reads them from
-      (QuantEcon/data-lectures#91).
 
 builder: builders/fred_data.py
 builder_status: committed

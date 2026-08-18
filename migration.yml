@@ -766,22 +766,28 @@ datasets:
   # sweep by basename, and do not copy the spelling into the repoint.
   fred_data.csv:
     pilot: C2
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#98
       date: 2026-08-18
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-advanced.myst
+        pr: QuantEcon/lecture-python-advanced.myst#375
+        date: 2026-08-18
     cutover: null
 
   acs_data_summary.csv:
     pilot: C2
-    status: landed
+    status: repointed
     prior_pattern: local-path
     landed:
       pr: QuantEcon/data-lectures#98
       date: 2026-08-18
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-advanced.myst
+        pr: QuantEcon/lecture-python-advanced.myst#375
+        date: 2026-08-18
     cutover: null
 
   # Lands as a FORMAT CONVERSION of advanced.myst's lectures/dataBHS.mat — a
@@ -792,12 +798,15 @@ datasets:
   # differ — dual_recorded cannot fire); the flip PR deletes it.
   dataBHS.csv:
     pilot: C2
-    status: landed
+    status: repointed
     prior_pattern: local-path
     landed:
       pr: QuantEcon/data-lectures#98
       date: 2026-08-18
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-advanced.myst
+        pr: QuantEcon/lecture-python-advanced.myst#375
+        date: 2026-08-18
     cutover: null
 
   # Track D — the one lecture-python-programming dataset, riding with C2 (its
@@ -811,12 +820,15 @@ datasets:
   # literals; sweep by basename.
   test_pwt.csv:
     pilot: D
-    status: landed
+    status: repointed
     prior_pattern: own-repo
     landed:
       pr: QuantEcon/data-lectures#98
       date: 2026-08-18
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-python-programming
+        pr: QuantEcon/lecture-python-programming#612
+        date: 2026-08-18
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
