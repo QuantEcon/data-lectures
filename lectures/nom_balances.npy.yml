@@ -105,6 +105,22 @@ consumers:
       three .xlsx reads in the same lecture were repointed and these two .npy
       reads were not, and the lecture is outside the canary's build set so
       nothing fails. Tracked in QuantEcon/workspace-lectures#46.
+  - repo: QuantEcon/tom-econ370-2025
+    file: lectures/french_rev.md
+    note: >
+      Course fork with a live Pages site; reads its own blob-identical
+      `datasets/` copy (french_rev.md:715-716), not this file, and its
+      `base_url` still points at lecture-python-intro. A frozen course
+      record, accepted as-is rather than repointed -- the decision is
+      recorded in QuantEcon/workspace-lectures#47.
+  - repo: QuantEcon/python-lecture-sandpit.myst
+    file: lectures/french_rev.md
+    note: >
+      Public sandpit holding `lectures/_static/` copies. Three french_rev
+      variants reference the basenames but only `french_rev.md`'s
+      `_static/` reads resolve; `french_rev copy.md` and `french_rev_tom.md`
+      read a `datasets/` path that does not exist in that repo. Not
+      repointed; recorded in QuantEcon/workspace-lectures#47.
 
 # ---------------------------------------------------------------------------
 # Builder
