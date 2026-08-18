@@ -111,8 +111,10 @@ consumers:
       Course fork with a live Pages site; reads its own blob-identical
       `datasets/` copy (french_rev.md:715-716), not this file, and its
       `base_url` still points at lecture-python-intro. A frozen course
-      record, accepted as-is rather than repointed -- the decision is
-      recorded in QuantEcon/workspace-lectures#47.
+      record, accepted as-is rather than repointed: the repo is slated
+      for archival (owner decision, 2026-08-19, on
+      QuantEcon/workspace-lectures#47). Archived repos keep serving raw
+      and Pages URLs, so nothing here changes at archival time.
   - repo: QuantEcon/python-lecture-sandpit.myst
     file: lectures/french_rev.md
     note: >
