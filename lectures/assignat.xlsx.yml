@@ -118,6 +118,15 @@ consumers:
     file: lectures/french_rev.md
   - repo: QuantEcon/test-actions-lecture-intro
     file: lectures/french_rev.md
+  - repo: QuantEcon/tom-econ370-2025
+    file: lectures/french_rev.md
+    note: >
+      BROKEN reader (measured 2026-08-19): fetches this dataset through a
+      stale `base_url` still pointing at lecture-python-intro's deleted
+      `datasets/` copy (french_rev.md:70-75), which serves 404. The
+      published Pages site is unaffected (the repo commits its executed
+      `_build`); only re-execution breaks. Handling tracked in
+      QuantEcon/workspace-lectures#47.
 
 builder: null
 builder_status: not-applicable    # verbatim republication -- nothing to build
