@@ -182,6 +182,13 @@ consumers:
       the same downloadable-notebook 404. Mirroring the repoint there is
       tracked in QuantEcon/lecture-tools-techniques#11; until it lands, a
       correction to these values must be applied to that repo's .mat by hand.
+  - repo: QuantEcon/python-lecture-sandpit.myst
+    file: lectures/dataBHS.mat
+    note: >
+      Holder only, not a reader: the public sandpit commits its own
+      `lectures/dataBHS.mat` copy but no file in that repo references it
+      (checked 2026-08-19 -- QuantEcon/workspace-lectures#47's grouped
+      phrasing overstated this one). An orphan copy, accepted as-is.
 
 builder: builders/dataBHS.py
 builder_status: committed
