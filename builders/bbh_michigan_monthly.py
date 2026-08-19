@@ -31,8 +31,9 @@ which AGENTS.md ("A migration moves bytes; it does not update them") forbids.
 
 Network cost: the deposit is a single 189 MiB zip. This builder HTTP-range-reads
 the zip's central directory and then only the three compressed members it needs
-(~825 KB transferred in total, measured -- each member is read through a 256 KiB
-buffer, so reads overshoot the ~310 KiB of compressed member bytes), falling
+(824,944 bytes transferred in total, measured -- each member is read through a
+256 KiB buffer, so reads overshoot the ~310 KiB of compressed member bytes),
+falling
 back to a full download if the host stops honouring Range.
 
 Stages: fetch -> pre-process -> validate -> write.
