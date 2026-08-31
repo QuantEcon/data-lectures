@@ -78,7 +78,7 @@ integrity:
       the register's post-migration review and KEPT deliberately: the data is
       the current Maddison release and the three labels are load-bearing for
       long_run_growth, so restoring the pristine file would change nothing a
-      reader sees while touching three consuming repos.
+      reader sees while touching all four consuming repos, the canary included.
     delta_kind: local-edit
     delta: >
       Re-fetched from the Maddison release and compared cell by cell across all
