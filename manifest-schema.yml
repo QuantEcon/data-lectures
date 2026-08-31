@@ -168,7 +168,13 @@ schema:
   columns:
     - {name: economy, dtype: string, description: ISO3 country code}
     - {name: Country, dtype: string, description: Country name}
-    - {name: YR1960, dtype: float, description: Annual GDP growth (%), one column per year}
+    # A column entry carries EITHER `name` (one exact column) OR `pattern` (a
+    # regex matching a run of columns), never both. `pattern` is for files
+    # whose column set grows — one column per year here — where enumerating
+    # them would hard-code an end year into a file whose purpose is to move.
+    # First used by business_cycle_data.csv.yml (2026-09-01); proposed in
+    # QuantEcon/data-lectures#14.
+    - {pattern: 'YR\d{4}', dtype: float64, description: Annual GDP growth (%), one column per year from YR1960}
   row_count_floor: 5                    # PR validation fails below this. For a
                                         # frozen historical extract set it to the
                                         # exact row count by design (P1 lingcod =

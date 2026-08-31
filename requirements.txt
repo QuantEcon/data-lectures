@@ -1,6 +1,6 @@
 wbgapi==1.0.12
-pandas==2.3.3        # imported by 9 of the 10 builders — every one except
-                     # builders/business_cycle.py. Pinned so an
+pandas==2.3.3        # imported by every .py builder (business_cycle.py joined
+                     # them with its validate() stage, 2026-09-01). Pinned so an
                      # integrity.upstream.status of `verified` names a
                      # reproducible environment rather than whatever python is
                      # ambient (QuantEcon/data-lectures#85). This is the

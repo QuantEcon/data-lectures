@@ -112,7 +112,7 @@ The limits: **50 MiB** warns on push, **100 MiB** (104,857,600 B) is a hard bloc
 
 **One builder per published dataset, in `builders/`, named for the dataset it produces:** `builders/<stem>.<ext>` builds `lectures/<stem>.<ext2>`. The stem is the dataset's, not the lecture's — `builders/japan_earthquakes.py` writes `lectures/japan_earthquakes.csv`. That makes the manifest's `builder:` field predictable and lets CI assert it.
 
-Where one builder produces a **set** of files, name it for the set and let each file's manifest point at the same path — `business_cycle.py` writes three. The stem rule is the default, not an invariant; what CI asserts is that every `builder:` path exists, and that a dataset claiming a builder names one.
+Where one builder produces a **set** of files, name it for the set and let each file's manifest point at the same path — the SCF and Forbes builders each write two. The stem rule is the default, not an invariant; what CI asserts is that every `builder:` path exists, and that a dataset claiming a builder names one. A builder's **provenance byproducts** — upstream metadata dumps that are not datasets — go to `provenance/`, never `lectures/`: `business_cycle.py` writes one dataset there and two dumps here.
 
 `scripts/` is repo tooling — the audit dashboard and the catalog generator — and produces no dataset. Keep the two apart.
 
@@ -154,12 +154,14 @@ The generated dashboard (`scripts/build_audit.py`, [#20](https://github.com/Quan
 ```
 lectures/            # the published tree — flat, live on Pages; read via raw URLs
                      #   today, qeld.url() once the package ships (PLAN-QELD-PACKAGE.md)
-                     #   21 files, 18 with manifests (business_cycle's three still
-                     #   need theirs — see #13). Manifests are sidecars: <filename>.yml
+                     #   41 datasets, 41 manifests (complete since 2026-09-01).
+                     #   Manifests are sidecars: <filename>.yml
 builders/            # one builder per published dataset — NOT published
                      #   builders/<stem>.py builds lectures/<stem>.<ext>
 sources/             # inputs a builder cannot re-fetch — NOT published, per-path LFS
                      #   no manifests; sources/README.md is the audit trail
+provenance/          # upstream metadata dumps a builder writes beside its data —
+                     #   NOT published, no manifests, regenerated every run (#13)
 scripts/             # repo tooling — NOT published, produces no dataset
   build_catalog.py   #   generates CATALOG.md from the manifests
   build_audit.py     #   the audit dashboard: scan lecture repos → audit.json → site/
