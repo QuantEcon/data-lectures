@@ -94,7 +94,7 @@ schema:
       dtypes: [float64]
       known_nulls_total: 0
       description: monthly index aligned with the P:Q block above
-  # 14 further sheets ship with the workbook and are not read by any lecture:
+  # 15 further sheets ship with the workbook and are not read by any lecture:
   #   Intro, Fig6, Data2, Denomina, Dom-nat, Exchge, Exchge2, Exchge3,
   #   Inflatio, Metal, Mint, Ramel, Ramel2, Revoluti, Post-95.
   # Kept as the authors assembled them -- they are the working provenance for

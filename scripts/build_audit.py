@@ -306,7 +306,6 @@ def committed_referenced(repo: str, committed: list[str], all_refs: list[dict]):
     """Which committed data files does some lecture actually read?"""
     referenced = set()
     for path in committed:
-        base = Path(path).name
         for r in all_refs:
             if r["pattern"] == "embedded":
                 continue  # a %%file cell shadows, it does not reference
@@ -319,9 +318,6 @@ def committed_referenced(repo: str, committed: list[str], all_refs: list[dict]):
             elif r.get("gh_repo", "").lower() == repo.lower():
                 if r.get("path", "").strip("/") == path:
                     referenced.add(path)
-            elif r["pattern"] == "local-path" and r["repo"] == repo and \
-                    Path(r["target"]).name == base:
-                referenced.add(path)
     return referenced
 
 
