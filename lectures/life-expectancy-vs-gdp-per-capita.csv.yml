@@ -87,7 +87,11 @@ integrity:
     note: >
       OWID has published a newer vintage under the same grapher slug. Our copy
       is an older export and is what every consuming lecture reads. See `delta`
-      before refreshing — the change is not cosmetic.
+      before refreshing — the change is not cosmetic. Reviewed 2026-09-01 under
+      the register's post-migration review and KEPT: adopting the new vintage is
+      a lecture-content change (a new filename, four repos, five figures) with
+      no reader benefit, since the lecture embeds the live OWID grapher beside
+      the frozen data. Revisit only on an author request in lecture-python-intro.
     delta_kind: upstream-moved
     delta: >
       Fetched 2026-08-12: HTTP 200, 1,414,428 B against our 2,059,709 B.
