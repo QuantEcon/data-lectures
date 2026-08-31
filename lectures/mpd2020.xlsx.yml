@@ -74,7 +74,11 @@ integrity:
     against: https://www.rug.nl/ggdc/historicaldevelopment/maddison/data/mpd2020.xlsx
     note: >
       Checked in full against upstream and found to differ in three header
-      labels; every data value matches. See `delta`.
+      labels; every data value matches. See `delta`. Reviewed 2026-09-01 under
+      the register's post-migration review and KEPT deliberately: the data is
+      the current Maddison release and the three labels are load-bearing for
+      long_run_growth, so restoring the pristine file would change nothing a
+      reader sees while touching three consuming repos.
     delta_kind: local-edit
     delta: >
       Re-fetched from the Maddison release and compared cell by cell across all
