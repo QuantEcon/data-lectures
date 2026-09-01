@@ -12,13 +12,14 @@
 # vintage under a new name.
 
 filename: business_cycle_data.csv
-title: World Bank GDP growth (annual %) — USA, ARG, GBR, GRC, JPN, 1960 to 2023
+title: World Bank GDP growth (annual %) — USA, ARG, GBR, GRC, JPN, 1960 onward
 description: >
   Annual real GDP growth (percent, constant local currency) for the United
   States, Argentina, the United Kingdom, Greece and Japan, extracted from World
   Bank WDI series NY.GDP.MKTP.KD.ZG in the wide layout wbgapi emits: one row
   per economy (ISO3 code as the index, country name as `Country`), one
-  `YR<year>` column per year from 1960. It is the snapshot twin of the live
+  `YR<year>` column per year from 1960 to the newest year the source carries
+  (`schema.date_range.end`). It is the snapshot twin of the live
   `wb.data.DataFrame` call the intro `business_cycle` lecture makes; the call
   is reproduced verbatim by the builder.
 
@@ -62,18 +63,16 @@ license:
     is the model case for this repo's cache-with-attribution policy
     (AGENTS.md, "Licensing and attribution").
 
-retrieved: null                 # The bytes were produced by the committed
-                                # builder, in QuantEcon/data commit b857c5c of
-                                # 2025-02-16 — but that is when QuantEcon ran
-                                # the script and committed the output, and
-                                # AGENTS.md says not to reconstruct a
-                                # retrieval date from git history. The vintage
-                                # is pinned by content instead: YR2023 is the
-                                # last column and is populated for all five
-                                # economies, which places the export after the
-                                # WDI release that first carried 2023 growth,
-                                # and integrity.upstream records how far the
-                                # live series has moved since.
+# `retrieved` is stamped by scripts/snapshots.py on every merged refresh; null
+# until the first one. The inherited bytes were produced by the committed
+# builder in QuantEcon/data commit b857c5c of 2025-02-16 — but that is when
+# QuantEcon ran the script and committed the output, and AGENTS.md says not to
+# reconstruct a retrieval date from git history. The vintage is pinned by
+# content instead: YR2023 is the last column and is populated for all five
+# economies, which places the export after the WDI release that first carried
+# 2023 growth, and integrity.upstream records how far the live series has
+# moved since.
+retrieved: null
 maintainer: QuantEcon
 
 # ---------------------------------------------------------------------------
@@ -91,6 +90,9 @@ integrity:
     # aggregate is expected to. For a dynamic snapshot this is the normal
     # state between refreshes, not a defect — the refresh is the resolution,
     # and it is a deliberate PR, not something this manifest asks for.
+    # status / date / against / note are stamped by scripts/snapshots.py on
+    # every merged refresh (the delta block below is dropped at the same time,
+    # since a fresh snapshot is `verified` by construction).
     status: diverged
     date: 2026-09-01
     against: builders/business_cycle.py    # live WDI, lastupdated 2026-07-13
@@ -141,10 +143,10 @@ schema:
   row_count_floor: 5            # exact by construction: the builder asks for
                                 # five economies and validate() asserts the
                                 # set. Columns, not rows, are what grow.
-  date_range: {start: 1960, end: 2023}   # `end` is the newest year column in
-                                         # the COMMITTED bytes; a refresh PR
-                                         # updates it, which is what makes the
-                                         # refresh diff self-describing.
+  # `end` is the newest year column in the COMMITTED bytes, stamped by
+  # scripts/snapshots.py on every refresh — which is what makes a refresh PR's
+  # manifest diff self-describing.
+  date_range: {start: 1960, end: 2023}
 
   # Growth is undefined in the series' first year, so YR1960 is empty for all
   # five economies and nothing else is. validate() asserts exactly this hole.

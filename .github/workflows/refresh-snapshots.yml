@@ -1,0 +1,267 @@
+# Dynamic snapshots (PLAN Phase 5): the weekly sources-alive canary and the
+# refresh-as-PR, in one manifest-driven workflow.
+#
+#   canary   every `class: dynamic-snapshot` dataset with a runnable builder:
+#            fetch + validate to a scratch directory, no commit. A failure
+#            opens (or updates) one `upstream-break` issue here, classified
+#            by the builder's exit code — 2 is a ValidationError (the data
+#            broke the contract; a human), anything else is a fetch failure
+#            (retry). Consumers are unaffected either way: they read the
+#            last-good snapshot. This is where live-API fragility lives now,
+#            instead of in the lecture repos' CI.
+#   refresh  the datasets that are DUE — cadence elapsed since `retrieved`,
+#            `integrity.upstream.status: diverged`, or never refreshed — get
+#            the builder run in place, the manifest stamped
+#            (scripts/snapshots.py), CATALOG.md regenerated, and a PR on
+#            `refresh/<stem>`. A later run updates the same branch and PR.
+#            Nothing lands on main without a review; the PR body carries the
+#            builder's overlap summary, which is the review surface.
+#
+# Who gets told, per AGENTS.md "Refresh, break, or schema change": a break is
+# an issue HERE; a merged refresh reaches consumers per the manifest's
+# `on_refresh` (the fan-out is not wired yet — the PR body lists what it would
+# do, and today no snapshot has a consumer).
+#
+# Token: the PR is opened with QUANTECON_SERVICES_PAT when the org secret is
+# available to this repo, falling back to the workflow token. The fallback
+# works, with one known cost — GitHub does not run `pull_request` workflows
+# for PRs opened by GITHUB_TOKEN, so the required `consumed-files` check will
+# not start on its own; close and reopen the PR (or push to it) to trigger it.
+
+name: refresh-snapshots
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"    # weekly, an hour after audit-dashboard
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: "one dataset (its lectures/ filename), or blank for all"
+        required: false
+        default: ""
+      force:
+        description: "refresh even if not due"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh-snapshots
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      all: ${{ steps.plan.outputs.all }}
+      due: ${{ steps.plan.outputs.due }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - id: plan
+        env:
+          DATASET: ${{ inputs.dataset }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          flags=""
+          [ -n "$DATASET" ] && flags="$flags --dataset $DATASET"
+          [ "$FORCE" = "true" ] && flags="$flags --all"
+          all=$(python scripts/snapshots.py list | jq -c .)
+          due=$(python scripts/snapshots.py due $flags | jq -c .)
+          echo "all=$all" >> "$GITHUB_OUTPUT"
+          echo "due=$due" >> "$GITHUB_OUTPUT"
+          echo "canary: $(echo "$all" | jq -r '.[].dataset' | tr '\n' ' ')"
+          echo "due:    $(echo "$due" | jq -r '.[].dataset' | tr '\n' ' ')"
+
+  canary:
+    needs: plan
+    if: needs.plan.outputs.all != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        snapshot: ${{ fromJson(needs.plan.outputs.all) }}
+    name: canary (${{ matrix.snapshot.dataset }})
+    # A matrix cannot expose one output per leg, so a failing leg leaves its
+    # failure.json + log as an artifact and the notify job reads those.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Fetch + validate, no commit
+        id: run
+        env:
+          BUILDER: ${{ matrix.snapshot.builder }}
+          DATASET: ${{ matrix.snapshot.dataset }}
+        run: |
+          set +e
+          python "$BUILDER" --out-dir canary-out --summary-json summary.json 2>&1 | tee builder.log
+          code=${PIPESTATUS[0]}
+          set -e
+          case "$code" in
+            0) kind=ok ;;
+            2) kind=validation ;;
+            *) kind=fetch ;;
+          esac
+          echo "kind=$kind" >> "$GITHUB_OUTPUT"
+          # Data, not shell: the notifier reads this with jq, never sources it.
+          jq -n --arg dataset "$DATASET" --arg builder "$BUILDER" \
+                --arg kind "$kind" --arg code "$code" \
+                '{dataset: $dataset, builder: $builder, kind: $kind, code: $code}' \
+                > failure.json
+          exit "$code"
+      - name: Keep the failure for the notifier
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canary-failure-${{ matrix.snapshot.stem }}
+          path: |
+            failure.json
+            builder.log
+          retention-days: 7
+
+  notify:
+    if: failure()
+    needs: [plan, canary]
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: canary-failure-*
+          path: failures
+      - name: Open (or update) the upstream-break issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create upstream-break --force --color b60205 \
+            --description "A dynamic snapshot's builder failed against its live source"
+
+          {
+            echo "The weekly sources-alive canary failed. Nothing was written: every consumer keeps reading the last-good snapshot, so no lecture is affected — this is the alarm moving from the lecture repos' CI to here, doing its job."
+            echo
+            for dir in failures/*/; do
+              [ -f "$dir/failure.json" ] || continue
+              dataset=$(jq -r .dataset "$dir/failure.json")
+              builder=$(jq -r .builder "$dir/failure.json")
+              kind=$(jq -r .kind "$dir/failure.json")
+              code=$(jq -r .code "$dir/failure.json")
+              case "$kind" in
+                validation) what="**validation failed** (exit 2) — the fetched data broke the published contract. A human decides: absorb the upstream change in the builder's \`pre_process\` stage so the published schema is unchanged, or, if it cannot honestly be absorbed, plan a new-filename vintage (AGENTS.md, \"Refresh, break, or schema change\")." ;;
+                *)          what="**fetch failed** (exit $code) — the upstream or the network, not the data. Re-run the workflow; if it fails again, the source has moved or gone." ;;
+              esac
+              echo "### \`$dataset\` — $what"
+              echo
+              echo "Builder: \`$builder\`. Last lines of its log:"
+              echo
+              echo '```'
+              tail -n 15 "$dir/builder.log"
+              echo '```'
+              echo
+            done
+            echo "Run: $RUN_URL"
+            echo
+            echo "_Posted automatically. Later failures comment here rather than opening new issues, so close this once the canary is green._"
+          } > body.md
+
+          open=$(gh issue list --label upstream-break --state open --limit 1 \
+                   --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body-file body.md
+          else
+            gh issue create --title "refresh-snapshots: a dynamic snapshot's builder is failing" \
+              --label upstream-break --assignee mmcky --body-file body.md
+          fi
+
+  refresh:
+    needs: [plan, canary]
+    if: needs.plan.outputs.due != '[]' && needs.canary.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        snapshot: ${{ fromJson(needs.plan.outputs.due) }}
+    name: refresh (${{ matrix.snapshot.dataset }})
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          # The PAT, when present, is what lets the PR trigger `consumed-files`
+          # (see the header). `persist-credentials` keeps it for the push.
+          token: ${{ secrets.QUANTECON_SERVICES_PAT || github.token }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run the builder in place and stamp the manifest
+        env:
+          BUILDER: ${{ matrix.snapshot.builder }}
+          DATASET: ${{ matrix.snapshot.dataset }}
+        run: |
+          python "$BUILDER" --summary-json summary.json
+          if git diff --quiet -- "lectures/$DATASET"; then
+            echo "bytes_changed=false" >> "$GITHUB_ENV"
+          else
+            echo "bytes_changed=true" >> "$GITHUB_ENV"
+          fi
+          python scripts/snapshots.py stamp "$DATASET" --summary summary.json
+          python scripts/build_catalog.py
+          python .github/scripts/check_consumed_files.py
+          python scripts/snapshots.py pr-body "$DATASET" --summary summary.json > pr.md
+          head -1 pr.md > pr-title.txt
+          tail -n +3 pr.md > pr-body.md
+      - name: Branch, commit, push, open or update the PR
+        env:
+          GH_TOKEN: ${{ secrets.QUANTECON_SERVICES_PAT || github.token }}
+          PAT_PRESENT: ${{ secrets.QUANTECON_SERVICES_PAT != '' }}
+          GH_REPO: ${{ github.repository }}
+          DATASET: ${{ matrix.snapshot.dataset }}
+          STEM: ${{ matrix.snapshot.stem }}
+          WHY: ${{ matrix.snapshot.why }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          branch="refresh/$STEM"
+          title=$(cat pr-title.txt)
+          {
+            cat pr-body.md
+            echo
+            echo "Why now: $WHY. Bytes changed: \`$bytes_changed\`. Run: $RUN_URL"
+            if [ "$PAT_PRESENT" != "true" ]; then
+              echo
+              echo "_Opened with the workflow token (no \`QUANTECON_SERVICES_PAT\` reached this repo), so the required \`consumed-files\` check will not start by itself — close and reopen this PR, or push to it, to trigger it._"
+            fi
+          } > body.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add -A lectures provenance CATALOG.md
+          if git diff --cached --quiet; then
+            echo "nothing to commit for $DATASET"; exit 0
+          fi
+          git commit -q -m "$title" -m "Scheduled refresh. $WHY. Run: $RUN_URL"
+          git push --force-with-lease origin "$branch"
+          open=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            gh pr edit "$open" --title "$title" --body-file body.md
+            gh pr comment "$open" --body "Updated by a later run: $RUN_URL"
+          else
+            gh pr create --base main --head "$branch" --title "$title" --body-file body.md
+          fi

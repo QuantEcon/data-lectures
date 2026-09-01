@@ -118,7 +118,9 @@ Where one builder produces a **set** of files, name it for the set and let each 
 
 **Where a builder reads its input from.** The normal case is the third-party upstream, fetched at run time: eight of the nine `committed` builders here do that, and it is the fetch stage of the contract below. A builder reads from `sources/` **only when the input cannot be re-fetched** — the upstream is gone, unlocatable, or was inherited with no recoverable source. `sources/` is that exception layer, not a general input tree, and it is emphatically not "the big-file directory": the defining property is un-refetchability, not size. What it must never be is a network read from another QuantEcon repo — that is how a retired repo becomes load-bearing again.
 
-Builders follow four stages — **fetch → pre-process → validate → write** — and only write on validation pass (expected columns/dtypes, row-count floor, recency of date range, no all-NaN columns, values unchanged in the overlap window with the previous vintage). Lectures always read the last-good snapshot: an upstream outage may fail a refresh, it must never break a lecture build.
+Builders follow four stages — **fetch → pre-process → validate → write** — and only write on validation pass (expected columns/dtypes, row-count floor, recency of date range, no all-NaN columns, and a **bounded** overlap window against the previous vintage — a tracking snapshot is revised by its source, so the test is a tolerance plus a printed summary, never equality). Lectures always read the last-good snapshot: an upstream outage may fail a refresh, it must never break a lecture build.
+
+**A dynamic snapshot's builder also honours the refresh contract** that `.github/workflows/refresh-snapshots.yml` and `scripts/snapshots.py` rely on — copy `builders/_template.py`: `--out-dir` (dry run for the weekly canary), `--summary-json` (the run summary the manifest stamp and the refresh PR body are built from), writes through a temp file and `os.replace()`, and exit code **2** for a `ValidationError` against **1** for a fetch failure, which is how the canary issue tells "the data broke the contract" from "the network was down". The manifest fields the workflow stamps (`retrieved`, `integrity.sha256`, `integrity.upstream.*`, `schema.date_range.end`) must be single-line values with their reasoning in comments **above** them, not beside — the stamp replaces the line.
 
 ### Live APIs
 
@@ -178,6 +180,8 @@ scripts/             # repo tooling — NOT published, produces no dataset
   build_catalog.py   #   generates CATALOG.md from the manifests
   build_audit.py     #   the audit dashboard: scan lecture repos → audit.json → site/
   render_audit.py    #   its render stage
+  snapshots.py       #   dynamic snapshots: which are due, stamp a manifest after
+                     #   a refresh, render the refresh PR body
   audit_annotations.yml  # curated judgment for not-yet-migrated data refs
 migration.yml        # migration lifecycle tracker (status + PR provenance per dataset)
 manifest-schema.yml  # per-dataset manifest schema (strawman)

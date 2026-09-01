@@ -37,17 +37,27 @@ failed refresh nor an interrupted one can leave anything but the last-good
 snapshot in place.
 
 Usage:
-    python builders/business_cycle.py              # refresh in place
-    python builders/business_cycle.py --out-dir D  # write everything to D
-                                                   # (a dry run; validates
-                                                   # against lectures/ still)
+    python builders/business_cycle.py                    # refresh in place
+    python builders/business_cycle.py --out-dir D        # dry run: write to D,
+                                                         # still validating
+                                                         # against lectures/
+    python builders/business_cycle.py --summary-json S   # also write the
+                                                         # machine-readable
+                                                         # run summary to S
+
+Exit codes (the contract .github/workflows/refresh-snapshots.yml relies on):
+    0  wrote (or dry-ran) a validated snapshot
+    1  fetch or other infrastructure failure -- retry, the data is not at fault
+    2  ValidationError -- the fetched data broke the contract; needs a human
 
 Requires pandas and wbgapi (requirements.txt).
 """
 import argparse
 import datetime as dt
+import json
 import os
 import re
+import sys
 
 import pandas as pd
 import wbgapi as wb
@@ -82,6 +92,17 @@ MIN_ABS_MAX, MAX_ABS = 1.0, 50.0
 MAX_STALENESS_YEARS = 2
 
 
+class ValidationError(Exception):
+    """The fetched data broke the published contract -- distinct from a fetch
+    failure, so CI can tell 'the data is wrong' (a human) from 'the network
+    was down' (a retry). Exit code 2."""
+
+
+def _check(condition, message):
+    if not condition:
+        raise ValidationError(message)
+
+
 def fetch():
     """Live WDI, exactly the lecture's own three calls."""
     frame = wb.data.DataFrame(SERIES, ECONOMIES, labels=True)
@@ -105,49 +126,71 @@ def _years(frame):
 
 
 def validate(frame, previous=None):
-    """Refuse to write anything that is not the shape we expect."""
+    """Refuse to write anything that is not the shape we expect. Returns the
+    run summary (the refresh PR's body and the manifest stamp are built from
+    it), raising ValidationError on the first broken invariant."""
     # Grid: Country, then YR<first>..YR<last> with no gap.
-    assert list(frame.columns[:1]) == ['Country'], list(frame.columns[:3])
+    _check(list(frame.columns[:1]) == ['Country'], f'first columns {list(frame.columns[:3])}')
     years = _years(frame)
-    assert len(years) == len(frame.columns) - 1, 'non-year column present'
-    assert years[0] == FIRST_YEAR, years[0]
-    assert years == list(range(FIRST_YEAR, years[-1] + 1)), 'gap in the year grid'
+    _check(len(years) == len(frame.columns) - 1, 'non-year column present')
+    _check(years[0] == FIRST_YEAR, f'first year is {years[0]}, not {FIRST_YEAR}')
+    _check(years == list(range(FIRST_YEAR, years[-1] + 1)), 'gap in the year grid')
     year_cols = [f'YR{y}' for y in years]
 
     # Economies: exactly the five, one row each.
-    assert frame.index.name == 'economy'
-    assert sorted(frame.index) == sorted(ECONOMIES), sorted(frame.index)
-    assert frame['Country'].notnull().all()
+    _check(frame.index.name == 'economy', f'index is {frame.index.name!r}')
+    _check(sorted(frame.index) == sorted(ECONOMIES), f'economies {sorted(frame.index)}')
+    _check(frame['Country'].notnull().all(), 'a Country label is missing')
 
     # Dtypes and units.
     values = frame[year_cols]
-    assert all(pd.api.types.is_float_dtype(values[c]) for c in year_cols), 'non-float year column'
-    assert values.abs().max().max() >= MIN_ABS_MAX, 'values look like ratios, not percent'
-    assert values.abs().max().max() <= MAX_ABS, 'growth rate out of band'
+    _check(all(pd.api.types.is_float_dtype(values[c]) for c in year_cols), 'non-float year column')
+    _check(values.abs().max().max() >= MIN_ABS_MAX, 'values look like ratios, not percent')
+    _check(values.abs().max().max() <= MAX_ABS, 'growth rate out of band')
 
     # The one structural null: growth is undefined in the series' first year.
     nulls = values.isnull().sum()
-    assert dict(nulls[nulls > 0]) == {f'YR{FIRST_YEAR}': len(ECONOMIES)}, dict(nulls[nulls > 0])
+    _check(dict(nulls[nulls > 0]) == {f'YR{FIRST_YEAR}': len(ECONOMIES)},
+           f'unexpected nulls {dict(nulls[nulls > 0])}')
 
     # Recency.
-    assert years[-1] >= dt.date.today().year - MAX_STALENESS_YEARS, f'newest year is {years[-1]}'
+    _check(years[-1] >= dt.date.today().year - MAX_STALENESS_YEARS, f'newest year is {years[-1]}')
+
+    summary = {
+        'dataset': OUT_FILE,
+        'builder': os.path.relpath(os.path.abspath(__file__), REPO_ROOT),
+        'rows': int(frame.shape[0]),
+        'columns': int(frame.shape[1]),
+        'date_range': {'start': years[0], 'end': years[-1]},
+        'overlap': None,
+    }
 
     # Overlap window against the last-good snapshot: revisions are expected,
     # bounded, and reported; a lost observation or a rescale is not.
     if previous is not None:
         prev_years = [f'YR{y}' for y in _years(previous)]
-        assert set(prev_years) <= set(year_cols), 'a year column disappeared'
-        assert sorted(previous.index) == sorted(frame.index), 'the economy set changed'
+        _check(set(prev_years) <= set(year_cols), 'a year column disappeared')
+        _check(sorted(previous.index) == sorted(frame.index), 'the economy set changed')
         old = previous.loc[frame.index, prev_years]
         new = frame.loc[frame.index, prev_years]
-        assert not (old.notnull() & new.isnull()).any().any(), 'a populated cell went empty'
+        _check(not (old.notnull() & new.isnull()).any().any(), 'a populated cell went empty')
         diff = (old - new).abs()
         changed = int((diff > 1e-9).sum().sum())
         worst = float(diff.max().max())
+        new_cols = sorted(set(year_cols) - set(prev_years))
+        summary['overlap'] = {
+            'window': f'{prev_years[0]}..{prev_years[-1]}',
+            'previous_end': _years(previous)[-1],
+            'cells_total': int(diff.size),
+            'cells_revised': changed,
+            'max_abs_change': round(worst, 4),
+            'new_columns': new_cols,
+        }
         print(f'overlap window {prev_years[0]}..{prev_years[-1]}: '
               f'{changed} of {diff.size} cells revised, max |change| {worst:.3f} pp; '
-              f'new columns: {sorted(set(year_cols) - set(prev_years)) or "none"}')
-        assert worst <= MAX_REVISION, f'revision of {worst:.3f} pp exceeds {MAX_REVISION}'
+              f'new columns: {new_cols or "none"}')
+        _check(worst <= MAX_REVISION, f'revision of {worst:.3f} pp exceeds {MAX_REVISION}')
+    return summary
 
 
 def _atomic_write(path, text):
@@ -159,7 +202,7 @@ def _atomic_write(path, text):
     os.replace(tmp, path)
 
 
-def run(out_dir=None):
+def run(out_dir=None, summary_json=None):
     data_dir = out_dir or PUBLISHED_DIR
     prov_dir = out_dir or PROVENANCE_DIR
     previous_path = os.path.join(PUBLISHED_DIR, OUT_FILE)
@@ -168,7 +211,9 @@ def run(out_dir=None):
 
     frame, metadata, info = fetch()
     frame = pre_process(frame)
-    validate(frame, previous)
+    summary = validate(frame, previous)
+    if summary_json:
+        _atomic_write(summary_json, json.dumps(summary, indent=1) + '\n')
 
     os.makedirs(data_dir, exist_ok=True)
     os.makedirs(prov_dir, exist_ok=True)
@@ -183,4 +228,10 @@ def run(out_dir=None):
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--out-dir', help='write outputs here instead of lectures/ and provenance/')
-    run(ap.parse_args().out_dir)
+    ap.add_argument('--summary-json', help='also write the run summary (JSON) here')
+    args = ap.parse_args()
+    try:
+        run(args.out_dir, args.summary_json)
+    except ValidationError as exc:
+        print(f'::error::{OUT_FILE}: validation failed -- {exc}', file=sys.stderr)
+        sys.exit(2)
