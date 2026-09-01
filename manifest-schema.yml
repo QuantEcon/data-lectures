@@ -216,6 +216,21 @@ consumers: []
   # The generated catalog surfaces `note` beside the consumer, so a reader of
   # CATALOG.md's "Used by" column cannot mistake a local-copy reader for a
   # repointed one.
+  #
+  # Dynamic snapshots only (sketched 2026-09-01, AGENTS.md "Refresh, break, or
+  # schema change"; acted on by the Phase 5 consumer fan-out, not yet built).
+  # What a merged refresh does for this consumer:
+  #   rebuild   dispatch the repo's build; the figures re-render and nothing
+  #             on the page narrates a specific number
+  #   review    open an issue in the repo carrying the builder's overlap
+  #             summary, because prose quotes a value or a row count that the
+  #             refresh may have moved
+  # Omit for static datasets. A refresh never changes the published schema
+  # (that is a new filename), so this routes VALUE changes only.
+  #
+  # - repo: QuantEcon/lecture-python-intro
+  #   file: lectures/business_cycle.md
+  #   on_refresh: review
 
 # ---------------------------------------------------------------------------
 # Builder — required for constructed and dynamic-snapshot; omit for verbatim

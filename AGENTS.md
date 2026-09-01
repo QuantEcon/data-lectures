@@ -124,6 +124,18 @@ Builders follow four stages — **fetch → pre-process → validate → write**
 
 Live API calls are for *teaching data access*, not for getting data. Don't propose "the lecture should just call the API" as a fix — the fix is a snapshot here plus an automated refresh.
 
+### Refresh, break, or schema change — who gets told
+
+A dynamic snapshot has three interfaces, and each failure mode has a different audience. Settled 2026-09-01 while retrofitting `business_cycle.py`; the workflows that act on it are PLAN Phase 5.
+
+| What happened | Detected by | Who is told | Consumer code changes? |
+| --- | --- | --- | --- |
+| **Upstream interface changed** (a renamed column, a dropped series, a units switch) | the builder's `validate()` fails; nothing is written, the last-good snapshot stays | an issue **in this repo** (the sources-alive canary). Consumers are unaffected by construction | **No.** Absorb it in the builder's `pre_process` stage so the published schema is unchanged — that adapter logic is where upstream churn is supposed to live |
+| **Successful refresh** — schema intact, values revised | the refresh lands as a PR here whose body is `validate()`'s overlap summary | on merge, each repo in the manifest's `consumers` list, per its `on_refresh` (`manifest-schema.yml`): `rebuild` dispatches a build, `review` opens an issue there with the summary, for a lecture whose prose narrates a number | No, but figures and narrated numbers may need an author's eye |
+| **Published schema changes deliberately** — the upstream change cannot honestly be absorbed | a decision, not a detection | an issue in every `consumers[].repo`, opened by hand as the invitation to opt in | **Yes, on the consumer's schedule:** new filename per "Corrections vs vintages"; the old file stays valid |
+
+The case none of this covers is a lecture where **the API call is the lesson** (`business_cycle` teaches `wb.series.info`): an upstream change to the call itself must reach the lecture, because the code on the page is the content. A snapshot twin still belongs beside it — as the `lecture-wasm` read and the fallback — but the canary only makes the break heard sooner.
+
 ### Licensing and attribution
 
 Because this repo is a **stability cache, not a content-distribution host** (see "What this repo is"), the licence question is *"is this source OK to cache and serve publicly, with attribution?"* — not *"may we republish this as our own?"*. Attribution to the upstream source is carried in every manifest (`source`: name, url, series, citation), and that is the primary obligation.
