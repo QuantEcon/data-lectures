@@ -32,7 +32,9 @@ metadata, which is where the CC BY-4.0 licence the manifest cites is stated,
 and the `wb.series.info(q='GDP growth')` listing the lecture teaches.
 
 Stages: fetch -> pre-process -> validate -> write. Writes only on validation
-pass, so a failed refresh leaves the last-good snapshot in place.
+pass, and each write goes through a temp file and os.replace(), so neither a
+failed refresh nor an interrupted one can leave anything but the last-good
+snapshot in place.
 
 Usage:
     python builders/business_cycle.py              # refresh in place
@@ -148,6 +150,15 @@ def validate(frame, previous=None):
         assert worst <= MAX_REVISION, f'revision of {worst:.3f} pp exceeds {MAX_REVISION}'
 
 
+def _atomic_write(path, text):
+    """Write via a same-directory temp file and os.replace(), so an interrupted
+    run cannot leave a truncated file where the last-good snapshot was."""
+    tmp = path + '.tmp'
+    with open(tmp, 'w') as f:
+        f.write(text)
+    os.replace(tmp, path)
+
+
 def run(out_dir=None):
     data_dir = out_dir or PUBLISHED_DIR
     prov_dir = out_dir or PROVENANCE_DIR
@@ -161,11 +172,9 @@ def run(out_dir=None):
 
     os.makedirs(data_dir, exist_ok=True)
     os.makedirs(prov_dir, exist_ok=True)
-    frame.to_csv(os.path.join(data_dir, OUT_FILE))
-    with open(os.path.join(prov_dir, METADATA_FILE), 'w') as f:
-        f.write(metadata)
-    with open(os.path.join(prov_dir, INFO_FILE), 'w') as f:
-        f.write(info)
+    _atomic_write(os.path.join(data_dir, OUT_FILE), frame.to_csv())
+    _atomic_write(os.path.join(prov_dir, METADATA_FILE), metadata)
+    _atomic_write(os.path.join(prov_dir, INFO_FILE), info)
     years = _years(frame)
     print(f'wrote {OUT_FILE}: {frame.shape[0]} economies x {len(years)} years '
           f'({years[0]} .. {years[-1]}) -> {data_dir}')
