@@ -174,83 +174,9 @@ api:
 # exercise-download (prose link target — referenced, just not by a code cell)
 # ---------------------------------------------------------------------------
 committed_unreferenced:
-  lecture-python-intro:lectures/datasets/GDP_per_capita_world_bank.csv:
-    kind: orphan
-    note: no reference anywhere; the QuantEcon/data copy was dropped at Phase 2
-  lecture-python-intro:lectures/datasets/Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv:
-    kind: orphan
-    note: metadata twin of the World Bank GDP-per-capita orphan
-  lecture-python-intro:lectures/datasets/fig_3.ods:
-    kind: orphan
-    note: source-format twin of fig_3.xlsx; referenced by nothing
-  lecture-python-programming:lectures/_static/lecture_specific/pandas/data/ticker_data.csv:
-    kind: orphan
-    note: no reference anywhere
-  lecture-python-programming:lectures/_static/lecture_specific/python_advanced_features/numbers.txt:
-    kind: shadowed
-    note: debugging lecture writes it with %%file
   lecture-python-programming:lectures/_static/lecture_specific/python_advanced_features/test_table.csv:
     kind: exercise-download
     note: prose exercise link tells the reader to download this exact URL — keep
-  lecture-python-programming:lectures/_static/lecture_specific/python_foundations/test_table.csv:
-    kind: orphan
-    note: duplicate of the python_advanced_features copy
-  lecture-python-programming:lectures/_static/lecture_specific/python_foundations/us_cities.txt:
-    kind: shadowed
-    note: python_essentials writes it with %%writefile
-  lecture-python.myst:lectures/_static/lecture_specific/finite_markov/web_graph_data.txt:
-    kind: shadowed
-    note: finite_markov writes it with %%file
-  lecture-python.myst:lectures/web_graph_data.txt:
-    kind: shadowed
-    note: shadowed duplicate at lectures/ root
-  lecture-python-intro:lectures/graph.txt:
-    kind: shadowed
-    note: >
-      short_path regenerates it via %%file before reading it, so the committed
-      bytes are never consumed — the build prints "Overwriting graph.txt". It
-      became an orphan when QuantEcon/lecture-wasm#63 removed the only URL read
-      of it in the organisation; deletable as Track X
-  lecture-dp:lectures/graph.txt:
-    kind: shadowed
-    note: short_path regenerates it via %%file
-  lecture-dp:lectures/_static/lecture_specific/finite_markov/web_graph_data.txt:
-    kind: orphan
-    note: inherited from python.myst; no finite_markov data reference in this repo
-  lecture-dp:lectures/_static/lecture_specific/match_transport/acs_data_summary.csv:
-    kind: orphan
-    note: inherited copy, no consuming lecture in this repo
-  lecture-dp:lectures/_static/lecture_specific/mle/fp.dta:
-    kind: orphan
-    note: inherited from python.myst, no consuming lecture
-  lecture-dp:lectures/_static/lecture_specific/ols/maketable1.dta:
-    kind: orphan
-    note: inherited from python.myst, no consuming lecture
-  lecture-dp:lectures/_static/lecture_specific/ols/maketable2.dta:
-    kind: orphan
-    note: inherited from python.myst, no consuming lecture
-  lecture-dp:lectures/_static/lecture_specific/ols/maketable4.dta:
-    kind: orphan
-    note: inherited from python.myst, no consuming lecture
-  lecture-dp:lectures/_static/lecture_specific/pandas_panel/countries.csv:
-    kind: orphan
-    note: inherited copy; the consuming lectures live in other repos and now read data-lectures
-  lecture-dp:lectures/_static/lecture_specific/pandas_panel/employ.csv:
-    kind: orphan
-    note: inherited copy; the consuming lectures live in other repos and now read data-lectures
-  lecture-dp:lectures/_static/lecture_specific/pandas_panel/realwage.csv:
-    kind: orphan
-    note: inherited copy; the consuming lectures live in other repos and now read data-lectures
-  lecture-wasm:lectures/datasets/GDP_per_capita_world_bank.csv:
-    kind: mirror-orphan
-    note: orphan in intro, mirrored into wasm
-  lecture-wasm:lectures/datasets/Metadata_Country_API_NY.GDP.PCAP.CD_DS2_en_csv_v2_4770417.csv:
-    kind: mirror-orphan
-    note: orphan in intro, mirrored into wasm
-  continuous_time_mcs:lectures/old_stuff.txt:
-    kind: orphan
-    note: scratch file at lectures/ root; referenced by nothing
-
 # Scanner-visible targets that are not datasets (tutorial artifacts the
 # lecture itself creates, code files, etc.) — suppressed from the audit.
 ignore_targets: []
