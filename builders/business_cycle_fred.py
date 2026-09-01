@@ -89,9 +89,11 @@ def fetch():
 
 
 def pre_process(frame):
+    # Pure: no casts that can raise. USREC stays float here (a `.` from FRED
+    # would be NaN) so that validate() is what rejects a hole in it, with
+    # exit code 2, rather than an astype() raising ValueError with exit 1.
     frame = frame.loc[START:].copy()
     frame.index.name = 'DATE'
-    frame['USREC'] = frame['USREC'].astype('int64')
     return frame[COLUMNS]
 
 
@@ -124,6 +126,7 @@ def validate(frame, previous=None):
             _check(s.loc[last + pd.offsets.MonthBegin(1):].isnull().all(), f'{col}: observed after {last.date()}')
         lo, hi = BANDS[col]
         _check(s.dropna().between(lo, hi).all(), f'{col}: out of band [{lo}, {hi}]')
+    _check(frame['USREC'].notnull().all(), 'USREC has a missing month')
     _check(set(frame['USREC'].unique()) <= {0, 1}, 'USREC not 0/1')
 
     summary = {
@@ -172,6 +175,7 @@ def run(out_dir=None, summary_json=None):
                 if os.path.exists(previous_path) else None)
     frame = pre_process(fetch())
     summary = validate(frame, previous)
+    frame['USREC'] = frame['USREC'].astype('int64')   # safe: validated complete and 0/1
     if summary_json:
         _atomic_write(summary_json, json.dumps(summary, indent=1) + '\n')
     os.makedirs(data_dir, exist_ok=True)

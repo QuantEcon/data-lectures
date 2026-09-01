@@ -217,23 +217,24 @@ def cmd_due(args) -> int:
 
 def _load_summary(path: str, dataset: str) -> dict:
     """A builder writes one summary (a dict) or, when it produces a set of
-    files, one per file (a list); either way, the entry for `dataset`."""
+    files, one per file (a list); either way, the entry for `dataset` — and
+    refuse anything else. Not an assert: `python -O` would drop it, and this
+    is the guard that stops one builder's summary from stamping, or
+    describing, another dataset."""
     loaded = json.loads(pathlib.Path(path).read_text())
-    if isinstance(loaded, list):
-        matches = [s for s in loaded if s.get("dataset") == dataset]
-        return matches[0] if matches else {"dataset": None}
-    return loaded
+    entries = loaded if isinstance(loaded, list) else [loaded]
+    matches = [s for s in entries if isinstance(s, dict) and s.get("dataset") == dataset]
+    if not matches:
+        found = sorted(str(s.get("dataset")) for s in entries if isinstance(s, dict))
+        print(f"::error::{dataset}: no summary for it in {path} (found {found}) — refusing",
+              file=sys.stderr)
+        raise SystemExit(1)
+    return matches[0]
 
 
 def cmd_stamp(args) -> int:
-    summary = _load_summary(args.summary, args.dataset)
+    summary = _load_summary(args.summary, args.dataset)   # refuses a mismatch
     dataset = args.dataset
-    if summary.get("dataset") != dataset:
-        # Not an assert: `python -O` would drop it, and this is the guard that
-        # stops one builder's summary from stamping another dataset's manifest.
-        print(f"::error::{dataset}: summary is for {summary.get('dataset')!r}, "
-              f"not {dataset!r} — refusing to stamp", file=sys.stderr)
-        return 1
     data_path = LECTURES / dataset
     manifest_path = LECTURES / f"{dataset}.yml"
     today = dt.date.today().isoformat()

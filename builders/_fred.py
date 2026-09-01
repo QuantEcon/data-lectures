@@ -30,6 +30,7 @@ Not a builder: the leading underscore keeps it out of any manifest's
 their own directory as sys.path[0]).
 """
 import io
+import urllib.parse
 import urllib.request
 
 import pandas as pd
@@ -43,7 +44,7 @@ class Fred:
         self.timeout = timeout
 
     def _get(self, params):
-        query = '&'.join(f'{k}={v}' for k, v in params.items() if v is not None)
+        query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
         request = urllib.request.Request(f'{FREDGRAPH}?{query}',
                                          headers={'User-Agent': self.user_agent})
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
