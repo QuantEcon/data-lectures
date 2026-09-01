@@ -203,13 +203,13 @@ def cmd_list(args) -> int:
     if args.by_builder:
         # One leg per builder for the canary: a builder that writes a set
         # fetches once for all of them, so running it per dataset only
-        # repeats the same fetch. The leg is named for its first dataset.
-        seen, unique = set(), []
+        # repeats the same fetch. One pass, first-seen order; the leg is
+        # named for the builder's first dataset.
+        by_builder: dict[str, dict] = {}
         for r in rows:
-            if r["builder"] not in seen:
-                seen.add(r["builder"])
-                unique.append({**r, "datasets": [x["dataset"] for x in rows if x["builder"] == r["builder"]]})
-        rows = unique
+            leg = by_builder.setdefault(r["builder"], {**r, "datasets": []})
+            leg["datasets"].append(r["dataset"])
+        rows = list(by_builder.values())
     print(json.dumps(rows, indent=1))
     return 0
 

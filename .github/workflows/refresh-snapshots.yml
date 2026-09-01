@@ -70,13 +70,18 @@ jobs:
           DATASET: ${{ inputs.dataset }}
           FORCE: ${{ inputs.force }}
         run: |
-          flags=""
-          dsflag=""
-          [ -n "$DATASET" ] && flags="$flags --dataset $DATASET" && dsflag="--dataset $DATASET"
-          [ "$FORCE" = "true" ] && flags="$flags --all"
+          # Arrays, not string concatenation: the dataset input is a single
+          # argument however it is spelled.
+          due_flags=()
+          list_flags=()
+          if [ -n "$DATASET" ]; then
+            due_flags+=(--dataset "$DATASET")
+            list_flags+=(--dataset "$DATASET")
+          fi
+          [ "$FORCE" = "true" ] && due_flags+=(--all)
           # canary: one leg per BUILDER (a set-writing builder fetches once)
-          all=$(python scripts/snapshots.py list --by-builder $dsflag | jq -c .)
-          due=$(python scripts/snapshots.py due $flags | jq -c .)
+          all=$(python scripts/snapshots.py list --by-builder "${list_flags[@]}" | jq -c .)
+          due=$(python scripts/snapshots.py due "${due_flags[@]}" | jq -c .)
           echo "all=$all" >> "$GITHUB_OUTPUT"
           echo "due=$due" >> "$GITHUB_OUTPUT"
           echo "canary: $(echo "$all" | jq -r '.[].dataset' | tr '\n' ' ')"

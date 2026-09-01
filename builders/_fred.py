@@ -21,13 +21,14 @@ What it normalises:
   DatetimeIndex named `DATE`, so committed files keep the header the
   lectures expect
 - FRED's `.` for a missing observation -> NaN
-- the User-Agent: NONE by default, deliberately. Measured 2026-09-01 from a
-  GitHub-hosted runner (data-lectures#115): FRED's edge answers
-  `Python-urllib/3.12` (urllib's own default) and `curl/8.5.0` in ~50 ms,
-  and STALLS `qeld-builder` and even `Mozilla/5.0` until the read times
-  out. The same requests all succeed from a workstation, which is how the
-  custom agent survived local testing. Pass `user_agent=` only if you have
-  measured that it works from where the builder will actually run
+- NO CUSTOM User-Agent by default, deliberately: the request goes out with
+  urllib's own `Python-urllib/x.y`. Measured 2026-09-01 from a GitHub-hosted
+  runner (data-lectures#115): FRED's edge answers `Python-urllib/3.12` and
+  `curl/8.5.0` in ~50 ms, and STALLS `qeld-builder` and even `Mozilla/5.0`
+  until the read times out. The same requests all succeed from a
+  workstation, which is how the custom agent survived local testing. Pass
+  `user_agent=` only if you have measured that it works from where the
+  builder will actually run
 - one series per request, aligned with an outer join in frame(), so a
   series that starts later is simply empty before its first observation
 
@@ -46,7 +47,8 @@ FREDGRAPH = 'https://fred.stlouisfed.org/graph/fredgraph.csv'
 
 class Fred:
     def __init__(self, user_agent=None, timeout=60):
-        self.user_agent = user_agent      # None -> urllib's default, see above
+        self.user_agent = user_agent      # None -> no custom header; urllib
+                                          # sends Python-urllib/x.y (see above)
         self.timeout = timeout
 
     def _get(self, params):
