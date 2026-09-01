@@ -26,7 +26,11 @@ QuantEcon/data-lectures#14. The contract the refresh workflow relies on
               equality. Measure the source's routine revisions before
               choosing the bound (business_cycle: observed max 1.5 pp,
               bound 5 pp)
-  provenance  upstream metadata dumps go to provenance/, never lectures/
+  provenance  upstream metadata dumps go to provenance/, never lectures/;
+              collapse runs of blank lines so a refresh diff shows content
+  manifest    prose in the sidecar must not embed facts a refresh can change
+              (an end year, an observed range, a row count) -- those live in
+              the fields scripts/snapshots.py stamps, and only there
 
 Requires pandas plus whatever the source needs (add it to requirements.txt).
 """

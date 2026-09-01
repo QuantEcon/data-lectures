@@ -29,7 +29,10 @@ is the review surface for a refresh PR (PLAN Phase 5).
 Two provenance dumps are written beside the data, to provenance/ (NOT
 lectures/ -- they are not datasets; QuantEcon/data-lectures#13): the series
 metadata, which is where the CC BY-4.0 licence the manifest cites is stated,
-and the `wb.series.info(q='GDP growth')` listing the lecture teaches.
+and the `wb.series.info(q='GDP growth')` listing the lecture teaches. Runs of
+blank lines in the World Bank's text are collapsed to one (whitespace carries
+no evidence, and the raw dump had runs ten newlines deep), so a refresh diff
+of the dump shows what the source SAID, not how it was padded.
 
 Stages: fetch -> pre-process -> validate -> write. Writes only on validation
 pass, and each write goes through a temp file and os.replace(), so neither a
@@ -103,11 +106,16 @@ def _check(condition, message):
         raise ValidationError(message)
 
 
+def _tidy(text):
+    """Collapse runs of blank lines in an upstream text dump to one."""
+    return re.sub(r'\n{3,}', '\n\n', text)
+
+
 def fetch():
     """Live WDI, exactly the lecture's own three calls."""
     frame = wb.data.DataFrame(SERIES, ECONOMIES, labels=True)
-    metadata = str(wb.series.metadata.get(SERIES))
-    info = str(wb.series.info(q='GDP growth'))
+    metadata = _tidy(str(wb.series.metadata.get(SERIES)))
+    info = _tidy(str(wb.series.info(q='GDP growth')))
     return frame, metadata, info
 
 

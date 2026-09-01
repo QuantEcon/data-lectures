@@ -19,8 +19,10 @@ failing every rule a dataset must meet.
 | `business_cycle_metadata.md` | `builders/business_cycle.py` | `wb.series.metadata.get('NY.GDP.MKTP.KD.ZG')` — the World Bank's own record for the series: definition, source, periodicity and the `License_Type: CC BY-4.0` / `License_URL` fields that `lectures/business_cycle_data.csv.yml` cites |
 | `business_cycle_info.md` | `builders/business_cycle.py` | `wb.series.info(q='GDP growth')` — the fuzzy-search listing the consuming lecture teaches; kept because the builder reproduces the lecture's own query, not because anything reads it |
 
-Files here carry no manifest and no hash gate. They are **regenerated on every
-builder run** and are expected to drift: between the committed dump of
+Files here carry no manifest and no hash gate. Runs of blank lines in the
+upstream text are collapsed to one before writing — whitespace carries no
+evidence, and the raw World Bank dump had runs ten newlines deep. They are
+**regenerated on every builder run** and are expected to drift: between the committed dump of
 2025-02 and a run on 2026-09-01 the World Bank rewrote the metadata prose and
 added a `Dataset: WB_WDI` line. The manifest's typed `source` and `license`
 fields are the durable record; a dump is the evidence they were read from.
