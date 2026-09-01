@@ -39,8 +39,11 @@ See the [draft convention](https://github.com/QuantEcon/QuantEcon.manual/pull/10
 
 | Path | What | Published |
 | --- | --- | --- |
-| `lectures/` | the published tree — flat. Every dataset lives here, directly. No folder implies ownership by a lecture series: any lecture may consume any file | yes |
-| `scripts/` | builders for constructed and dynamic datasets, plus the audit-dashboard generator | no |
+| `lectures/` | the published tree — flat. Every dataset lives here, directly, beside its sidecar manifest `<filename>.yml`. No folder implies ownership by a lecture series: any lecture may consume any file | yes |
+| `builders/` | one builder per constructed or dynamic dataset, `builders/<stem>.<ext>` → `lectures/<stem>.<ext2>` | no |
+| `sources/` | builder inputs that cannot be re-fetched (per-path LFS); `sources/README.md` is their audit trail | no |
+| `provenance/` | upstream metadata dumps a builder writes beside its dataset — evidence for the manifest's `source` and `license` fields, regenerated every run | no |
+| `scripts/` | repo tooling: the catalog generator, the audit dashboard, and the dynamic-snapshot plumbing (`snapshots.py`) | no |
 | `manifest-schema.yml` | the per-dataset manifest schema (strawman — see [`PLAN.md`](PLAN.md) Phase 2) | no |
 | `migration.yml` | the migration lifecycle tracker — which PRs landed and repointed each dataset (transitional; archivable when the migration programme completes) | rendered |
 
@@ -69,3 +72,21 @@ not-yet-migrated references). A new data reference with no annotation, or a
 migration status the scan contradicts, **fails the build** — the dashboard
 cannot silently rot. CI rebuilds it on push to `main`, weekly, and on demand
 (`.github/workflows/audit-dashboard.yml`).
+
+## Dynamic snapshots
+
+A `class: dynamic-snapshot` dataset tracks a moving source (World Bank, FRED)
+and is refreshed **in place, by PR, never silently**. Every week
+`.github/workflows/refresh-snapshots.yml` runs each such builder as a
+**canary** (fetch + validate, no commit; a failure opens an `upstream-break`
+issue here, and no lecture is affected because consumers read the last-good
+snapshot), and for any dataset whose `cadence` has elapsed it runs the builder
+for real, stamps the manifest, and opens a PR on `refresh/<stem>` whose body is
+the builder's overlap summary — the place a revision is reviewed rather than
+merely diffed. The rules for who is told what are in `AGENTS.md`, "Refresh,
+break, or schema change".
+
+```
+python scripts/snapshots.py due                          # what would refresh this week
+python builders/<stem>.py --out-dir /tmp/x --summary-json /tmp/s.json   # dry run
+```

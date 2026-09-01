@@ -24,8 +24,19 @@ dataset claiming a builder names one.
 Builders follow four stages — **fetch → pre-process → validate → write** — and
 only write on validation pass. Lectures always read the last-good snapshot: an
 upstream outage may fail a refresh, it must never break a lecture build. The
-template and the architecture discussion are in
-[#14](https://github.com/QuantEcon/data-lectures/issues/14).
+architecture discussion is in
+[#14](https://github.com/QuantEcon/data-lectures/issues/14); the copy-able
+template is [`_template.py`](_template.py) (not a builder — the underscore
+keeps it out of any manifest).
+
+A **dynamic snapshot's** builder additionally honours the refresh contract
+(`.github/workflows/refresh-snapshots.yml`, `scripts/snapshots.py`):
+`--out-dir` for a dry run (the weekly canary), `--summary-json` for the run
+summary the refresh PR and the manifest stamp are built from, atomic writes,
+and exit code 2 for a `ValidationError` against 1 for a fetch failure. The
+overlap window against the previous vintage is **bounded and reported, never
+asserted equal** — the source revises the series; measure its routine
+revisions before choosing the bound.
 
 Most builders fetch from the third-party upstream at run time, which is the
 normal case. A builder reads from `sources/` only when its input **cannot be
