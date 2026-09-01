@@ -1,0 +1,175 @@
+# Manifest for business_cycle_data.csv — the repo's one DYNAMIC SNAPSHOT, and
+# the prototype for the P4 pilot (PLAN Phase 8: a maintained snapshot twin for
+# lectures that fetch live API data). The file has sat here since the Feb 2025
+# migration (QuantEcon/data b857c5c, then the 2026-07-16 flatten in #10)
+# without a manifest; this one closes the Phase 6 backfill.
+#
+# Read this before refreshing: the World Bank REVISES this series. A re-run of
+# the builder is not expected to reproduce these bytes and validate() does not
+# ask it to — see integrity.upstream. A refresh is a deliberate in-place
+# update of a tracking snapshot, reviewed through the builder's overlap-window
+# summary (PLAN Phase 5, refresh-as-PR), not a correction and not a new
+# vintage under a new name.
+
+filename: business_cycle_data.csv
+title: World Bank GDP growth (annual %) — USA, ARG, GBR, GRC, JPN, 1960 to 2023
+description: >
+  Annual real GDP growth (percent, constant local currency) for the United
+  States, Argentina, the United Kingdom, Greece and Japan, extracted from World
+  Bank WDI series NY.GDP.MKTP.KD.ZG in the wide layout wbgapi emits: one row
+  per economy (ISO3 code as the index, country name as `Country`), one
+  `YR<year>` column per year from 1960. It is the snapshot twin of the live
+  `wb.data.DataFrame` call the intro `business_cycle` lecture makes; the call
+  is reproduced verbatim by the builder.
+
+# Constructed, tracking a moving source: the World Bank republishes and revises
+# this series continuously, and the file is meant to be refreshed in place on
+# the cadence below rather than frozen.
+class: dynamic-snapshot
+
+source:
+  name: World Bank, World Development Indicators (national accounts data, and OECD National Accounts data files)
+  series: NY.GDP.MKTP.KD.ZG
+  url: https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+  doi: null
+  version: >
+    Unknown for the committed bytes — WDI carries a database-level
+    `lastupdated` stamp but the export recorded none (see `retrieved`). The
+    live database at the 2026-09-01 check reported lastupdated 2026-07-13 and
+    had moved on from these bytes (see integrity.upstream).
+  citation: >
+    World Bank, World Development Indicators, series NY.GDP.MKTP.KD.ZG (GDP
+    growth, annual %), from World Bank national accounts data and OECD
+    National Accounts data files. Retrieved via wbgapi.
+  note: >
+    Five economies and the wide `YR<year>` layout are the lecture's choices,
+    not the source's — the builder passes exactly the lecture's arguments
+    (`wb.data.DataFrame('NY.GDP.MKTP.KD.ZG', ['USA','ARG','GBR','GRC','JPN'],
+    labels=True)`). Row order is whatever wbgapi returns (JPN, GRC, GBR, ARG,
+    USA on every run so far) and is kept as returned so a refresh diff is
+    values-only.
+
+license:
+  name: CC BY-4.0
+  url: https://datacatalog.worldbank.org/public-licenses#cc-by
+  redistribution: permitted
+  verified: 2026-09-01
+  note: >
+    Stated by the source itself in the series metadata (`License_Type:
+    CC BY-4.0`, `License_URL` as above), which the builder dumps to
+    provenance/business_cycle_metadata.md on every run; re-read from the live
+    metadata on the verification date. World Bank open data under CC BY-4.0
+    is the model case for this repo's cache-with-attribution policy
+    (AGENTS.md, "Licensing and attribution").
+
+retrieved: null                 # The bytes were produced by the committed
+                                # builder, in QuantEcon/data commit b857c5c of
+                                # 2025-02-16 — but that is when QuantEcon ran
+                                # the script and committed the output, and
+                                # AGENTS.md says not to reconstruct a
+                                # retrieval date from git history. The vintage
+                                # is pinned by content instead: YR2023 is the
+                                # last column and is populated for all five
+                                # economies, which places the export after the
+                                # WDI release that first carried 2023 growth,
+                                # and integrity.upstream records how far the
+                                # live series has moved since.
+maintainer: QuantEcon
+
+# ---------------------------------------------------------------------------
+# Integrity (PLAN Phase 7)
+# ---------------------------------------------------------------------------
+# No migration check applies: no lecture has ever read this file (it was
+# "never adopted" — PLAN "The audit (2026-07-15)"), so there is no prior copy
+# to byte-match and no figure a change here could alter today.
+
+integrity:
+  sha256: 20e928d444b749ae52bc6c29283c316fe0c7e9cc4a215a0303bdfb365a7bc38d
+  upstream:
+    # `diverged`, not `failing`: the builder was re-run in full against live
+    # WDI and its output differs from these bytes in the way a revised
+    # aggregate is expected to. For a dynamic snapshot this is the normal
+    # state between refreshes, not a defect — the refresh is the resolution,
+    # and it is a deliberate PR, not something this manifest asks for.
+    status: diverged
+    date: 2026-09-01
+    against: builders/business_cycle.py    # live WDI, lastupdated 2026-07-13
+    note: >
+      Re-run of the builder against live WDI on 2026-09-01: same five rows,
+      same layout, same single structural null, but 236 of the 320
+      overlapping cells revised and two new year columns. Expected for a
+      tracking snapshot; see `delta`.
+    delta_kind: upstream-moved
+    delta: >
+      Live WDI (lastupdated 2026-07-13) vs the committed file, measured
+      2026-09-01 with wbgapi 1.0.12 / pandas 2.3.3. Shape 5x67 against 5x65:
+      YR2024 and YR2025 added, populated for all five economies. In the
+      1960-2023 overlap, 63 of 64 year columns carry at least one revised
+      cell — 236 of 320 cells in all, median |change| 0.0 pp, 90th percentile
+      0.29, 99th percentile 1.00, maximum 1.50 pp. Nulls unchanged (YR1960,
+      all five). No column renamed, no economy added or dropped, row order
+      unchanged.
+    delta_evidence: >
+      `upstream-moved` is the only kind possible here: the committed file is
+      the verbatim output of `wb.data.DataFrame(...).to_csv()` with no
+      post-processing, and the builder that wrote it is the one committed
+      beside it, so a local edit has nowhere to have happened. The pattern of
+      the delta — small revisions spread across the whole history, largest in
+      the most recent years, plus two appended years — is the signature of
+      national-accounts revision and rebasing (WDI aggregates on constant
+      2015 prices, and member countries revise back-series), not of any
+      change on this side. The revisions are why validate() bounds the
+      overlap window at 5 pp rather than asserting equality.
+    register: QuantEcon/data-lectures#39
+
+# ---------------------------------------------------------------------------
+# Shape
+# ---------------------------------------------------------------------------
+# Measured from the committed bytes 2026-09-01 (pandas 2.3.3) and asserted by
+# validate() on every builder run. This is the first manifest to use a
+# `pattern` column entry (manifest-schema.yml; QuantEcon/data-lectures#14): the
+# year columns are one column per year and their count grows on every refresh,
+# so enumerating them would hard-code an end year into a file whose purpose is
+# to move.
+
+schema:
+  format: csv
+  columns:
+    - {name: economy, dtype: str, description: "ISO3 code — wbgapi's index, written as the CSV's first column; the lecture reads it with index_col=0"}
+    - {name: Country, dtype: str, description: "country name, the label column wbgapi adds with labels=True"}
+    - {pattern: 'YR\d{4}', dtype: float64, description: "annual real GDP growth, percent, one column per year on an unbroken grid from YR1960 to the newest year the source carries (YR2023 in the committed bytes). Observed -10.89 to 13.20"}
+  row_count_floor: 5            # exact by construction: the builder asks for
+                                # five economies and validate() asserts the
+                                # set. Columns, not rows, are what grow.
+  date_range: {start: 1960, end: 2023}   # `end` is the newest year column in
+                                         # the COMMITTED bytes; a refresh PR
+                                         # updates it, which is what makes the
+                                         # refresh diff self-describing.
+
+  # Growth is undefined in the series' first year, so YR1960 is empty for all
+  # five economies and nothing else is. validate() asserts exactly this hole.
+  known_nulls: {YR1960: 5}
+
+# ---------------------------------------------------------------------------
+# Consumers — how a correction knows what to rebuild
+# ---------------------------------------------------------------------------
+# None. No lecture reads these bytes: intro's business_cycle.md (lines 83, 109
+# and 512 on 2026-09-01) and its lecture-wasm mirror make the live wbgapi call
+# the builder reproduces, and the org-wide code search for this basename on
+# 2026-09-01 returned only this repo. Whether those lectures adopt the snapshot
+# — and whether the live call stays as the lesson, with the snapshot as the
+# wasm twin (AGENTS.md, "Live APIs") — is the P4 decision (PLAN Phase 8), not
+# something this manifest settles. When a consumer is added, `cadence` below
+# becomes load-bearing.
+consumers: []
+
+builder: builders/business_cycle.py
+builder_status: committed       # four-stage since 2026-09-01 (PLAN Phase 5);
+                                # `committed` here asserts the builder RUNS and
+                                # validates, not that it reproduces the bytes —
+                                # a dynamic snapshot is not meant to.
+
+# Dynamic snapshots only. The series is annual; the World Bank revises it
+# several times a year but the lecture's figures change materially only when
+# a new year lands (WDI typically carries year T from mid T+1).
+cadence: annual

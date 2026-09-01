@@ -112,7 +112,7 @@ The limits: **50 MiB** warns on push, **100 MiB** (104,857,600 B) is a hard bloc
 
 **One builder per published dataset, in `builders/`, named for the dataset it produces:** `builders/<stem>.<ext>` builds `lectures/<stem>.<ext2>`. The stem is the dataset's, not the lecture's — `builders/japan_earthquakes.py` writes `lectures/japan_earthquakes.csv`. That makes the manifest's `builder:` field predictable and lets CI assert it.
 
-Where one builder produces a **set** of files, name it for the set and let each file's manifest point at the same path — `business_cycle.py` writes three. The stem rule is the default, not an invariant; what CI asserts is that every `builder:` path exists, and that a dataset claiming a builder names one.
+Where one builder produces a **set** of files, name it for the set and let each file's manifest point at the same path — the SCF and Forbes builders each write two. The stem rule is the default, not an invariant; what CI asserts is that every `builder:` path exists, and that a dataset claiming a builder names one. A builder's **provenance byproducts** — upstream metadata dumps that are not datasets — go to `provenance/`, never `lectures/`: `business_cycle.py` writes one dataset there and two dumps here.
 
 `scripts/` is repo tooling — the audit dashboard and the catalog generator — and produces no dataset. Keep the two apart.
 
@@ -123,6 +123,18 @@ Builders follow four stages — **fetch → pre-process → validate → write**
 ### Live APIs
 
 Live API calls are for *teaching data access*, not for getting data. Don't propose "the lecture should just call the API" as a fix — the fix is a snapshot here plus an automated refresh.
+
+### Refresh, break, or schema change — who gets told
+
+A dynamic snapshot has three interfaces, and each failure mode has a different audience. Settled 2026-09-01 while retrofitting `business_cycle.py`; the workflows that act on it are PLAN Phase 5.
+
+| What happened | Detected by | Who is told | Consumer code changes? |
+| --- | --- | --- | --- |
+| **Upstream interface changed** (a renamed column, a dropped series, a units switch) | the builder's `validate()` fails; nothing is written, the last-good snapshot stays | an issue **in this repo** (the sources-alive canary). Consumers are unaffected by construction | **No.** Absorb it in the builder's `pre_process` stage so the published schema is unchanged — that adapter logic is where upstream churn is supposed to live |
+| **Successful refresh** — schema intact, values revised | the refresh lands as a PR here whose body is `validate()`'s overlap summary | on merge, each repo in the manifest's `consumers` list, per its `on_refresh` (`manifest-schema.yml`): `rebuild` dispatches a build, `review` opens an issue there with the summary, for a lecture whose prose narrates a number | No, but figures and narrated numbers may need an author's eye |
+| **Published schema changes deliberately** — the upstream change cannot honestly be absorbed | a decision, not a detection | an issue in every `consumers[].repo`, opened by hand as the invitation to opt in | **Yes, on the consumer's schedule:** new filename per "Corrections vs vintages"; the old file stays valid |
+
+The case none of this covers is a lecture where **the API call is the lesson** (`business_cycle` teaches `wb.series.info`): an upstream change to the call itself must reach the lecture, because the code on the page is the content. A snapshot twin still belongs beside it — as the `lecture-wasm` read and the fallback — but the canary only makes the break heard sooner.
 
 ### Licensing and attribution
 
@@ -154,12 +166,14 @@ The generated dashboard (`scripts/build_audit.py`, [#20](https://github.com/Quan
 ```
 lectures/            # the published tree — flat, live on Pages; read via raw URLs
                      #   today, qeld.url() once the package ships (PLAN-QELD-PACKAGE.md)
-                     #   21 files, 18 with manifests (business_cycle's three still
-                     #   need theirs — see #13). Manifests are sidecars: <filename>.yml
+                     #   41 datasets, 41 manifests (complete since 2026-09-01).
+                     #   Manifests are sidecars: <filename>.yml
 builders/            # one builder per published dataset — NOT published
                      #   builders/<stem>.py builds lectures/<stem>.<ext>
 sources/             # inputs a builder cannot re-fetch — NOT published, per-path LFS
                      #   no manifests; sources/README.md is the audit trail
+provenance/          # upstream metadata dumps a builder writes beside its data —
+                     #   NOT published, no manifests, regenerated every run (#13)
 scripts/             # repo tooling — NOT published, produces no dataset
   build_catalog.py   #   generates CATALOG.md from the manifests
   build_audit.py     #   the audit dashboard: scan lecture repos → audit.json → site/

@@ -830,6 +830,24 @@ datasets:
         date: 2026-08-18
     cutover: null
 
+  # The dynamic-snapshot prototype. The BYTES have been in the published tree
+  # since the 2026-07-16 flatten (#10; originally QuantEcon/data b857c5c,
+  # 2025-02-16), but `landed` means file + manifest (see the lifecycle above),
+  # and the manifest arrived with #109 — so that is the landing PR. No
+  # consumer: intro's business_cycle still makes the live wbgapi call the
+  # builder reproduces; whether it adopts the snapshot is the P4 decision.
+  business_cycle_data.csv:
+    pilot: P4
+    status: landed
+    prior_pattern: null           # never read from anywhere — the lecture
+                                  # fetches live (api pattern), so there is no
+                                  # prior file read to migrate
+    landed:
+      pr: QuantEcon/data-lectures#109
+      date: 2026-09-01
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people
