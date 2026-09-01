@@ -1,58 +1,44 @@
 #!/usr/bin/env python3
 """
-Builder for lectures/business_cycle_data.csv.
+Builder for the World Bank half of the `business_cycle` lecture's data --
+three annual tables from WDI, each in the wide layout wbgapi emits (one row
+per economy, ISO3 code as the index, country name as `Country`, one `YR<year>`
+column per year from 1960):
 
-Fetches annual real GDP growth (World Bank WDI series NY.GDP.MKTP.KD.ZG) for
-five economies -- USA, ARG, GBR, GRC and JPN -- exactly as the intro
-`business_cycle` lecture fetches it live with wbgapi, and writes it as one
-wide CSV: one row per economy, one `YR<year>` column per year from 1960.
+    business_cycle_data.csv       NY.GDP.MKTP.KD.ZG  real GDP growth, %, for
+                                  the nine economies the lecture plots (the
+                                  union of its two selections)
+    unemployment_rate_annual.csv  SL.UEM.TOTL.NE.ZS  unemployment, % of labour
+                                  force (national estimate), USA FRA GBR JPN
+    private_credit_to_gdp.csv     FS.AST.PRVT.GD.ZS  domestic credit to the
+                                  private sector, % of GDP, GBR
 
-This is the repo's one DYNAMIC SNAPSHOT (`class: dynamic-snapshot`,
-`cadence: annual` in the manifest). Unlike the frozen extracts beside it, the
-World Bank revises this series continuously -- national-accounts rebasing
-moves historical growth rates by up to about 1.5 percentage points -- so a
-refresh is NOT expected to reproduce the committed bytes, and validate() does
-not ask it to. Measured 2026-09-01: 63 of the 64 overlapping year columns had
-at least one revised cell (236 of 320 cells; median change 0.0, 99th
-percentile 1.0, maximum 1.5), and two new columns (YR2024, YR2025) had
-appeared. That delta is recorded in the manifest's integrity.upstream block
-and in the register at QuantEcon/data-lectures#39.
+One builder, three files: the "builder writes a set" precedent
+(builders/README.md). The two new filenames are PROVISIONAL pending the naming
+policy (QuantEcon/data-lectures#113); they are free to change while no lecture
+reads them.
 
-What validate() DOES assert is the contract a consumer can rely on: the
-shape, the column grid, the fixed set of economies, percent units, the one
-structural null (YR1960, growth being undefined in the series' first year),
-recency, and -- against the previously committed snapshot -- that no revision
-exceeds MAX_REVISION percentage points and no previously populated cell has
-gone empty. It prints the overlap-window summary on every run; that summary
-is the review surface for a refresh PR (PLAN Phase 5).
+These are DYNAMIC SNAPSHOTS (`cadence: annual`). The World Bank revises this
+data continuously -- national-accounts rebasing moved GDP growth by up to 1.5
+percentage points between the 2025-02 and 2026-09 vintages -- so a refresh is
+NOT expected to reproduce the committed bytes and validate() does not ask it
+to. What it asserts is the contract a consumer can rely on: the grid, the
+fixed economy set, units, structurally-placed nulls, recency, and a bounded
+overlap window against the committed snapshot, printed as the review surface
+for the refresh PR.
 
-Two provenance dumps are written beside the data, to provenance/ (NOT
-lectures/ -- they are not datasets; QuantEcon/data-lectures#13): the series
-metadata, which is where the CC BY-4.0 licence the manifest cites is stated,
-and the `wb.series.info(q='GDP growth')` listing the lecture teaches. Runs of
-blank lines in the World Bank's text are collapsed to one (whitespace carries
-no evidence, and the raw dump had runs ten newlines deep), so a refresh diff
-of the dump shows what the source SAID, not how it was padded.
+Nulls: WDI series start at different years per economy (UK and French
+unemployment begin in 1971 and 1970), GDP growth is undefined in 1960 for
+everyone, and the newest year may not be published yet for every series. So
+the rule is structural, not a count: a null is allowed only BEFORE an
+economy's first observation or in the newest MAX_TRAILING_YEARS, never inside
+the series. A gap opening mid-series fails the refresh.
 
-Stages: fetch -> pre-process -> validate -> write. Writes only on validation
-pass, and each write goes through a temp file and os.replace(), so neither a
-failed refresh nor an interrupted one can leave anything but the last-good
-snapshot in place.
-
-Usage:
-    python builders/business_cycle.py                    # refresh in place
-    python builders/business_cycle.py --out-dir D        # dry run: write to D,
-                                                         # still validating
-                                                         # against lectures/
-    python builders/business_cycle.py --summary-json S   # also write the
-                                                         # machine-readable
-                                                         # run summary to S
-
-Exit codes (the contract .github/workflows/refresh-snapshots.yml relies on):
-    0  wrote (or dry-ran) a validated snapshot
-    1  fetch or other infrastructure failure -- retry, the data is not at fault
-    2  ValidationError -- the fetched data broke the contract; needs a human
-
+Two provenance dumps (the GDP series' metadata, where the CC BY-4.0 licence
+is stated, and the `wb.series.info` listing the lecture teaches) go to
+provenance/, with runs of blank lines collapsed. Stages: fetch -> pre-process
+-> validate -> write; --out-dir dry-runs; --summary-json writes one summary
+PER FILE as a JSON list. Exit 2 on ValidationError, 1 on a fetch failure.
 Requires pandas and wbgapi (requirements.txt).
 """
 import argparse
@@ -70,35 +56,34 @@ REPO_ROOT = os.path.dirname(CURRENT_FILE_DIR)
 PUBLISHED_DIR = os.path.join(REPO_ROOT, 'lectures')
 PROVENANCE_DIR = os.path.join(REPO_ROOT, 'provenance')
 
-OUT_FILE = 'business_cycle_data.csv'
 METADATA_FILE = 'business_cycle_metadata.md'
 INFO_FILE = 'business_cycle_info.md'
-
-SERIES = 'NY.GDP.MKTP.KD.ZG'
-# The five economies the lecture plots, in the order it names them. wbgapi
-# returns rows in its own order (JPN, GRC, GBR, ARG, USA on every run so far);
-# that order is kept as returned so a refresh diff is values-only.
-ECONOMIES = ['USA', 'ARG', 'GBR', 'GRC', 'JPN']
 FIRST_YEAR = 1960
 YEAR_COL = re.compile(r'^YR(\d{4})$')
-
-# Overlap-window policy for a revised aggregate. The World Bank's routine
-# revisions to this series have measured at most 1.5 pp (2026-09-01, 2025-02
-# vintage vs live); a change past this bound is a rebasing, a units switch or
-# an upstream defect, and wants a human before it ships.
-MAX_REVISION = 5.0          # percentage points, any single cell
-# Percent units: a fetch that came back as a ratio (0.02 for 2%) or as an
-# index level would pass every shape check and rescale the lecture's figure.
-MIN_ABS_MAX, MAX_ABS = 1.0, 50.0
-# A refresh whose newest year is older than this many years behind today
-# means the fetch returned a stale or truncated panel.
 MAX_STALENESS_YEARS = 2
+MAX_TRAILING_YEARS = 2       # the newest years may be unpublished for a series
+
+# One entry per published file. `economies` is the lecture's selection (the
+# union of every call that reads the series); `band` is the unit sanity check
+# (percent / percent / percent of GDP); `max_revision` bounds the overlap
+# window in the series' own units (GDP growth measured at 1.5 pp routine;
+# the credit ratio is rebased in larger steps).
+TABLES = [
+    {'file': 'business_cycle_data.csv', 'series': 'NY.GDP.MKTP.KD.ZG',
+     'economies': ['USA', 'ARG', 'GBR', 'GRC', 'JPN', 'CHN', 'DEU', 'BRA', 'MEX'],
+     'band': (-50, 50), 'min_abs_max': 1.0, 'max_revision': 5.0,
+     'first_year_null': True},       # growth is undefined in the series' first year
+    {'file': 'unemployment_rate_annual.csv', 'series': 'SL.UEM.TOTL.NE.ZS',
+     'economies': ['USA', 'FRA', 'GBR', 'JPN'],
+     'band': (0, 60), 'min_abs_max': 1.0, 'max_revision': 3.0, 'first_year_null': False},
+    {'file': 'private_credit_to_gdp.csv', 'series': 'FS.AST.PRVT.GD.ZS',
+     'economies': ['GBR'],
+     'band': (0, 400), 'min_abs_max': 1.0, 'max_revision': 25.0, 'first_year_null': False},
+]
 
 
 class ValidationError(Exception):
-    """The fetched data broke the published contract -- distinct from a fetch
-    failure, so CI can tell 'the data is wrong' (a human) from 'the network
-    was down' (a retry). Exit code 2."""
+    """The fetched data broke the published contract -- exit code 2."""
 
 
 def _check(condition, message):
@@ -107,22 +92,17 @@ def _check(condition, message):
 
 
 def _tidy(text):
-    """Collapse runs of blank lines in an upstream text dump to one."""
     return re.sub(r'\n{3,}', '\n\n', text)
 
 
 def fetch():
-    """Live WDI, exactly the lecture's own three calls."""
-    frame = wb.data.DataFrame(SERIES, ECONOMIES, labels=True)
-    metadata = _tidy(str(wb.series.metadata.get(SERIES)))
+    frames = {t['file']: wb.data.DataFrame(t['series'], t['economies'], labels=True) for t in TABLES}
+    metadata = _tidy(str(wb.series.metadata.get(TABLES[0]['series'])))
     info = _tidy(str(wb.series.info(q='GDP growth')))
-    return frame, metadata, info
+    return frames, metadata, info
 
 
 def pre_process(frame):
-    # wbgapi's index is the ISO3 code, named `economy`; `Country` is the label
-    # column `labels=True` adds. Keep the layout the lecture (and the
-    # committed file) uses: Country first, then the year columns ascending.
     frame = frame.copy()
     frame.index.name = 'economy'
     years = sorted(c for c in frame.columns if YEAR_COL.match(c))
@@ -133,77 +113,74 @@ def _years(frame):
     return [int(YEAR_COL.match(c).group(1)) for c in frame.columns if YEAR_COL.match(c)]
 
 
-def validate(frame, previous=None):
-    """Refuse to write anything that is not the shape we expect. Returns the
-    run summary (the refresh PR's body and the manifest stamp are built from
-    it), raising ValidationError on the first broken invariant."""
-    # Grid: Country, then YR<first>..YR<last> with no gap.
-    _check(list(frame.columns[:1]) == ['Country'], f'first columns {list(frame.columns[:3])}')
+def validate(table, frame, previous=None):
+    name = table['file']
+    _check(list(frame.columns[:1]) == ['Country'], f'{name}: first columns {list(frame.columns[:3])}')
     years = _years(frame)
-    _check(len(years) == len(frame.columns) - 1, 'non-year column present')
-    _check(years[0] == FIRST_YEAR, f'first year is {years[0]}, not {FIRST_YEAR}')
-    _check(years == list(range(FIRST_YEAR, years[-1] + 1)), 'gap in the year grid')
+    _check(len(years) == len(frame.columns) - 1, f'{name}: non-year column present')
+    _check(years[0] == FIRST_YEAR, f'{name}: first year {years[0]}')
+    _check(years == list(range(FIRST_YEAR, years[-1] + 1)), f'{name}: gap in the year grid')
     year_cols = [f'YR{y}' for y in years]
-
-    # Economies: exactly the five, one row each.
-    _check(frame.index.name == 'economy', f'index is {frame.index.name!r}')
-    _check(sorted(frame.index) == sorted(ECONOMIES), f'economies {sorted(frame.index)}')
-    _check(frame['Country'].notnull().all(), 'a Country label is missing')
-
-    # Dtypes and units.
+    _check(frame.index.name == 'economy', f'{name}: index is {frame.index.name!r}')
+    _check(sorted(frame.index) == sorted(table['economies']), f'{name}: economies {sorted(frame.index)}')
+    _check(frame['Country'].notnull().all(), f'{name}: a Country label is missing')
     values = frame[year_cols]
-    _check(all(pd.api.types.is_float_dtype(values[c]) for c in year_cols), 'non-float year column')
-    _check(values.abs().max().max() >= MIN_ABS_MAX, 'values look like ratios, not percent')
-    _check(values.abs().max().max() <= MAX_ABS, 'growth rate out of band')
+    _check(all(pd.api.types.is_float_dtype(values[c]) for c in year_cols), f'{name}: non-float year column')
+    _check(values.abs().max().max() >= table['min_abs_max'], f'{name}: values look like ratios')
+    lo, hi = table['band']
+    _check(values.stack().between(lo, hi).all(), f'{name}: value out of band [{lo}, {hi}]')
+    _check(years[-1] >= dt.date.today().year - MAX_STALENESS_YEARS, f'{name}: newest year is {years[-1]}')
 
-    # The one structural null: growth is undefined in the series' first year.
-    nulls = values.isnull().sum()
-    _check(dict(nulls[nulls > 0]) == {f'YR{FIRST_YEAR}': len(ECONOMIES)},
-           f'unexpected nulls {dict(nulls[nulls > 0])}')
-
-    # Recency.
-    _check(years[-1] >= dt.date.today().year - MAX_STALENESS_YEARS, f'newest year is {years[-1]}')
+    # Nulls: only before an economy's first observation, or in the newest
+    # MAX_TRAILING_YEARS; never inside the series. GDP growth additionally has
+    # its first year empty for everyone.
+    trailing = set(year_cols[-MAX_TRAILING_YEARS:])
+    for econ in frame.index:
+        row = values.loc[econ]
+        first = row.first_valid_index()
+        _check(first is not None, f'{name}: {econ} has no data at all')
+        inner = row.loc[first:]
+        bad = [c for c in inner.index if pd.isnull(inner[c]) and c not in trailing]
+        _check(not bad, f'{name}: {econ} has a gap inside its series at {bad[:3]}')
+        if table['first_year_null']:
+            _check(pd.isnull(row[year_cols[0]]), f'{name}: {econ} has a value in {year_cols[0]}')
 
     summary = {
-        'dataset': OUT_FILE,
+        'dataset': name,
         'builder': os.path.relpath(os.path.abspath(__file__), REPO_ROOT),
         'rows': int(frame.shape[0]),
         'columns': int(frame.shape[1]),
         'date_range': {'start': years[0], 'end': years[-1]},
         'overlap': None,
     }
-
-    # Overlap window against the last-good snapshot: revisions are expected,
-    # bounded, and reported; a lost observation or a rescale is not.
     if previous is not None:
         prev_years = [f'YR{y}' for y in _years(previous)]
-        _check(set(prev_years) <= set(year_cols), 'a year column disappeared')
-        _check(sorted(previous.index) == sorted(frame.index), 'the economy set changed')
-        old = previous.loc[frame.index, prev_years]
-        new = frame.loc[frame.index, prev_years]
-        _check(not (old.notnull() & new.isnull()).any().any(), 'a populated cell went empty')
+        _check(set(prev_years) <= set(year_cols), f'{name}: a year column disappeared')
+        common = [e for e in previous.index if e in frame.index]
+        _check(common, f'{name}: no economy in common with the previous snapshot')
+        old = previous.loc[common, prev_years]
+        new = frame.loc[common, prev_years]
+        _check(not (old.notnull() & new.isnull()).any().any(), f'{name}: a populated cell went empty')
         diff = (old - new).abs()
         changed = int((diff > 1e-9).sum().sum())
-        worst = float(diff.max().max())
-        new_cols = sorted(set(year_cols) - set(prev_years))
+        worst = float(diff.max().max()) if diff.notnull().any().any() else 0.0
         summary['overlap'] = {
             'window': f'{prev_years[0]}..{prev_years[-1]}',
             'previous_end': _years(previous)[-1],
-            'cells_total': int(diff.size),
+            'cells_total': int(old.notnull().sum().sum()),
             'cells_revised': changed,
             'max_abs_change': round(worst, 4),
-            'new_columns': new_cols,
+            'new_columns': sorted(set(year_cols) - set(prev_years)),
+            'new_economies': sorted(set(frame.index) - set(previous.index)),
         }
-        print(f'overlap window {prev_years[0]}..{prev_years[-1]}: '
-              f'{changed} of {diff.size} cells revised, max |change| {worst:.3f} pp; '
-              f'new columns: {new_cols or "none"}')
-        _check(worst <= MAX_REVISION, f'revision of {worst:.3f} pp exceeds {MAX_REVISION}')
+        print(f'{name}: overlap {prev_years[0]}..{prev_years[-1]} over {common}: {changed} cells revised, '
+              f'max |change| {worst:.3f}; new columns {summary["overlap"]["new_columns"] or "none"}; '
+              f'new economies {summary["overlap"]["new_economies"] or "none"}')
+        _check(worst <= table['max_revision'], f'{name}: revision of {worst:.3f} exceeds {table["max_revision"]}')
     return summary
 
 
 def _atomic_write(path, text):
-    """Write via a same-directory temp file and os.replace(), so an interrupted
-    run cannot leave a truncated file where the last-good snapshot was."""
     tmp = path + '.tmp'
     with open(tmp, 'w') as f:
         f.write(text)
@@ -213,33 +190,35 @@ def _atomic_write(path, text):
 def run(out_dir=None, summary_json=None):
     data_dir = out_dir or PUBLISHED_DIR
     prov_dir = out_dir or PROVENANCE_DIR
-    previous_path = os.path.join(PUBLISHED_DIR, OUT_FILE)
-    previous = (pd.read_csv(previous_path, index_col=0)
-                if os.path.exists(previous_path) else None)
-
-    frame, metadata, info = fetch()
-    frame = pre_process(frame)
-    summary = validate(frame, previous)
+    frames, metadata, info = fetch()
+    summaries, outputs = [], {}
+    for table in TABLES:
+        previous_path = os.path.join(PUBLISHED_DIR, table['file'])
+        previous = pd.read_csv(previous_path, index_col=0) if os.path.exists(previous_path) else None
+        frame = pre_process(frames[table['file']])
+        summaries.append(validate(table, frame, previous))
+        outputs[table['file']] = frame
+    # Validate everything, then write everything: a failure in the third table
+    # must not leave the first two refreshed and the set out of step.
     if summary_json:
-        _atomic_write(summary_json, json.dumps(summary, indent=1) + '\n')
-
+        _atomic_write(summary_json, json.dumps(summaries, indent=1) + '\n')
     os.makedirs(data_dir, exist_ok=True)
     os.makedirs(prov_dir, exist_ok=True)
-    _atomic_write(os.path.join(data_dir, OUT_FILE), frame.to_csv())
+    for name, frame in outputs.items():
+        _atomic_write(os.path.join(data_dir, name), frame.to_csv())
+        years = _years(frame)
+        print(f'wrote {name}: {frame.shape[0]} economies x {len(years)} years ({years[0]} .. {years[-1]}) -> {data_dir}')
     _atomic_write(os.path.join(prov_dir, METADATA_FILE), metadata)
     _atomic_write(os.path.join(prov_dir, INFO_FILE), info)
-    years = _years(frame)
-    print(f'wrote {OUT_FILE}: {frame.shape[0]} economies x {len(years)} years '
-          f'({years[0]} .. {years[-1]}) -> {data_dir}')
 
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--out-dir', help='write outputs here instead of lectures/ and provenance/')
-    ap.add_argument('--summary-json', help='also write the run summary (JSON) here')
+    ap.add_argument('--summary-json', help='also write the run summaries (a JSON list) here')
     args = ap.parse_args()
     try:
         run(args.out_dir, args.summary_json)
     except ValidationError as exc:
-        print(f'::error::{OUT_FILE}: validation failed -- {exc}', file=sys.stderr)
+        print(f'::error::business_cycle: validation failed -- {exc}', file=sys.stderr)
         sys.exit(2)

@@ -215,8 +215,18 @@ def cmd_due(args) -> int:
     return 0
 
 
+def _load_summary(path: str, dataset: str) -> dict:
+    """A builder writes one summary (a dict) or, when it produces a set of
+    files, one per file (a list); either way, the entry for `dataset`."""
+    loaded = json.loads(pathlib.Path(path).read_text())
+    if isinstance(loaded, list):
+        matches = [s for s in loaded if s.get("dataset") == dataset]
+        return matches[0] if matches else {"dataset": None}
+    return loaded
+
+
 def cmd_stamp(args) -> int:
-    summary = json.loads(pathlib.Path(args.summary).read_text())
+    summary = _load_summary(args.summary, args.dataset)
     dataset = args.dataset
     if summary.get("dataset") != dataset:
         # Not an assert: `python -O` would drop it, and this is the guard that
@@ -259,7 +269,8 @@ def cmd_stamp(args) -> int:
         "date": _iso(up["date"]) == today,
         "against": up["against"] == summary["builder"],
         "delta dropped": not any(k in up for k in ("delta_kind", "delta", "delta_evidence", "register")),
-        "date_range.end": m["schema"]["date_range"]["end"] == end,
+        # YAML reads a date-shaped scalar back as a date object; compare as text.
+        "date_range.end": _iso(m["schema"]["date_range"]["end"]) == str(end),
     }
     failed = [k for k, ok in checks.items() if not ok]
     if failed:
@@ -271,7 +282,7 @@ def cmd_stamp(args) -> int:
 
 
 def cmd_pr_body(args) -> int:
-    summary = json.loads(pathlib.Path(args.summary).read_text())
+    summary = _load_summary(args.summary, args.dataset)
     dataset = args.dataset
     m = load_manifests()[dataset]
     ov = summary.get("overlap") or {}

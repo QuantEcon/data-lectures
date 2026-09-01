@@ -1,0 +1,79 @@
+# Manifest for private_credit_to_gdp.csv — the third of three World Bank
+# tables builders/business_cycle.py writes for the intro `business_cycle`
+# lecture. The FILENAME IS PROVISIONAL (naming policy: QuantEcon/data-lectures#113)
+# and free to change while `consumers` is empty. Landed 2026-09-01 as part of
+# the P4 dynamic-snapshot pilot.
+
+filename: private_credit_to_gdp.csv
+title: World Bank domestic credit to the private sector (% of GDP) — United Kingdom, 1960 onward
+description: >
+  Annual domestic credit to the private sector as a percentage of GDP for the
+  United Kingdom — the one economy the intro `business_cycle` lecture uses to
+  illustrate credit over the cycle — from World Bank WDI series
+  FS.AST.PRVT.GD.ZS, in the wide layout wbgapi emits: one row (ISO3 code as
+  the index, country name as `Country`), one `YR<year>` column per year from
+  1960 to the newest year the source carries (`schema.date_range.end`). The
+  snapshot twin of the lecture's live call.
+
+class: dynamic-snapshot
+
+source:
+  name: World Bank, World Development Indicators (International Monetary Fund, International Financial Statistics, and World Bank and OECD GDP estimates)
+  series: FS.AST.PRVT.GD.ZS
+  url: https://data.worldbank.org/indicator/FS.AST.PRVT.GD.ZS
+  doi: null
+  version: >
+    Live WDI at each refresh; the vintage is pinned by `retrieved` and
+    integrity.upstream.
+  citation: >
+    World Bank, World Development Indicators, series FS.AST.PRVT.GD.ZS
+    (domestic credit to private sector, % of GDP), from the IMF's
+    International Financial Statistics and World Bank and OECD GDP
+    estimates. Retrieved via wbgapi.
+  note: >
+    The newest year is typically unpublished for this series at the time of
+    a refresh (YR2025 was empty on 2026-09-01); the builder allows a null in
+    the newest two years and nowhere inside the series. This ratio is
+    rebased in larger steps than GDP growth is revised, so the builder's
+    overlap bound is 25 points rather than 5.
+
+license:
+  name: CC BY-4.0
+  url: https://datacatalog.worldbank.org/public-licenses#cc-by
+  redistribution: permitted
+  verified: 2026-09-01
+  note: >
+    World Bank open data under CC BY-4.0, as for the two sibling files.
+
+# Stamped by scripts/snapshots.py on every merged refresh.
+retrieved: 2026-09-01
+maintainer: QuantEcon
+
+integrity:
+  sha256: 197eaca1d173485aaad99fa0d45446fc69b11888c605c2592aeddce58dedc90d
+  upstream:
+    # Stamped by scripts/snapshots.py on every merged refresh.
+    status: verified
+    date: 2026-09-01
+    against: builders/business_cycle.py
+    note: "Refreshed 2026-09-01 by the scheduled refresh: these bytes are the builder's validated output from the live source that day, so they are verified by construction. Overlap window n/a: 0 of 0 cells revised, max |change| 0."
+
+schema:
+  format: csv
+  columns:
+    - {name: economy, dtype: str, description: "ISO3 code — wbgapi's index, written as the CSV's first column; read it with index_col=0"}
+    - {name: Country, dtype: str, description: "country name, the label column wbgapi adds with labels=True"}
+    - {pattern: 'YR\d{4}', dtype: float64, description: "domestic credit to the private sector, % of GDP, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value in [0, 400]"}
+  row_count_floor: 1            # exact by construction: one economy
+  # `end` is stamped by scripts/snapshots.py on every refresh.
+  date_range: {start: 1960, end: 2025}
+  # The newest year may be unpublished (a trailing null); nothing else.
+  # validate() asserts placement, not a count, which is why this is a ceiling.
+  known_nulls_total: 2
+
+# None yet — see business_cycle_data.csv.yml (QuantEcon/lecture-wasm#70).
+consumers: []
+
+builder: builders/business_cycle.py
+builder_status: committed
+cadence: annual
