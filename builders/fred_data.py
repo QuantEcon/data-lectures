@@ -61,7 +61,9 @@ def _fetch_series(code):
     url = f'{FRED_CSV}?id={code}&cosd={START}&coed={END}'
     if code in DAILY_AVERAGED:
         url += '&fq=Monthly&fam=avg'
-    request = urllib.request.Request(url, headers={'User-Agent': 'qeld-builder'})
+    # No custom User-Agent: FRED's edge stalls unfamiliar agents from GitHub
+    # runners and answers urllib's default at once (data-lectures#115).
+    request = urllib.request.Request(url)
     with urllib.request.urlopen(request) as response:
         payload = response.read()
     frame = pd.read_csv(io.BytesIO(payload), index_col=0, parse_dates=True,
