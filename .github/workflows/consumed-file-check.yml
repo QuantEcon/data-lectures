@@ -52,3 +52,31 @@ jobs:
             echo "::error file=CATALOG.md::CATALOG.md is stale. A manifest changed without regenerating the catalog — run 'python scripts/build_catalog.py' and commit the result."
             exit 1
           }
+
+      # TEMPORARY diagnostic (probe branch only, never merge): which FRED
+      # endpoints answer from a GitHub-hosted runner, with which user agent?
+      - name: FRED probe
+        run: |
+          probe () {
+            printf 'PROBE %-75s %-20s ' "$1" "$2"
+            curl -sS -o /dev/null -m 25 -A "$2" -w "http %{http_code}  %{size_download}B  %{time_total}s\n" "$1" || echo "FAILED (curl exit $?)"
+          }
+          U="https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE"
+          probe "$U" "qeld-builder"
+          probe "$U" "Python-urllib/3.12"
+          probe "$U" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/128 Safari/537.36"
+          probe "$U" "curl/8.5.0"
+          probe "https://fred.stlouisfed.org/data/UNRATE.txt" "qeld-builder"
+          probe "https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&file_type=json" "qeld-builder"
+          echo "PROBE egress IP: $(curl -s -m 10 https://api.ipify.org)"
+          echo "PROBE python urllib, qeld-builder UA, 25s timeout:"
+          python - <<'PY'
+          import urllib.request, time
+          for ua in ['qeld-builder', 'Python-urllib/3.12', 'Mozilla/5.0']:
+              t=time.time()
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request('https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE', headers={'User-Agent': ua}), timeout=25)
+                  print(f'PROBE urllib {ua!r}: {r.status} {len(r.read())}B {time.time()-t:.1f}s')
+              except Exception as e:
+                  print(f'PROBE urllib {ua!r}: {type(e).__name__} {str(e)[:60]} after {time.time()-t:.1f}s')
+          PY
