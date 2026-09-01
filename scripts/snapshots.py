@@ -218,7 +218,12 @@ def cmd_due(args) -> int:
 def cmd_stamp(args) -> int:
     summary = json.loads(pathlib.Path(args.summary).read_text())
     dataset = args.dataset
-    assert summary["dataset"] == dataset, (summary["dataset"], dataset)
+    if summary.get("dataset") != dataset:
+        # Not an assert: `python -O` would drop it, and this is the guard that
+        # stops one builder's summary from stamping another dataset's manifest.
+        print(f"::error::{dataset}: summary is for {summary.get('dataset')!r}, "
+              f"not {dataset!r} — refusing to stamp", file=sys.stderr)
+        return 1
     data_path = LECTURES / dataset
     manifest_path = LECTURES / f"{dataset}.yml"
     today = dt.date.today().isoformat()

@@ -90,7 +90,7 @@ jobs:
         snapshot: ${{ fromJson(needs.plan.outputs.all) }}
     name: canary (${{ matrix.snapshot.dataset }})
     # A matrix cannot expose one output per leg, so a failing leg leaves its
-    # failure.env + log as an artifact and the notify job reads those.
+    # failure.json + log as an artifact and the notify job reads those.
     steps:
       - uses: actions/checkout@v4
         with:
@@ -115,12 +115,11 @@ jobs:
             *) kind=fetch ;;
           esac
           echo "kind=$kind" >> "$GITHUB_OUTPUT"
-          {
-            echo "dataset=$DATASET"
-            echo "builder=$BUILDER"
-            echo "kind=$kind"
-            echo "code=$code"
-          } > failure.env
+          # Data, not shell: the notifier reads this with jq, never sources it.
+          jq -n --arg dataset "$DATASET" --arg builder "$BUILDER" \
+                --arg kind "$kind" --arg code "$code" \
+                '{dataset: $dataset, builder: $builder, kind: $kind, code: $code}' \
+                > failure.json
           exit "$code"
       - name: Keep the failure for the notifier
         if: failure()
@@ -128,7 +127,7 @@ jobs:
         with:
           name: canary-failure-${{ matrix.snapshot.stem }}
           path: |
-            failure.env
+            failure.json
             builder.log
           retention-days: 7
 
@@ -156,8 +155,11 @@ jobs:
             echo "The weekly sources-alive canary failed. Nothing was written: every consumer keeps reading the last-good snapshot, so no lecture is affected — this is the alarm moving from the lecture repos' CI to here, doing its job."
             echo
             for dir in failures/*/; do
-              [ -f "$dir/failure.env" ] || continue
-              . "$dir/failure.env"
+              [ -f "$dir/failure.json" ] || continue
+              dataset=$(jq -r .dataset "$dir/failure.json")
+              builder=$(jq -r .builder "$dir/failure.json")
+              kind=$(jq -r .kind "$dir/failure.json")
+              code=$(jq -r .code "$dir/failure.json")
               case "$kind" in
                 validation) what="**validation failed** (exit 2) — the fetched data broke the published contract. A human decides: absorb the upstream change in the builder's \`pre_process\` stage so the published schema is unchanged, or, if it cannot honestly be absorbed, plan a new-filename vintage (AGENTS.md, \"Refresh, break, or schema change\")." ;;
                 *)          what="**fetch failed** (exit $code) — the upstream or the network, not the data. Re-run the workflow; if it fails again, the source has moved or gone." ;;
