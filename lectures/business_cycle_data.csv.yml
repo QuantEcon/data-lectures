@@ -113,7 +113,7 @@ schema:
   columns:
     - {name: economy, dtype: str, description: "ISO3 code — wbgapi's index, written as the CSV's first column; the lecture reads it with index_col=0"}
     - {name: Country, dtype: str, description: "country name, the label column wbgapi adds with labels=True"}
-    - {pattern: 'YR\d{4}', dtype: float64, description: "annual real GDP growth, percent, one column per year on an unbroken grid from YR1960 to the newest year the source carries (YR2023 in the committed bytes). Observed -10.89 to 13.20"}
+    - {pattern: 'YR\d{4}', dtype: float64, description: "annual real GDP growth, percent, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value at ±50 and requires at least one |value| ≥ 1, so a units switch cannot ship; the observed range is deliberately not written here, since prose in a dynamic snapshot's manifest must not embed facts a refresh can change"}
   row_count_floor: 5            # exact by construction: the builder asks for
                                 # five economies and validate() asserts the
                                 # set. Columns, not rows, are what grow.
