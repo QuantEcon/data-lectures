@@ -1,0 +1,90 @@
+# Manifest for unemployment_rate_annual.csv — the second of three World Bank
+# tables builders/business_cycle.py writes for the intro `business_cycle`
+# lecture (with business_cycle_data.csv and private_credit_to_gdp.csv). The
+# FILENAME IS PROVISIONAL: it follows the strawman on the naming-policy issue
+# (QuantEcon/data-lectures#113) and is free to change while `consumers` is
+# empty. Landed 2026-09-01 as part of the P4 dynamic-snapshot pilot.
+
+filename: unemployment_rate_annual.csv
+title: World Bank unemployment rate (annual, % of labour force) — USA, FRA, GBR, JPN, 1960 onward
+description: >
+  Annual unemployment as a percentage of the total labour force (national
+  estimate) for the United States, France, the United Kingdom and Japan —
+  the four economies the intro `business_cycle` lecture compares — from World
+  Bank WDI series SL.UEM.TOTL.NE.ZS, in the wide layout wbgapi emits: one row
+  per economy (ISO3 code as the index, country name as `Country`), one
+  `YR<year>` column per year from 1960 to the newest year the source carries
+  (`schema.date_range.end`). The snapshot twin of the lecture's live call.
+
+class: dynamic-snapshot
+
+source:
+  name: World Bank, World Development Indicators (International Labour Organization, ILOSTAT database, national estimates)
+  series: SL.UEM.TOTL.NE.ZS
+  url: https://data.worldbank.org/indicator/SL.UEM.TOTL.NE.ZS
+  doi: null
+  version: >
+    Live WDI at each refresh; the vintage is pinned by `retrieved` and
+    integrity.upstream, not by a source-side edition (WDI carries only a
+    database-level lastupdated stamp).
+  citation: >
+    World Bank, World Development Indicators, series SL.UEM.TOTL.NE.ZS
+    (unemployment, total, % of total labor force, national estimate), from
+    the International Labour Organization's ILOSTAT database. Retrieved via
+    wbgapi.
+  note: >
+    National estimates, so the series start when each country's own labour
+    force survey does: the United Kingdom from 1971 and France from 1970,
+    the United States and Japan from 1960. The builder allows a null only
+    before an economy's first observation or in the newest two years, so
+    those leading gaps are structural and a gap opening later is a failure.
+
+license:
+  name: CC BY-4.0
+  url: https://datacatalog.worldbank.org/public-licenses#cc-by
+  redistribution: permitted
+  verified: 2026-09-01
+  note: >
+    World Bank open data under CC BY-4.0, the same terms as
+    business_cycle_data.csv (stated in the series metadata the builder dumps
+    to provenance/ for the GDP series; WDI applies one licence across the
+    database).
+
+# Stamped by scripts/snapshots.py on every merged refresh.
+retrieved: 2026-09-01
+maintainer: QuantEcon
+
+integrity:
+  sha256: 74a83c3cec97aea3899cc9f4c8e357b2527af4342d03ac3f3a8ec31b1e70fc71
+  upstream:
+    # Stamped by scripts/snapshots.py on every merged refresh: a fresh
+    # snapshot is `verified` by construction — these bytes are the builder's
+    # validated output from the live source that day.
+    status: verified
+    date: 2026-09-01
+    against: builders/business_cycle.py
+    note: "Refreshed 2026-09-01 by the scheduled refresh: these bytes are the builder's validated output from the live source that day, so they are verified by construction. Overlap window n/a: 0 of 0 cells revised, max |change| 0."
+
+schema:
+  format: csv
+  columns:
+    - {name: economy, dtype: str, description: "ISO3 code — wbgapi's index, written as the CSV's first column; read it with index_col=0"}
+    - {name: Country, dtype: str, description: "country name, the label column wbgapi adds with labels=True"}
+    - {pattern: 'YR\d{4}', dtype: float64, description: "unemployment, % of the labour force, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value in [0, 60]; the observed range is deliberately not written here"}
+  row_count_floor: 4            # exact by construction: four economies
+  # `end` is stamped by scripts/snapshots.py on every refresh.
+  date_range: {start: 1960, end: 2025}
+  # Leading nulls only: GBR is empty 1960–1970 (11 cells) and FRA 1960–1969
+  # (10), where the national series had not started. Declared as a total
+  # because the holes are per economy, not per column; validate() asserts
+  # their placement (before the first observation), not this count.
+  known_nulls_total: 21
+
+# None yet — see business_cycle_data.csv.yml: lecture-wasm will read this
+# file once business_cycle is re-enabled there (QuantEcon/lecture-wasm#70);
+# lecture-python-intro keeps its live call.
+consumers: []
+
+builder: builders/business_cycle.py
+builder_status: committed
+cadence: annual

@@ -27,7 +27,12 @@ upstream outage may fail a refresh, it must never break a lecture build. The
 architecture discussion is in
 [#14](https://github.com/QuantEcon/data-lectures/issues/14); the copy-able
 template is [`_template.py`](_template.py) (not a builder — the underscore
-keeps it out of any manifest).
+keeps it out of any manifest). Shared fetch code lives beside it under the
+same convention: [`_fred.py`](_fred.py) is the `Fred` class every FRED
+builder should use (`fred.series('UNRATE')`, `fred.frame([...])`), so a fetch
+stage is a line and `validate()` is the only thing worth reading. One
+builder per **source** for a lecture's data, writing a composite file where
+the lecture reads the series together (decided 2026-09-01 on #26).
 
 A **dynamic snapshot's** builder additionally honours the refresh contract
 (`.github/workflows/refresh-snapshots.yml`, `scripts/snapshots.py`):
@@ -59,7 +64,8 @@ re-fetched** — see `AGENTS.md`.
 | `fred_data.py` | `fred_data.csv` | committed — fetches six FRED series live over a pinned 1953-04..2024-12 window (yields and the recession dummy are stable history, unlike the BBH national-accounts snapshot). Reproduces its output byte for byte (2026-08-18) |
 | `hansen_singleton_1982_data.py` | `hansen_singleton_1982_data.csv` | committed — fetches FRED and the Ken French factors live. Reproduces its output byte for byte (2026-08-13) |
 | `hansen_singleton_1983_data.py` | `hansen_singleton_1983_data.csv` | committed — the same construction plus a T-bill leg, so its output is a strict superset of the 1982 file's. Reproduces its output byte for byte (2026-08-13) |
-| `business_cycle.py` | `business_cycle_data.csv` (plus two dumps to `provenance/`) | committed — the repo's one **dynamic snapshot** (`cadence: annual`), retrofitted to the four-stage contract 2026-09-01. Fetches live WDI; does NOT reproduce its bytes and is not meant to — the World Bank revises the series (63 of 64 year columns moved between the 2025-02 vintage and 2026-09-01). validate() bounds the overlap window at 5 pp and prints the revision summary, which is the review surface for a refresh PR |
+| `business_cycle.py` | `business_cycle_data.csv`, `unemployment_rate_annual.csv`, `private_credit_to_gdp.csv` (plus two dumps to `provenance/`) | committed — the World Bank half of the `business_cycle` lecture's data as three **dynamic snapshots** (`cadence: annual`), one builder writing a set. Fetches live WDI; does NOT reproduce its bytes and is not meant to — the World Bank revises the series (63 of 64 GDP-growth columns moved between the 2025-02 vintage and 2026-09-01). validate() places nulls (before an economy's first observation or in the newest two years, never inside a series), bounds each table's overlap window, and prints the summary — the review surface for a refresh PR. Validates all three before writing any |
+| `business_cycle_fred.py` | `us_business_cycle_monthly.csv` | committed — the FRED half as one composite **dynamic snapshot** (`cadence: monthly`): six series on a monthly grid from 1919. Built on the shared `_fred.py` library; declares every structural null exactly (series starts, UMCSENT's sparse pre-1978 years, the 2025-10 shutdown hole) so a new hole fails the refresh |
 | `webscrape_forbes.ipynb` | `forbes-global2000.csv`, `forbes-billionaires.csv` | **committed-frozen** — an undocumented Forbes API, a spoofed user-agent and hardcoded GDPR consent cookies. Defects recorded in the two manifests rather than fixed |
 | `generating_mini.md` | `SCF_plus_mini.csv`, `SCF_plus_mini_no_weights.csv` | **committed-frozen** — its `to_csv` calls are commented out upstream and stay that way. As written it still fetches the `high_dim_data` URL; that URL is historical, and the input is now committed at `sources/SCF_plus.dta`. See `sources/README.md` |
 | `usa-gini-nwealth-tincome-lincome.ipynb` | `usa-gini-nwealth-tincome-lincome.csv` | **committed-frozen** — three independent reasons, any one sufficient: no validate stage; it raises under the pinned pandas 3 (`np.asarray` of a Series is read-only under copy-on-write, so `rd.shuffle` fails — the lecture got the `.copy()` fix in QuantEcon/lecture-python-intro#776, this notebook did not); and it is non-deterministic, so it cannot reproduce its own bytes. It is also the only builder here whose input is **another file in this repo** |

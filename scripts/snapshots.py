@@ -215,15 +215,26 @@ def cmd_due(args) -> int:
     return 0
 
 
+def _load_summary(path: str, dataset: str) -> dict:
+    """A builder writes one summary (a dict) or, when it produces a set of
+    files, one per file (a list); either way, the entry for `dataset` — and
+    refuse anything else. Not an assert: `python -O` would drop it, and this
+    is the guard that stops one builder's summary from stamping, or
+    describing, another dataset."""
+    loaded = json.loads(pathlib.Path(path).read_text())
+    entries = loaded if isinstance(loaded, list) else [loaded]
+    matches = [s for s in entries if isinstance(s, dict) and s.get("dataset") == dataset]
+    if not matches:
+        found = sorted(str(s.get("dataset")) for s in entries if isinstance(s, dict))
+        print(f"::error::{dataset}: no summary for it in {path} (found {found}) — refusing",
+              file=sys.stderr)
+        raise SystemExit(1)
+    return matches[0]
+
+
 def cmd_stamp(args) -> int:
-    summary = json.loads(pathlib.Path(args.summary).read_text())
+    summary = _load_summary(args.summary, args.dataset)   # refuses a mismatch
     dataset = args.dataset
-    if summary.get("dataset") != dataset:
-        # Not an assert: `python -O` would drop it, and this is the guard that
-        # stops one builder's summary from stamping another dataset's manifest.
-        print(f"::error::{dataset}: summary is for {summary.get('dataset')!r}, "
-              f"not {dataset!r} — refusing to stamp", file=sys.stderr)
-        return 1
     data_path = LECTURES / dataset
     manifest_path = LECTURES / f"{dataset}.yml"
     today = dt.date.today().isoformat()
@@ -259,7 +270,8 @@ def cmd_stamp(args) -> int:
         "date": _iso(up["date"]) == today,
         "against": up["against"] == summary["builder"],
         "delta dropped": not any(k in up for k in ("delta_kind", "delta", "delta_evidence", "register")),
-        "date_range.end": m["schema"]["date_range"]["end"] == end,
+        # YAML reads a date-shaped scalar back as a date object; compare as text.
+        "date_range.end": _iso(m["schema"]["date_range"]["end"]) == str(end),
     }
     failed = [k for k, ok in checks.items() if not ok]
     if failed:
@@ -271,7 +283,7 @@ def cmd_stamp(args) -> int:
 
 
 def cmd_pr_body(args) -> int:
-    summary = json.loads(pathlib.Path(args.summary).read_text())
+    summary = _load_summary(args.summary, args.dataset)
     dataset = args.dataset
     m = load_manifests()[dataset]
     ov = summary.get("overlap") or {}

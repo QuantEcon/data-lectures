@@ -1,0 +1,131 @@
+# Manifest for us_business_cycle_monthly.csv — the FRED half of the intro
+# `business_cycle` lecture's data as one composite monthly file, built by
+# builders/business_cycle_fred.py on the shared builders/_fred.py library.
+# The FILENAME IS PROVISIONAL: it follows the strawman on the naming-policy
+# issue (QuantEcon/data-lectures#113 — name a composite for its topic, not
+# its lecture) and is free to change while `consumers` is empty. Landed
+# 2026-09-01 as part of the P4 dynamic-snapshot pilot; it is the first
+# composite dynamic snapshot and the first file with a monthly cadence.
+
+filename: us_business_cycle_monthly.csv
+title: US business-cycle indicators, monthly — unemployment, NBER recessions, consumer sentiment, core CPI, industrial production, 1919 onward
+description: >
+  Six FRED series on one monthly DATE index from 1919-01 to the newest month
+  FRED carries: the civilian unemployment rate (UNRATE), the NBER recession
+  indicator (USREC), the Michigan consumer sentiment index (UMCSENT), the CPI
+  less food and energy (CPILFESL), the industrial production index (INDPRO)
+  and the 1929–1942 unemployment rate from the NBER Macrohistory database
+  (M0892AUSM156SNBR), which the lecture splices before UNRATE. One file
+  rather than six because the lecture reads them together and a single URL
+  with these column names is what keeps the lecture readable. A consumer
+  selects series and dates in pandas; every value is in the units FRED
+  publishes.
+
+# Constructed, tracking moving sources: FRED appends a month every month and
+# revises CPILFESL and INDPRO, so the file is refreshed in place monthly.
+class: dynamic-snapshot
+
+source:
+  name: FRED (Federal Reserve Bank of St. Louis) — series UNRATE, USREC, UMCSENT, CPILFESL, INDPRO, M0892AUSM156SNBR
+  url: https://fred.stlouisfed.org
+  doi: null
+  version: >
+    Live FRED at each refresh, one `fredgraph.csv` request per series; the
+    vintage is pinned by `retrieved` and integrity.upstream.
+  series: >
+    UNRATE — civilian unemployment rate, %, SA, monthly from 1948-01 (BLS,
+    Current Population Survey). USREC — NBER-based recession indicator, 0/1,
+    from the NBER's peak/trough chronology. UMCSENT — University of Michigan
+    index of consumer sentiment, 1966Q1=100, quarterly-to-irregular from
+    1952-11 and monthly from 1978-01. CPILFESL — CPI for all urban consumers,
+    all items less food and energy, index 1982-84=100, SA, from 1957-01
+    (BLS). INDPRO — industrial production: total index, 2017=100, SA, from
+    1919-01 (Board of Governors). M0892AUSM156SNBR — unemployment rate for
+    the United States, %, NSA, 1929-04 to 1942-06 (NBER Macrohistory,
+    chapter 8).
+  citation: >
+    U.S. Bureau of Labor Statistics (UNRATE, CPILFESL); Federal Reserve Bank
+    of St. Louis, NBER based Recession Indicators (USREC); University of
+    Michigan, Surveys of Consumers (UMCSENT); Board of Governors of the
+    Federal Reserve System, Industrial Production and Capacity Utilization
+    (INDPRO); National Bureau of Economic Research, Macrohistory Database
+    (M0892AUSM156SNBR). All retrieved from FRED, Federal Reserve Bank of St.
+    Louis.
+  note: >
+    fredgraph.csv titles its date column `observation_date`; the library
+    renames it to `DATE`, the header every other FRED file here carries.
+    UNRATE and CPILFESL are both EMPTY for 2025-10 — the month the 2025
+    federal shutdown stopped BLS publishing — and the builder declares that
+    hole exactly, so a second shutdown month fails the refresh for a human
+    to look at rather than shipping silently.
+
+license:
+  name: null
+  url: https://fred.stlouisfed.org/legal/
+  redistribution: permitted
+  verified: 2026-09-01
+  note: >
+    Split provenance, one answer. FRED classifies each series on its page
+    (checked 2026-09-01): UNRATE is "public domain: citation requested", and
+    CPILFESL, INDPRO and USREC are US federal statistics or built from the
+    NBER's published dates (the fred_data.csv manifest's 2026-08-17 check of
+    federal series pages against FRED's S&P 500 page as a positive control is
+    the precedent). UMCSENT is the one third-party series: FRED classifies it
+    "copyrighted: citation required" (fred.stlouisfed.org/legal/#copyright-
+    citation-required) — the University of Michigan's terms permit use with
+    citation, which is exactly what this repo's cache-with-attribution policy
+    provides; the manifest's `source.citation` names the Surveys of
+    Consumers. M0892AUSM156SNBR is NBER Macrohistory data the NBER publishes
+    openly. So `permitted`, with the Michigan attribution as the condition
+    that makes it so; if Michigan's terms are ever read as forbidding a
+    cached CSV, the alternative is to drop UMCSENT from the composite.
+
+# Stamped by scripts/snapshots.py on every merged refresh.
+retrieved: 2026-09-01
+maintainer: QuantEcon
+
+integrity:
+  sha256: e6f8e0dea7999246f3bf23b4410dac14e70bac475351560a1f13895132e45f72
+  upstream:
+    # Stamped by scripts/snapshots.py on every merged refresh: a fresh
+    # snapshot is `verified` by construction.
+    status: verified
+    date: 2026-09-01
+    against: builders/business_cycle_fred.py
+    note: "Refreshed 2026-09-01 by the scheduled refresh: these bytes are the builder's validated output from the live source that day, so they are verified by construction. Overlap window n/a: 0 of 0 cells revised, max |change| 0."
+
+schema:
+  format: csv
+  columns:
+    - {name: DATE, dtype: datetime, description: "first-of-month date stamp on an unbroken monthly grid from 1919-01-01 to the newest month (`schema.date_range.end`); the CSV index column — read it with parse_dates and index_col"}
+    - {name: UNRATE, dtype: float64, description: "civilian unemployment rate, %, SA; empty before 1948-01 and for 2025-10; validate() bounds it in [0, 30]"}
+    - {name: USREC, dtype: int64, description: "NBER recession indicator, 1 in recession months and 0 otherwise; complete from 1919-01"}
+    - {name: UMCSENT, dtype: float64, description: "Michigan consumer sentiment index, 1966Q1=100; empty before 1952-11, sparse (quarterly then irregular) until 1978-01, monthly since; validate() bounds it in [20, 150]"}
+    - {name: CPILFESL, dtype: float64, description: "CPI less food and energy, index 1982-84=100, SA; empty before 1957-01 and for 2025-10; validate() bounds it in [20, 1000]"}
+    - {name: INDPRO, dtype: float64, description: "industrial production index, 2017=100, SA; complete from 1919-01; validate() bounds it in [1, 300]"}
+    - {name: M0892AUSM156SNBR, dtype: float64, description: "unemployment rate, %, NSA, from the NBER Macrohistory database; populated 1929-04 to 1942-06 only; validate() bounds it in [0, 40]"}
+  row_count_floor: 1291         # 1919-01 .. 2026-07 in the first vintage;
+                                # grows by one row per month. validate()
+                                # asserts the grid and recency (newest month
+                                # at most three months old), not this count.
+  # `end` is stamped by scripts/snapshots.py on every refresh.
+  date_range: {start: 1919-01-01, end: 2026-07-01}
+  # Every null is structural — before a series' first observation, in
+  # UMCSENT's sparse pre-1978 years, after the historical series' last month,
+  # or the 2025-10 shutdown hole in UNRATE and CPILFESL — and validate()
+  # asserts their PLACEMENT exactly. The totals below are the first vintage's
+  # (they grow only for M0892AUSM156SNBR, by one per month) and are recorded
+  # for the reader, not asserted.
+  known_nulls: {UNRATE: 349, UMCSENT: 616, CPILFESL: 457, M0892AUSM156SNBR: 1132}
+
+# None yet. Decided 2026-09-01: lecture-python-intro keeps its live
+# pandas_datareader calls (the API is the lesson there); lecture-wasm will
+# read this file once business_cycle is re-enabled in its build
+# (QuantEcon/lecture-wasm#70) — record it here with `on_refresh: rebuild`.
+# The python.myst unemployment_linear and unemployment_shocks lectures read
+# UNRATE live over the same window and are candidates for a later adoption.
+consumers: []
+
+builder: builders/business_cycle_fred.py
+builder_status: committed
+cadence: monthly

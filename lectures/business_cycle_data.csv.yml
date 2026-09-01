@@ -12,16 +12,17 @@
 # vintage under a new name.
 
 filename: business_cycle_data.csv
-title: World Bank GDP growth (annual %) — USA, ARG, GBR, GRC, JPN, 1960 onward
+title: World Bank GDP growth (annual %) — nine economies, 1960 onward
 description: >
-  Annual real GDP growth (percent, constant local currency) for the United
-  States, Argentina, the United Kingdom, Greece and Japan, extracted from World
-  Bank WDI series NY.GDP.MKTP.KD.ZG in the wide layout wbgapi emits: one row
-  per economy (ISO3 code as the index, country name as `Country`), one
-  `YR<year>` column per year from 1960 to the newest year the source carries
-  (`schema.date_range.end`). It is the snapshot twin of the live
-  `wb.data.DataFrame` call the intro `business_cycle` lecture makes; the call
-  is reproduced verbatim by the builder.
+  Annual real GDP growth (percent, constant local currency) for the nine
+  economies the intro `business_cycle` lecture plots — USA, ARG, GBR, GRC, JPN
+  in its opening section and CHN, USA, DEU, BRA, ARG, GBR, JPN, MEX in its
+  developed/developing comparison — extracted from World Bank WDI series
+  NY.GDP.MKTP.KD.ZG in the wide layout wbgapi emits: one row per economy
+  (ISO3 code as the index, country name as `Country`), one `YR<year>` column
+  per year from 1960 to the newest year the source carries
+  (`schema.date_range.end`). The snapshot twin of the lecture's live
+  `wb.data.DataFrame` calls; a consumer selects its economies with `.loc`.
 
 # Constructed, tracking a moving source: the World Bank republishes and revises
 # this series continuously, and the file is meant to be refreshed in place on
@@ -43,12 +44,13 @@ source:
     growth, annual %), from World Bank national accounts data and OECD
     National Accounts data files. Retrieved via wbgapi.
   note: >
-    Five economies and the wide `YR<year>` layout are the lecture's choices,
-    not the source's — the builder passes exactly the lecture's arguments
-    (`wb.data.DataFrame('NY.GDP.MKTP.KD.ZG', ['USA','ARG','GBR','GRC','JPN'],
-    labels=True)`). Row order is whatever wbgapi returns (JPN, GRC, GBR, ARG,
-    USA on every run so far) and is kept as returned so a refresh diff is
-    values-only.
+    The economy set and the wide `YR<year>` layout are the lecture's choices,
+    not the source's — the builder passes the union of the lecture's two
+    selections to `wb.data.DataFrame('NY.GDP.MKTP.KD.ZG', [...], labels=True)`.
+    Grew from five economies to nine on 2026-09-01, while the file had no
+    consumer, so that the lecture's second selection is covered too. Row
+    order is whatever wbgapi returns and is kept as returned so a refresh
+    diff is values-only.
 
 license:
   name: CC BY-4.0
@@ -83,7 +85,7 @@ maintainer: QuantEcon
 # to byte-match and no figure a change here could alter today.
 
 integrity:
-  sha256: 05b52b8d66be7565a75b66f897bf21095a7844fb0d47c036cad019bfc514315f
+  sha256: 41df23233ea238e4166c5c21cc383791015d4c9af6868b840901a8ce083c9da8
   upstream:
     # `diverged`, not `failing`: the builder was re-run in full against live
     # WDI and its output differs from these bytes in the way a revised
@@ -96,7 +98,7 @@ integrity:
     status: verified
     date: 2026-09-01
     against: builders/business_cycle.py
-    note: "Refreshed 2026-09-01 by the scheduled refresh: these bytes are the builder's validated output from the live source that day, so they are verified by construction. Overlap window YR1960..YR2023: 236 of 320 cells revised, max |change| 1.5002."
+    note: "Refreshed 2026-09-01 by the scheduled refresh: these bytes are the builder's validated output from the live source that day, so they are verified by construction. Overlap window YR1960..YR2025: 0 of 325 cells revised, max |change| 0.0."
 
 # ---------------------------------------------------------------------------
 # Shape
@@ -114,8 +116,8 @@ schema:
     - {name: economy, dtype: str, description: "ISO3 code — wbgapi's index, written as the CSV's first column; the lecture reads it with index_col=0"}
     - {name: Country, dtype: str, description: "country name, the label column wbgapi adds with labels=True"}
     - {pattern: 'YR\d{4}', dtype: float64, description: "annual real GDP growth, percent, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value at ±50 and requires at least one |value| ≥ 1, so a units switch cannot ship; the observed range is deliberately not written here, since prose in a dynamic snapshot's manifest must not embed facts a refresh can change"}
-  row_count_floor: 5            # exact by construction: the builder asks for
-                                # five economies and validate() asserts the
+  row_count_floor: 9            # exact by construction: the builder asks for
+                                # nine economies and validate() asserts the
                                 # set. Columns, not rows, are what grow.
   # `end` is the newest year column in the COMMITTED bytes, stamped by
   # scripts/snapshots.py on every refresh — which is what makes a refresh PR's
@@ -123,20 +125,20 @@ schema:
   date_range: {start: 1960, end: 2025}
 
   # Growth is undefined in the series' first year, so YR1960 is empty for all
-  # five economies and nothing else is. validate() asserts exactly this hole.
-  known_nulls: {YR1960: 5}
+  # nine economies. validate() additionally allows a null only before an
+  # economy's first observation or in the newest two years, never inside a
+  # series — none of either exists in this vintage.
+  known_nulls: {YR1960: 9}
 
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# None. No lecture reads these bytes: intro's business_cycle.md (lines 83, 109
-# and 512 on 2026-09-01) and its lecture-wasm mirror make the live wbgapi call
-# the builder reproduces, and the org-wide code search for this basename on
-# 2026-09-01 returned only this repo. Whether those lectures adopt the snapshot
-# — and whether the live call stays as the lesson, with the snapshot as the
-# wasm twin (AGENTS.md, "Live APIs") — is the P4 decision (PLAN Phase 8), not
-# something this manifest settles. When a consumer is added, `cadence` below
-# becomes load-bearing.
+# None yet. Decided 2026-09-01: lecture-python-intro KEEPS its live wbgapi
+# calls (the API is the lesson there), and lecture-wasm — where business_cycle
+# is currently excluded from the build because pyodide cannot reach the API —
+# will read this file and its two siblings plus us_business_cycle_monthly.csv
+# (QuantEcon/lecture-wasm#70). When that repoint lands, record it here with
+# `on_refresh: rebuild`, and `cadence` below becomes load-bearing.
 consumers: []
 
 builder: builders/business_cycle.py
@@ -148,4 +150,6 @@ builder_status: committed       # four-stage since 2026-09-01 (PLAN Phase 5);
 # Dynamic snapshots only. The series is annual; the World Bank revises it
 # several times a year but the lecture's figures change materially only when
 # a new year lands (WDI typically carries year T from mid T+1).
-cadence: annual
+cadence: annual                 # shared with unemployment_rate_annual.csv and
+                                # private_credit_to_gdp.csv, which the same
+                                # builder writes in the same run
