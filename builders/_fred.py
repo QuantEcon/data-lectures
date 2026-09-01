@@ -21,7 +21,13 @@ What it normalises:
   DatetimeIndex named `DATE`, so committed files keep the header the
   lectures expect
 - FRED's `.` for a missing observation -> NaN
-- a User-Agent header, which fred.stlouisfed.org has been seen to require
+- the User-Agent: NONE by default, deliberately. Measured 2026-09-01 from a
+  GitHub-hosted runner (data-lectures#115): FRED's edge answers
+  `Python-urllib/3.12` (urllib's own default) and `curl/8.5.0` in ~50 ms,
+  and STALLS `qeld-builder` and even `Mozilla/5.0` until the read times
+  out. The same requests all succeed from a workstation, which is how the
+  custom agent survived local testing. Pass `user_agent=` only if you have
+  measured that it works from where the builder will actually run
 - one series per request, aligned with an outer join in frame(), so a
   series that starts later is simply empty before its first observation
 
@@ -39,14 +45,14 @@ FREDGRAPH = 'https://fred.stlouisfed.org/graph/fredgraph.csv'
 
 
 class Fred:
-    def __init__(self, user_agent='qeld-builder', timeout=60):
-        self.user_agent = user_agent
+    def __init__(self, user_agent=None, timeout=60):
+        self.user_agent = user_agent      # None -> urllib's default, see above
         self.timeout = timeout
 
     def _get(self, params):
         query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
-        request = urllib.request.Request(f'{FREDGRAPH}?{query}',
-                                         headers={'User-Agent': self.user_agent})
+        headers = {'User-Agent': self.user_agent} if self.user_agent else {}
+        request = urllib.request.Request(f'{FREDGRAPH}?{query}', headers=headers)
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
             return response.read()
 

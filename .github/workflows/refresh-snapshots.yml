@@ -71,9 +71,11 @@ jobs:
           FORCE: ${{ inputs.force }}
         run: |
           flags=""
-          [ -n "$DATASET" ] && flags="$flags --dataset $DATASET"
+          dsflag=""
+          [ -n "$DATASET" ] && flags="$flags --dataset $DATASET" && dsflag="--dataset $DATASET"
           [ "$FORCE" = "true" ] && flags="$flags --all"
-          all=$(python scripts/snapshots.py list | jq -c .)
+          # canary: one leg per BUILDER (a set-writing builder fetches once)
+          all=$(python scripts/snapshots.py list --by-builder $dsflag | jq -c .)
           due=$(python scripts/snapshots.py due $flags | jq -c .)
           echo "all=$all" >> "$GITHUB_OUTPUT"
           echo "due=$due" >> "$GITHUB_OUTPUT"

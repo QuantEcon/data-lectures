@@ -197,7 +197,20 @@ def sha256(path: pathlib.Path) -> str:
 # ---------------------------------------------------------------------------
 
 def cmd_list(args) -> int:
-    print(json.dumps(snapshots(load_manifests()), indent=1))
+    rows = snapshots(load_manifests())
+    if args.dataset:
+        rows = [r for r in rows if r["dataset"] == args.dataset]
+    if args.by_builder:
+        # One leg per builder for the canary: a builder that writes a set
+        # fetches once for all of them, so running it per dataset only
+        # repeats the same fetch. The leg is named for its first dataset.
+        seen, unique = set(), []
+        for r in rows:
+            if r["builder"] not in seen:
+                seen.add(r["builder"])
+                unique.append({**r, "datasets": [x["dataset"] for x in rows if x["builder"] == r["builder"]]})
+        rows = unique
+    print(json.dumps(rows, indent=1))
     return 0
 
 
@@ -331,7 +344,8 @@ def cmd_pr_body(args) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("list").set_defaults(fn=cmd_list)
+    p = sub.add_parser("list"); p.add_argument("--dataset"); p.add_argument("--by-builder", action="store_true")
+    p.set_defaults(fn=cmd_list)
     p = sub.add_parser("due"); p.add_argument("--all", action="store_true"); p.add_argument("--dataset")
     p.set_defaults(fn=cmd_due)
     p = sub.add_parser("stamp"); p.add_argument("dataset"); p.add_argument("--summary", required=True)
