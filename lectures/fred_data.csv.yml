@@ -135,7 +135,7 @@ integrity:
 schema:
   format: csv
   columns:
-    - {name: DATE, dtype: datetime, description: "first-of-month date stamp, 1953-04-01 to 2024-12-01, 861 rows on an unbroken monthly grid. The CSV index column; the lecture reads it with parse_dates and index_col"}
+    - {name: DATE, dtype: datetime64, description: "first-of-month date stamp, 1953-04-01 to 2024-12-01, 861 rows on an unbroken monthly grid. The CSV index column; the lecture reads it with parse_dates and index_col"}
     - {name: GS1, dtype: float64, description: "1-year Treasury constant-maturity yield, percent per annum, monthly, NSA. Observed 0.05-16.72"}
     - {name: GS5, dtype: float64, description: "5-year Treasury constant-maturity yield, percent per annum. Observed 0.27-15.93"}
     - {name: GS10, dtype: float64, description: "10-year Treasury constant-maturity yield, percent per annum. Observed 0.62-15.32"}

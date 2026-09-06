@@ -49,13 +49,13 @@ schema:
   format: csv
   columns:
     - {name: "", dtype: int64, description: "pandas row index (0-based), not used by the lecture"}
-    - {name: GEO, dtype: string, description: geography (country or EU aggregate)}
-    - {name: AGE, dtype: string, description: age band (e.g. "From 15 to 24 years")}
-    - {name: UNIT, dtype: string, description: unit of measure (e.g. "Thousand persons")}
-    - {name: SEX, dtype: string, description: Total / Males / Females}
-    - {name: INDIC_EM, dtype: string, description: employment indicator (e.g. "Active population")}
+    - {name: GEO, dtype: str, description: geography (country or EU aggregate)}
+    - {name: AGE, dtype: str, description: age band (e.g. "From 15 to 24 years")}
+    - {name: UNIT, dtype: str, description: unit of measure (e.g. "Thousand persons")}
+    - {name: SEX, dtype: str, description: Total / Males / Females}
+    - {name: INDIC_EM, dtype: str, description: employment indicator (e.g. "Active population")}
     - {name: Value, dtype: float64, description: measured value in UNIT}
-    - {name: DATE, dtype: string, description: observation year as ISO date (YYYY-01-01)}
+    - {name: DATE, dtype: str, description: observation year as ISO date (YYYY-01-01)}
   row_count_floor: 15120         # frozen historical extract -- exact row count
   date_range: {start: 2007-01-01, end: 2016-01-01}
   # 1080 rows carry a row index but are otherwise entirely blank -- spacer rows

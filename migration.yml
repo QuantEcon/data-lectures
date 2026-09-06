@@ -836,7 +836,9 @@ datasets:
   # and the manifest arrived with #109 — so that is the landing PR. No
   # consumer: intro's business_cycle still makes the live wbgapi call the
   # builder reproduces; whether it adopts the snapshot is the P4 decision.
-  business_cycle_data.csv:
+  # Renamed from business_cycle_data.csv on 2026-09-07 under the naming policy
+  # (#113), while `consumers` was still empty; no URL was ever read.
+  gdp_growth_annual.csv:
     pilot: P4
     status: landed
     prior_pattern: null           # never read from anywhere — the lecture
@@ -850,7 +852,7 @@ datasets:
 
   # The rest of the business_cycle set (#114): two more World Bank tables from
   # the same builder, and the FRED half as one composite monthly file. Names
-  # provisional pending #113. Consumer-to-be: lecture-wasm (lecture-wasm#70).
+  # settled 2026-09-07 (#113). Consumer-to-be: lecture-wasm (lecture-wasm#70).
   unemployment_rate_annual.csv:
     pilot: P4
     status: landed

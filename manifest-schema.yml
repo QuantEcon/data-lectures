@@ -33,11 +33,28 @@
 # Identity
 # ---------------------------------------------------------------------------
 
-filename: business_cycle_data.csv       # must match the sidecar's own name
+# NAMING (policy settled 2026-09-07, QuantEcon/data-lectures#113). The tree is
+# flat, so the filename is the whole identity: the served URL's last segment
+# and the future `qeld.url('<filename>')` key. Name a file once, by these rules:
+#   1. name the VARIABLE(S), not the source and not the lecture
+#      (gdp_growth_annual, unemployment_rate_annual, private_credit_to_gdp);
+#   2. add FREQUENCY when the same variable plausibly exists at another
+#      frequency (unemployment_rate_annual beside a monthly one);
+#   3. a COMPOSITE is named for what unites its members — if that is only one
+#      lecture, name the topic, not the lecture file (us_business_cycle_monthly,
+#      not business_cycle_data);
+#   4. NO SOURCE PREFIX (no wdi_/fred_) — provenance is `source:` and CATALOG.md;
+#   5. NEVER coverage or vintage in a dynamic snapshot's name (it changes on
+#      refresh); a verbatim release keeps the upstream's own name (mpd2020.xlsx);
+#   6. rename FREELY while `consumers: []`; once adopted, only as a NEW filename
+#      with the old one kept serving — a rename breaks every consumer and every
+#      downloaded notebook. Selection ("these nine economies") lives in the
+#      manifest, not the name.
+filename: gdp_growth_annual.csv         # must match the sidecar's own name
 title: World Bank GDP growth (annual %) — selected economies
 description: >
-  Annual real GDP growth for USA, ARG, GBR, GRC and JPN, extracted from World
-  Bank series NY.GDP.MKTP.KD.ZG.
+  Annual real GDP growth for nine economies, extracted from World Bank series
+  NY.GDP.MKTP.KD.ZG.
 
 # Exactly one of: verbatim | constructed | dynamic-snapshot
 #   verbatim         third-party file republished as distributed
@@ -163,29 +180,89 @@ integrity:
 # Shape — what a consumer can rely on; also the basis for PR validation tests
 # ---------------------------------------------------------------------------
 
+# The schema block is an EXECUTABLE CONTRACT: the shared manifest-driven
+# validate() (QuantEcon/data-lectures#119) reads it as its spec, both in every
+# dynamic builder's validate stage and in the PR-validation workflow. The three
+# decisions that make it executable were settled 2026-09-07 — #120 (`pattern`),
+# #121 (nulls), #122 (dtypes) — and are recorded beside the fields below.
+#
+# What the validator reads: the RAW file as written, with pandas defaults —
+# honouring `delimiter` (countries.csv is semicolon-separated) and `read_as`
+# (positional workbook reads), with no `index_col`, and with `parse_dates` on
+# every column declared `datetime64`. The manifest describes the bytes on
+# disk, not the frame a particular lecture builds from them.
+
 schema:
   format: csv
   columns:
-    - {name: economy, dtype: string, description: ISO3 country code}
-    - {name: Country, dtype: string, description: Country name}
-    # A column entry carries EITHER `name` (one exact column) OR `pattern` (a
-    # regex matching a run of columns), never both. `pattern` is for files
-    # whose column set grows — one column per year here — where enumerating
-    # them would hard-code an end year into a file whose purpose is to move.
-    # First used by business_cycle_data.csv.yml (2026-09-01); proposed in
-    # QuantEcon/data-lectures#14.
-    - {pattern: 'YR\d{4}', dtype: float64, description: Annual GDP growth (%), one column per year from YR1960}
+    # dtype (#122): the canonical vocabulary is what pandas 3 reports for a
+    # default read — `str`, `float64`, `int64`, `bool`, `datetime64` — plus the
+    # storage types a non-CSV format genuinely carries (`float32`, `int32`,
+    # `int8` from Stata). `string`, `object` and `datetime` are retired (swept
+    # 2026-09-07). The validator compares by FAMILY, not exact string: str /
+    # string / object are one text family, datetime64 matches any unit, and a
+    # nullable bool read back as object matches `bool` — so the check stays
+    # green on pandas-2 readers (lecture-datascience, Pyodide). A CSV carries
+    # no dtypes, so a declaration is a statement about a default read; a
+    # `datetime64` declaration is also the instruction to parse that column.
+    - {name: economy, dtype: str, description: ISO3 country code}
+    - {name: Country, dtype: str, description: Country name}
+    # pattern (#120): a column entry carries EITHER `name` (one exact column)
+    # OR `pattern` (a regex), never both. `pattern` is for files whose column
+    # set grows — one column per year here — where enumerating them would
+    # hard-code an end year into a file whose purpose is to move. Semantics:
+    #   - Python `re`, full-match (`YR\d{4}` cannot match `YR19601`);
+    #   - the validator walks `columns` IN ORDER and a pattern consumes the
+    #     maximal run of CONSECUTIVE matching columns in that position —
+    #     column order is part of the contract (positional reads exist);
+    #   - at least ONE column must match, else "wide part missing" fails;
+    #   - EXHAUSTIVE: every file column is claimed by exactly one entry, so an
+    #     unexpected column fails;
+    #   - exactly one CAPTURE GROUP marks the date token, from which the
+    #     validator derives `date_range` for a wide file. A stricter grid
+    #     check (no gaps) is the builder's, layered on top.
+    # First used by business_cycle_data.csv.yml (now gdp_growth_annual.csv.yml,
+    # 2026-09-01); proposed in QuantEcon/data-lectures#14.
+    - {pattern: 'YR(\d{4})', dtype: float64, description: Annual GDP growth (%), one column per year from YR1960}
   row_count_floor: 5                    # PR validation fails below this. For a
                                         # frozen historical extract set it to the
                                         # exact row count by design (P1 lingcod =
                                         # 82); a loose floor is for files that grow.
   date_range: {start: 1960, end: null}  # null end = tracks the moving source
 
-  # Nulls that are correct and must not fail validation. P1 found a real one:
-  # lingcod's F/Fmsy is null in its terminal assessment year, which a blanket
-  # no-nulls rule would reject. Declaring them makes the invariant tests
-  # (Phase 5) enforceable without hand-waving.
+  # Nulls (#121). Two forms, defaulted by `class`:
+  #
+  # `known_nulls: {column: N}` — an EXACT count; `n != N` fails. Required for
+  # every nulled column of a `verbatim` or `constructed` file (P1 found a real
+  # one: lingcod's F/Fmsy is null in its terminal assessment year, which a
+  # blanket no-nulls rule would reject). A dynamic snapshot may also declare
+  # an exact count for a column whose nulls are stable by construction
+  # (gdp_growth_annual's YR1960: growth is undefined in the first year).
+  # There is deliberately NO ceiling form ({max: N}): a ceiling silently
+  # accepts a column emptying out below the bound, which is the failure the
+  # check exists to catch.
   known_nulls: {}                       # e.g. {F_over_Fmsy: 1}
+  # `nulls:` — a PLACEMENT rule, required for `dynamic-snapshot` because its
+  # counts move on every refresh while WHERE a null may sit does not. It
+  # mirrors what both dynamic builders already assert by hand:
+  #   along:   rows | columns   which way a series runs — down a time index
+  #                             (one series per column) or along a run of
+  #                             pattern columns (one series per row)
+  #   leading: true | false     empty before a series' first observation
+  #   recent:  N                the newest N periods may be unpublished
+  #   ended:   [series, ...]    series that stopped; empty after their last
+  #                             observation (a historical FRED series)
+  #   inner:   {series: [P, ...] | {sparse_until: P}}
+  #                             accepted holes INSIDE a series: listed
+  #                             periods, or an irregular early history
+  # A null anywhere else fails. See us_business_cycle_monthly.csv.yml for the
+  # full form and gdp_growth_annual.csv.yml for the wide-file form.
+  # nulls: {along: columns, leading: true, recent: 2, ended: [], inner: {}}
+  #
+  # `known_nulls_total: N` is legal ONLY inside a `sheets:` entry read with
+  # `header: null` (assignat.xlsx, dette.xlsx): a positional read has no
+  # column names to count against, so an exact total is the only form. It is
+  # not a ceiling and not for named columns.
 
 # ---------------------------------------------------------------------------
 # Consumers — machine-readable, so a correction knows what to rebuild

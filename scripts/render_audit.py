@@ -1098,7 +1098,7 @@ def audit_rules() -> str:
          "lecture's wbgapi/yfinance sections) or when currency is the point. “The lecture "
          "needs series X” is not a reason — that's what snapshots are for."),
         ("Every live-API lecture gets a snapshot twin.",
-         "A refresh builder in data-lectures producing the snapshot (the business_cycle_data.csv "
+         "A refresh builder in data-lectures producing the snapshot (the gdp_growth_annual.csv "
          "pattern, already prototyped). Breakage becomes a one-line URL switch, and the WASM "
          "build always uses the twin — pyodide cannot reach the live APIs at all."),
         ("Prefer direct CSV endpoints over wrapper libraries.",

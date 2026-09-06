@@ -45,7 +45,7 @@ api:
   lecture-python-intro:business_cycle:pandas_datareader:
     series: UNRATE, USREC, M0892AUSM156SNBR, UMCSENT, CPILFESL, INDPRO
     pedagogy: mixed
-    note: snapshot pipeline already exists (data-lectures business_cycle_data.csv) but is unadopted
+    note: snapshot pipeline already exists (data-lectures gdp_growth_annual.csv, business_cycle_data.csv until 2026-09-07) but is unadopted
   lecture-python-intro:commod_price:yfinance:
     series: CT=F
     pedagogy: incidental

@@ -103,7 +103,7 @@ schema:
     - {name: rank, dtype: float64, description: annual-list rank}
     - {name: worth, dtype: float64, description: annual-list net worth (USD millions)}
     - {name: title, dtype: str, description: job title}
-    - {name: government, dtype: str, description: "whether the wealth is government-linked, as the string True/False"}
+    - {name: government, dtype: bool, description: "whether the wealth is government-linked; True/False in the bytes, which pandas reads as bool — a nullable bool column comes back as `object` under a default read and the validator compares by family (#122)"}
     - {name: pay, dtype: float64, description: reported pay (USD millions)}
     - {name: managementAssets, dtype: float64, description: assets under management (USD millions)}
   row_count_floor: 2935         # frozen extract — exact row count by design

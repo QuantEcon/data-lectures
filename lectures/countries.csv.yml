@@ -58,23 +58,23 @@ schema:
   format: csv
   delimiter: ";"                 # read with pd.read_csv(url, sep=';')
   columns:
-    - {name: Country (en), dtype: string, description: country name in English (used by the lecture)}
-    - {name: Country (de), dtype: string, description: country name in German}
-    - {name: Country (local), dtype: string, description: local-language country name}
-    - {name: Country code, dtype: string, description: ISO 3166 alpha-2 code}
-    - {name: Continent, dtype: string, description: continent (used by the lecture)}
-    - {name: Capital, dtype: string, description: capital city}
+    - {name: Country (en), dtype: str, description: country name in English (used by the lecture)}
+    - {name: Country (de), dtype: str, description: country name in German}
+    - {name: Country (local), dtype: str, description: local-language country name}
+    - {name: Country code, dtype: str, description: ISO 3166 alpha-2 code}
+    - {name: Continent, dtype: str, description: continent (used by the lecture)}
+    - {name: Capital, dtype: str, description: capital city}
     - {name: Population, dtype: int64, description: population count}
     - {name: Area, dtype: int64, description: land area (km²)}
     - {name: Coastline, dtype: int64, description: coastline length (km)}
-    - {name: Government form, dtype: string, description: form of government}
-    - {name: Currency, dtype: string, description: currency name}
-    - {name: Currency code, dtype: string, description: ISO 4217 currency code}
-    - {name: Dialing prefix, dtype: string, description: international dialing prefix (e.g. "1-684" for territories)}
+    - {name: Government form, dtype: str, description: form of government}
+    - {name: Currency, dtype: str, description: currency name}
+    - {name: Currency code, dtype: str, description: ISO 4217 currency code}
+    - {name: Dialing prefix, dtype: str, description: international dialing prefix (e.g. "1-684" for territories)}
     - {name: Birthrate, dtype: float64, description: births per 1000}
     - {name: Deathrate, dtype: float64, description: deaths per 1000}
     - {name: Life expectancy, dtype: float64, description: life expectancy (years)}
-    - {name: Url, dtype: string, description: source page on laenderdaten.info}
+    - {name: Url, dtype: str, description: source page on laenderdaten.info}
   row_count_floor: 248           # frozen historical extract -- exact row count
   # date_range omitted: country-attribute table, no time dimension.
   known_nulls:

@@ -63,15 +63,17 @@ schema:
   columns:
     - {name: economy, dtype: str, description: "ISO3 code — wbgapi's index, written as the CSV's first column; read it with index_col=0"}
     - {name: Country, dtype: str, description: "country name, the label column wbgapi adds with labels=True"}
-    - {pattern: 'YR\d{4}', dtype: float64, description: "domestic credit to the private sector, % of GDP, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value in [0, 400]"}
+    - {pattern: 'YR(\d{4})', dtype: float64, description: "domestic credit to the private sector, % of GDP, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value in [0, 400]"}
   row_count_floor: 1            # exact by construction: one economy
   # `end` is stamped by scripts/snapshots.py on every refresh.
   date_range: {start: 1960, end: 2025}
   # The newest year may be unpublished (a trailing null); nothing else.
-  # validate() asserts placement, not a count, which is why this is a ceiling.
-  known_nulls_total: 2
+  # Placement rule (#121): validate() asserts where a null may sit, not a
+  # count — before the first observation or in the newest two years.
+  known_nulls: {}
+  nulls: {along: columns, leading: true, recent: 2, ended: [], inner: {}}
 
-# None yet — see business_cycle_data.csv.yml (QuantEcon/lecture-wasm#70).
+# None yet — see gdp_growth_annual.csv.yml (QuantEcon/lecture-wasm#70).
 consumers: []
 
 builder: builders/business_cycle.py
