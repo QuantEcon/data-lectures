@@ -5,7 +5,7 @@ three annual tables from WDI, each in the wide layout wbgapi emits (one row
 per economy, ISO3 code as the index, country name as `Country`, one `YR<year>`
 column per year from 1960):
 
-    business_cycle_data.csv       NY.GDP.MKTP.KD.ZG  real GDP growth, %, for
+    gdp_growth_annual.csv         NY.GDP.MKTP.KD.ZG  real GDP growth, %, for
                                   the nine economies the lecture plots (the
                                   union of its two selections)
     unemployment_rate_annual.csv  SL.UEM.TOTL.NE.ZS  unemployment, % of labour
@@ -14,9 +14,10 @@ column per year from 1960):
                                   private sector, % of GDP, GBR
 
 One builder, three files: the "builder writes a set" precedent
-(builders/README.md). The two new filenames are PROVISIONAL pending the naming
-policy (QuantEcon/data-lectures#113); they are free to change while no lecture
-reads them.
+(builders/README.md). Filenames follow the naming policy settled 2026-09-07
+(QuantEcon/data-lectures#113): the variable, then frequency where the same
+variable exists at another frequency. gdp_growth_annual.csv was
+business_cycle_data.csv until then, renamed while nothing read it.
 
 These are DYNAMIC SNAPSHOTS (`cadence: annual`). The World Bank revises this
 data continuously -- national-accounts rebasing moved GDP growth by up to 1.5
@@ -69,7 +70,7 @@ MAX_TRAILING_YEARS = 2       # the newest years may be unpublished for a series
 # window in the series' own units (GDP growth measured at 1.5 pp routine;
 # the credit ratio is rebased in larger steps).
 TABLES = [
-    {'file': 'business_cycle_data.csv', 'series': 'NY.GDP.MKTP.KD.ZG',
+    {'file': 'gdp_growth_annual.csv', 'series': 'NY.GDP.MKTP.KD.ZG',
      'economies': ['USA', 'ARG', 'GBR', 'GRC', 'JPN', 'CHN', 'DEU', 'BRA', 'MEX'],
      'band': (-50, 50), 'min_abs_max': 1.0, 'max_revision': 5.0,
      'first_year_null': True},       # growth is undefined in the series' first year

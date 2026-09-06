@@ -67,7 +67,7 @@ integrity:
 schema:
   format: csv
   columns:
-    - {name: sex, dtype: object, description: "male or female (NHANES RIAGENDR)"}
+    - {name: sex, dtype: str, description: "male or female (NHANES RIAGENDR)"}
     - {name: height_cm, dtype: float64, description: standing height in centimetres (NHANES BMXHT)}
   row_count_floor: 10478
   date_range: {start: 2015, end: 2018}

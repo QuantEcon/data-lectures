@@ -1,8 +1,13 @@
-# Manifest for business_cycle_data.csv — the repo's one DYNAMIC SNAPSHOT, and
+# Manifest for gdp_growth_annual.csv — the repo's first DYNAMIC SNAPSHOT, and
 # the prototype for the P4 pilot (PLAN Phase 8: a maintained snapshot twin for
 # lectures that fetch live API data). The file has sat here since the Feb 2025
 # migration (QuantEcon/data b857c5c, then the 2026-07-16 flatten in #10)
 # without a manifest; this one closes the Phase 6 backfill.
+#
+# Named business_cycle_data.csv until 2026-09-07, when the naming policy
+# (QuantEcon/data-lectures#113) settled: a file is named for the variable it
+# holds, not the lecture that first read it. Renamed while `consumers` was
+# still empty, which is the only time a rename is free (policy rule 6).
 #
 # Read this before refreshing: the World Bank REVISES this series. A re-run of
 # the builder is not expected to reproduce these bytes and validate() does not
@@ -11,7 +16,7 @@
 # summary (PLAN Phase 5, refresh-as-PR), not a correction and not a new
 # vintage under a new name.
 
-filename: business_cycle_data.csv
+filename: gdp_growth_annual.csv
 title: World Bank GDP growth (annual %) — nine economies, 1960 onward
 description: >
   Annual real GDP growth (percent, constant local currency) for the nine
@@ -115,7 +120,7 @@ schema:
   columns:
     - {name: economy, dtype: str, description: "ISO3 code — wbgapi's index, written as the CSV's first column; the lecture reads it with index_col=0"}
     - {name: Country, dtype: str, description: "country name, the label column wbgapi adds with labels=True"}
-    - {pattern: 'YR\d{4}', dtype: float64, description: "annual real GDP growth, percent, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value at ±50 and requires at least one |value| ≥ 1, so a units switch cannot ship; the observed range is deliberately not written here, since prose in a dynamic snapshot's manifest must not embed facts a refresh can change"}
+    - {pattern: 'YR(\d{4})', dtype: float64, description: "annual real GDP growth, percent, one column per year on an unbroken grid from YR1960 to the newest year the source carries (`schema.date_range.end`). The builder's validate() bounds every value at ±50 and requires at least one |value| ≥ 1, so a units switch cannot ship; the observed range is deliberately not written here, since prose in a dynamic snapshot's manifest must not embed facts a refresh can change"}
   row_count_floor: 9            # exact by construction: the builder asks for
                                 # nine economies and validate() asserts the
                                 # set. Columns, not rows, are what grow.
@@ -125,10 +130,15 @@ schema:
   date_range: {start: 1960, end: 2025}
 
   # Growth is undefined in the series' first year, so YR1960 is empty for all
-  # nine economies. validate() additionally allows a null only before an
-  # economy's first observation or in the newest two years, never inside a
-  # series — none of either exists in this vintage.
+  # nine economies — stable by construction, so declared as an exact count.
   known_nulls: {YR1960: 9}
+  # Placement rule (#121, 2026-09-07): a dynamic snapshot declares WHERE nulls
+  # may sit, not how many. Series run along the YR<year> columns, one per
+  # economy row; a null is allowed before an economy's first observation or
+  # in the newest two years (the World Bank publishes year T from mid T+1),
+  # never inside a series. This is what validate() asserts today
+  # (MAX_TRAILING_YEARS = 2); the shared validator (#119) reads it from here.
+  nulls: {along: columns, leading: true, recent: 2, ended: [], inner: {}}
 
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild

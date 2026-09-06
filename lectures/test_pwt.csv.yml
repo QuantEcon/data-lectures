@@ -126,8 +126,8 @@ integrity:
 schema:
   format: csv
   columns:
-    - {name: country, dtype: object, description: "country name, 8 unique — Argentina, Australia, India, Israel, Malawi, South Africa, United States, Uruguay"}
-    - {name: country isocode, dtype: object, description: "ISO 3166-1 alpha-3 code. The SPACE in this column name is load-bearing for the lectures, which demonstrate column selection on it"}
+    - {name: country, dtype: str, description: "country name, 8 unique — Argentina, Australia, India, Israel, Malawi, South Africa, United States, Uruguay"}
+    - {name: country isocode, dtype: str, description: "ISO 3166-1 alpha-3 code. The SPACE in this column name is load-bearing for the lectures, which demonstrate column selection on it"}
     - {name: year, dtype: int64, description: "2000 in every row"}
     - {name: POP, dtype: float64, description: "population, thousands. Observed 3219.793-1006300.297"}
     - {name: XRAT, dtype: float64, description: "exchange rate, national currency per US dollar. Observed 0.9995-59.543808"}

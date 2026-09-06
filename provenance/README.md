@@ -16,7 +16,7 @@ failing every rule a dataset must meet.
 
 | File | Written by | What it is |
 | --- | --- | --- |
-| `business_cycle_metadata.md` | `builders/business_cycle.py` | `wb.series.metadata.get('NY.GDP.MKTP.KD.ZG')` — the World Bank's own record for the series: definition, source, periodicity and the `License_Type: CC BY-4.0` / `License_URL` fields that `lectures/business_cycle_data.csv.yml` cites |
+| `business_cycle_metadata.md` | `builders/business_cycle.py` | `wb.series.metadata.get('NY.GDP.MKTP.KD.ZG')` — the World Bank's own record for the series: definition, source, periodicity and the `License_Type: CC BY-4.0` / `License_URL` fields that `lectures/gdp_growth_annual.csv.yml` cites |
 | `business_cycle_info.md` | `builders/business_cycle.py` | `wb.series.info(q='GDP growth')` — the fuzzy-search listing the consuming lecture teaches; kept because the builder reproduces the lecture's own query, not because anything reads it |
 
 Files here carry no manifest and no hash gate. Runs of blank lines in the

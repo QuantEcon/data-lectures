@@ -60,7 +60,7 @@ schema:
     - {name: bedrooms, dtype: int64, description: bedrooms above grade}
     - {name: living_area_sqft, dtype: int64, description: above-grade living area in square feet}
     - {name: year_built, dtype: int64, description: year of original construction}
-    - {name: neighborhood, dtype: object, description: neighborhood within Ames city limits}
+    - {name: neighborhood, dtype: str, description: neighborhood within Ames city limits}
   row_count_floor: 2930
   date_range: {start: 2006, end: 2010}
   known_nulls: {}
