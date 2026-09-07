@@ -7,6 +7,8 @@ dynamic builders run.
 
   python scripts/validate_datasets.py             # everything under lectures/
   python scripts/validate_datasets.py lectures/gdp_growth_annual.csv.yml ...
+  python scripts/validate_datasets.py --builders   # each dynamic builder's own
+                                                  # validate() on the committed bytes
 
 Two passes per manifest:
 
@@ -91,8 +93,44 @@ def conformance(m: dict, path: pathlib.Path) -> list[str]:
     return errs
 
 
+def builder_layer() -> int:
+    """The builder-layer half: every dynamic snapshot's own validate() on its
+    COMMITTED bytes, no network, through the builder's check_committed()
+    (#128 -- a builder check that broke under pandas 3 while the shared
+    layer stayed green, unseen until a validator dry-ran the builder)."""
+    import importlib
+    failed = 0
+    seen = set()          # a set-writing builder is named by several manifests; run it once
+    for path in sorted(LECTURES.glob('*.yml')):
+        m = yaml.safe_load(path.read_text(encoding='utf-8')) or {}
+        if m.get('class') != 'dynamic-snapshot' or m.get('builder_status') != 'committed':
+            continue
+        if m['builder'] in seen:
+            continue
+        seen.add(m['builder'])
+        mod_name = pathlib.Path(m['builder']).stem
+        try:
+            mod = importlib.import_module(mod_name)
+            fn = getattr(mod, 'check_committed', None)
+            if fn is None:
+                raise AttributeError(f'{m["builder"]} has no check_committed() (see builders/_template.py)')
+            for f in fn():
+                print(f'{"ok  builder layer":70s} {f}  ({m["builder"]})')
+        except Exception as e:
+            failed += 1
+            print(f'::error file={m["builder"]}::{type(e).__name__}: {e}')
+            print(f'FAIL {m["filename"]}: builder layer')
+    return failed
+
+
 def main(argv: list[str]) -> int:
-    paths = [pathlib.Path(a) for a in argv] or sorted(LECTURES.glob('*.yml'))
+    if argv and argv[0] == '--builders':
+        n = builder_layer()
+        print(f'\nbuilder layer: {"all green" if not n else f"{n} builder(s) failed"}')
+        return 1 if n else 0
+    # Resolve the arguments: REPO is absolute and relative_to() does not
+    # resolve, so a relative path crashed the failure report (#129).
+    paths = [pathlib.Path(a).resolve() for a in argv] or sorted(LECTURES.glob('*.yml'))
     failed = 0
     skipped_formats: dict[str, int] = {}
     for path in paths:

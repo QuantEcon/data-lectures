@@ -16,10 +16,13 @@
 # consumed-file-check.yml stays beside this as the byte-integrity (sha256) and
 # catalog-freshness gate; this job is the schema half PLAN Phase 5 promised.
 #
-# pandas is pinned to requirements.txt's version (2.3.3), deliberately one
-# major behind the lectures' anaconda=2026.07 (pandas 3): the validator
-# compares dtypes by family precisely so it is green on both, and running the
-# older one here is the standing check that it stays so.
+# Runs as a matrix over BOTH pandas majors -- requirements.txt's 2.3.3 (the
+# canary's environment) and 3.x (the lectures' anaconda=2026.07) -- and runs
+# BOTH validation layers: the shared manifest-driven one, and each dynamic
+# builder's own validate() on its committed bytes (`--builders`, no network).
+# The 2.3.3-only, shared-layer-only first version claimed to be "the standing
+# check that it stays green on both" and was not: business_cycle.py's band
+# check failed under pandas 3 for a week without anything noticing (#128).
 
 name: validate-datasets
 
@@ -31,6 +34,11 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pandas: ["2.3.3", "3"]
+    name: validate (pandas ${{ matrix.pandas }})
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,5 +46,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pandas==2.3.3 PyYAML==6.0.3
+      # wbgapi: builders/business_cycle.py imports it at module level, and the
+      # builder layer imports the module (it never calls the network here).
+      - run: pip install "pandas==${{ matrix.pandas }}.*" PyYAML==6.0.3 wbgapi==1.0.12
+        if: matrix.pandas != '3'
+      - run: pip install "pandas>=3,<4" PyYAML==6.0.3 wbgapi==1.0.12
+        if: matrix.pandas == '3'
+      - run: python -c "import pandas; print('pandas', pandas.__version__)"
       - run: python scripts/validate_datasets.py
+      - run: python scripts/validate_datasets.py --builders
