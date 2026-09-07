@@ -7,6 +7,8 @@ dynamic builders run.
 
   python scripts/validate_datasets.py             # everything under lectures/
   python scripts/validate_datasets.py lectures/gdp_growth_annual.csv.yml ...
+  python scripts/validate_datasets.py --builders   # each dynamic builder's own
+                                                  # validate() on the committed bytes
 
 Two passes per manifest:
 
@@ -91,8 +93,53 @@ def conformance(m: dict, path: pathlib.Path) -> list[str]:
     return errs
 
 
+def builder_layer() -> int:
+    """The builder-layer half: every dynamic snapshot's own validate() on its
+    COMMITTED bytes, no network, through the builder's check_committed()
+    (#128 -- a builder check that broke under pandas 3 while the shared
+    layer stayed green, unseen until a validator dry-ran the builder)."""
+    import importlib
+    failed = 0
+    seen = set()          # a set-writing builder is named by several manifests; run it once
+    for path in sorted(LECTURES.glob('*.yml')):
+        m = yaml.safe_load(path.read_text(encoding='utf-8')) or {}
+        if m.get('class') != 'dynamic-snapshot' or m.get('builder_status') != 'committed':
+            continue
+        # A malformed manifest (no builder, no filename) is annotated on the
+        # sidecar, never a bare KeyError -- the conformance pass catches it
+        # first in CI, but --builders also runs on its own (Copilot on #131).
+        builder, filename = m.get('builder'), m.get('filename') or path.name[:-4]
+        sidecar = path.relative_to(REPO)
+        if not builder:
+            failed += 1
+            print(f'::error file={sidecar}::dynamic snapshot with builder_status committed but no builder path')
+            print(f'FAIL {filename}: builder layer')
+            continue
+        if builder in seen:
+            continue
+        seen.add(builder)
+        try:
+            mod = importlib.import_module(pathlib.Path(builder).stem)
+            fn = getattr(mod, 'check_committed', None)
+            if fn is None:
+                raise AttributeError(f'{builder} has no check_committed() (see builders/_template.py)')
+            for f in fn():
+                print(f'{"ok  builder layer":70s} {f}  ({builder})')
+        except Exception as e:
+            failed += 1
+            print(f'::error file={builder}::{type(e).__name__}: {e}')
+            print(f'FAIL {filename}: builder layer')
+    return failed
+
+
 def main(argv: list[str]) -> int:
-    paths = [pathlib.Path(a) for a in argv] or sorted(LECTURES.glob('*.yml'))
+    if argv and argv[0] == '--builders':
+        n = builder_layer()
+        print(f'\nbuilder layer: {"all green" if not n else f"{n} builder(s) failed"}')
+        return 1 if n else 0
+    # Resolve the arguments: REPO is absolute and relative_to() does not
+    # resolve, so a relative path crashed the failure report (#129).
+    paths = [pathlib.Path(a).resolve() for a in argv] or sorted(LECTURES.glob('*.yml'))
     failed = 0
     skipped_formats: dict[str, int] = {}
     for path in paths:

@@ -85,7 +85,10 @@ def validate(frame, previous=None):
     raw = frame.reset_index() if frame.index.name else frame
     prev_raw = previous.reset_index() if previous is not None and previous.index.name else previous
     shared = validate_schema(raw, manifest, prev_raw)
-    # builder-specific: bands / grid / recency ...
+    # builder-specific: bands / grid / recency ... Two idioms that bit once:
+    # call .dropna() BEFORE a band check (pandas 3's stack() keeps NaN, #128),
+    # and never compare against a dtype string -- the shared validator already
+    # did that by family (#122).
     raise NotImplementedError
     summary = {
         'dataset': OUT_FILE,
@@ -99,6 +102,16 @@ def validate(frame, previous=None):
         _check(shared['overlap']['max_abs_change'] <= MAX_REVISION,
                f'revision {shared["overlap"]["max_abs_change"]} exceeds {MAX_REVISION}')
     return summary
+
+
+def check_committed():
+    """Builder-layer validation of the COMMITTED file(s), no network. Called by
+    scripts/validate_datasets.py --builders on every PR, under both pandas
+    majors, so a builder-specific check that breaks on a pandas change fails
+    the PR rather than the next canary. Yield each file validated."""
+    frame = pd.read_csv(os.path.join(PUBLISHED_DIR, OUT_FILE), index_col=0)
+    validate(frame)
+    yield OUT_FILE
 
 
 def _atomic_write(path, text):

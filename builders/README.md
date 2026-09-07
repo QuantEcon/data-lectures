@@ -39,7 +39,9 @@ and measures the overlap window against the previous vintage
 calls `validate(frame.reset_index(), manifest, previous)` and adds only what
 a schema cannot say — value bands, a grid, recency, the revision *bound*. The
 same function runs over every committed CSV on every PR
-(`scripts/validate_datasets.py`, `validate-datasets.yml`). One
+(`scripts/validate_datasets.py`, `validate-datasets.yml`), and each dynamic
+builder's `check_committed()` runs its own layer there too, under both pandas
+majors, with no network. One
 builder per **source** for a lecture's data, writing a composite file where
 the lecture reads the series together (decided 2026-09-01 on #26).
 

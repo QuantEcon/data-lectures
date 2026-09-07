@@ -146,6 +146,14 @@ def validate(frame, previous=None):
     return summary
 
 
+def check_committed():
+    """Builder-layer validation of the COMMITTED file, no network (see
+    scripts/validate_datasets.py --builders)."""
+    frame = pd.read_csv(os.path.join(PUBLISHED_DIR, OUT_FILE), index_col=0, parse_dates=True)
+    validate(frame)
+    yield OUT_FILE
+
+
 def _atomic_write(path, text):
     tmp = path + '.tmp'
     with open(tmp, 'w') as f:

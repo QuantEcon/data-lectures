@@ -141,7 +141,10 @@ def validate(table, frame, previous=None):
     values = frame[year_cols]
     _check(values.abs().max().max() >= table['min_abs_max'], f'{name}: values look like ratios')
     lo, hi = table['band']
-    _check(values.stack().between(lo, hi).all(), f'{name}: value out of band [{lo}, {hi}]')
+    # .dropna() is load-bearing: pandas 3's stack() keeps NaN (no dropna= any
+    # more), and the structural nulls the manifest places would fail between().
+    # Found by the #127 validation (#128).
+    _check(values.stack().dropna().between(lo, hi).all(), f'{name}: value out of band [{lo}, {hi}]')
     _check(years[-1] >= dt.date.today().year - MAX_STALENESS_YEARS, f'{name}: newest year is {years[-1]}')
     if table['first_year_null']:
         _check(values[year_cols[0]].isnull().all(), f'{name}: a value in {year_cols[0]} -- growth is undefined in the first year')
@@ -165,6 +168,17 @@ def validate(table, frame, previous=None):
               f'new economies {ov["new_economies"] or "none"}')
         _check(worst <= table['max_revision'], f'{name}: revision of {worst:.3f} exceeds {table["max_revision"]}')
     return summary
+
+
+def check_committed():
+    """Run this builder's validate() on the COMMITTED files, no network — the
+    builder-layer half of PR validation (scripts/validate_datasets.py
+    --builders), so a pandas or builder change that would fail the next
+    canary fails the PR that introduces it instead (#128)."""
+    for table in TABLES:
+        frame = pd.read_csv(os.path.join(PUBLISHED_DIR, table['file']), index_col=0)
+        validate(table, frame)
+        yield table['file']
 
 
 def _atomic_write(path, text):
