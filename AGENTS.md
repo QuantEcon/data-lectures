@@ -174,7 +174,8 @@ The generated dashboard (`scripts/build_audit.py`, [#20](https://github.com/Quan
 ```
 lectures/            # the published tree — flat, live on Pages; read via raw URLs
                      #   today, qeld.url() once the package ships (PLAN-QELD-PACKAGE.md)
-                     #   41 datasets, 41 manifests (complete since 2026-09-01).
+                     #   44 datasets, 44 manifests (complete since 2026-09-01;
+                     #   the business_cycle set added three on 2026-09-01, #114).
                      #   Manifests are sidecars: <filename>.yml
 builders/            # one builder per published dataset — NOT published
                      #   builders/<stem>.py builds lectures/<stem>.<ext>
@@ -199,3 +200,7 @@ AGENTS.md            # this file
 The Feb 2025 consumer-keyed layout (`lecture-python-intro/{static,dynamic,scripts}/`) was flattened into this tree on 2026-07-16, while nothing referenced the repo.
 
 **That freedom is now spent — the repo is live.** The first repoint merged on 2026-07-17 (P1: `msy_fishery` in lecture-python-intro reads `lectures/lingcod_msy_recovery.csv` from `raw/main`), so every move or rename in `lectures/` is a breaking change for a live lecture build. Treat published filenames as an API: corrections in place, new vintages under new names, and check `consumers` before touching anything. Enforced by the `protect-main` ruleset (PRs only, no force-push, and the `consumed-files` check is **required** — a PR that breaks a consumed file cannot merge).
+
+**The git history is complete — it does not begin at [#57](https://github.com/QuantEcon/data-lectures/pull/57).** The root commit is `77ece40` ("Initial commit", 2025-02-09) and `main` carried 104 commits at `47017ea` on 2026-09-07, so the Feb 2025 migration from `QuantEcon/data` (`c0adb7a`) and the 2026-07-16 flatten ([#10](https://github.com/QuantEcon/data-lectures/pull/10), `52dbb89`) are both in git, and `git log --follow` crosses them. A clone reporting a **single root at `931d626` with 50 commits** is shallow, not authoritative: `git clone --depth=50` at `818811b` reproduces that signature exactly, because a shallow boundary hides its parents and so is indistinguishable from a root. Run `git rev-parse --is-shallow-repository` before concluding history is missing — the 2026-09-07 validation did not, and refuted a checklist box on the artefact.
+
+**`check_consumed_files.py` hashes every file whose manifest records an `integrity.sha256`, with or without `consumers`.** That is the deliberate rekeying in [#56](https://github.com/QuantEcon/data-lectures/pull/56) — manifests land ahead of their repoints, so keying the hash on `consumers` made the one PR that introduces new bytes the one PR that never verified them. The consequence for a validation checklist is that `consumed-files` goes red for **any** change to a published file's bytes: measured on [#130](https://github.com/QuantEcon/data-lectures/pull/130), a manifest-only mutation left it green with only `validate` red, while appending a column to `gdp_growth_annual.csv` turned both red. A check that wants the schema gate isolated must mutate a manifest, not the data.
