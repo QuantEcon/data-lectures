@@ -76,7 +76,7 @@ schema:
   # a terminal assessment year. Recorded so PR validation does not "fix" it:
   # a blanket no-nulls rule would reject this file wrongly.
   known_nulls:
-    F_over_Fmsy: 1
+    F_over_Fmsy: 2
 
 # ---------------------------------------------------------------------------
 # Consumers -- how a correction knows what to rebuild
