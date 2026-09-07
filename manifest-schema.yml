@@ -20,7 +20,11 @@
 # which doubles as the public dataset registry.
 #
 # COMPLETENESS: this file documents the fields that recur across the corpus. It
-# is not a closed schema and nothing validates against it — a dataset whose
+# is not a closed schema, but since 2026-09-07 the `schema` block IS validated:
+# scripts/validate_datasets.py (run by .github/workflows/validate-datasets.yml
+# on every PR) checks every manifest's conformance to the rules recorded below
+# and, for CSVs, that the committed bytes satisfy their own schema block, via
+# builders/_validate.py (#119). Provenance fields stay descriptive — a dataset whose
 # provenance needs a field not shown here should add one rather than distort
 # itself to fit, and a field that earns its place in several manifests should
 # then be documented back here. Two such extensions are already in wide use and
@@ -238,6 +242,9 @@ schema:
   # blanket no-nulls rule would reject). A dynamic snapshot may also declare
   # an exact count for a column whose nulls are stable by construction
   # (gdp_growth_annual's YR1960: growth is undefined in the first year).
+  # A column with no entry must have no nulls -- every column of a frozen
+  # file, and the LABEL columns of a dynamic snapshot (economy, Country, DATE:
+  # the placement rule below governs only its series).
   # There is deliberately NO ceiling form ({max: N}): a ceiling silently
   # accepts a column emptying out below the bound, which is the failure the
   # check exists to catch.

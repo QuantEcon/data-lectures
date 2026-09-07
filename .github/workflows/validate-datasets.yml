@@ -1,0 +1,42 @@
+# PR validation (PLAN Phase 5; QuantEcon/data-lectures#119): the manifest's
+# schema block is an executable contract, and this is where it executes on
+# every PR. Two passes, both in scripts/validate_datasets.py:
+#
+#   conformance  every manifest obeys manifest-schema.yml's rules -- canonical
+#                dtype names (#122), name-xor-pattern with one capture group
+#                (#120), exact known_nulls and a `nulls:` placement block on
+#                every dynamic snapshot (#121), known_nulls_total only inside
+#                header-less sheet reads
+#   bytes        every CSV's committed bytes satisfy its own schema block,
+#                through the same builders/_validate.py the dynamic builders
+#                run -- so a manifest that drifts from its file fails here
+#                before it can fail a refresh
+#
+# Non-CSV formats get the conformance pass only, and the log says so.
+# consumed-file-check.yml stays beside this as the byte-integrity (sha256) and
+# catalog-freshness gate; this job is the schema half PLAN Phase 5 promised.
+#
+# pandas is pinned to requirements.txt's version (2.3.3), deliberately one
+# major behind the lectures' anaconda=2026.07 (pandas 3): the validator
+# compares dtypes by family precisely so it is green on both, and running the
+# older one here is the standing check that it stays so.
+
+name: validate-datasets
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false          # lectures/ is plain git; a pointer here should fail (see consumed-file-check.yml)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas==2.3.3 PyYAML==6.0.3
+      - run: python scripts/validate_datasets.py

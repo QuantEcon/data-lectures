@@ -1,6 +1,8 @@
 # Go-live guardrail (PLAN Phase 5): a PR must not break a file a live lecture
-# consumes. The narrowest possible check — full PR validation (manifest schema,
-# dtypes, invariant tests) comes later in Phase 5 and will subsume this job.
+# consumes. This job is the byte-integrity (sha256) and catalog-freshness gate;
+# its sibling validate-datasets.yml (2026-09-07, #119) is the schema gate —
+# manifest conformance and per-dataset invariants. Together they are the "PR
+# validation" Phase 5 promised; neither subsumes the other.
 
 name: consumed-file-check
 

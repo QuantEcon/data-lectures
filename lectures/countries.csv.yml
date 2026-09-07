@@ -79,6 +79,12 @@ schema:
   # date_range omitted: country-attribute table, no time dimension.
   known_nulls:
     Capital: 248                 # Capital column is empty throughout this export
+    Country code: 1              # NOT a null in the bytes: Namibia's ISO alpha-2
+                                 # code is the string "NA", which a default
+                                 # pd.read_csv parses as missing. The schema
+                                 # describes a default read (#122), so it is
+                                 # declared; a lecture that needs Namibia's code
+                                 # must pass keep_default_na=False.
     Country (local): 3
     Currency: 1
     Currency code: 1

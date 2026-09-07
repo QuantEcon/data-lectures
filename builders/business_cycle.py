@@ -32,7 +32,8 @@ Nulls: WDI series start at different years per economy (UK and French
 unemployment begin in 1971 and 1970), GDP growth is undefined in 1960 for
 everyone, and the newest year may not be published yet for every series. So
 the rule is structural, not a count: a null is allowed only BEFORE an
-economy's first observation or in the newest MAX_TRAILING_YEARS, never inside
+economy's first observation or in the newest years the manifest's `nulls.recent`
+allows, never inside
 the series. A gap opening mid-series fails the refresh.
 
 Two provenance dumps (the GDP series' metadata, where the CC BY-4.0 licence
@@ -50,6 +51,9 @@ import re
 import sys
 
 import pandas as pd
+import yaml
+
+from _validate import ValidationError, validate as validate_schema
 import wbgapi as wb
 
 CURRENT_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -62,7 +66,7 @@ INFO_FILE = 'business_cycle_info.md'
 FIRST_YEAR = 1960
 YEAR_COL = re.compile(r'^YR(\d{4})$')
 MAX_STALENESS_YEARS = 2
-MAX_TRAILING_YEARS = 2       # the newest years may be unpublished for a series
+# (the newest-years allowance is `nulls.recent` in each manifest, read by _validate)
 
 # One entry per published file. `economies` is the lecture's selection (the
 # union of every call that reads the series); `band` is the unit sanity check
@@ -83,8 +87,9 @@ TABLES = [
 ]
 
 
-class ValidationError(Exception):
-    """The fetched data broke the published contract -- exit code 2."""
+def _manifest(file):
+    with open(os.path.join(PUBLISHED_DIR, file + '.yml')) as f:
+        return yaml.safe_load(f)
 
 
 def _check(condition, message):
@@ -115,68 +120,49 @@ def _years(frame):
 
 
 def validate(table, frame, previous=None):
+    """Two layers. The manifest's schema block is the spec for columns, dtypes,
+    exact and placed nulls, the row floor, date_range and the overlap window
+    (builders/_validate.py, #119); this function adds only what a schema
+    cannot say -- the unbroken year grid, the fixed economy set, the value
+    band, recency, GDP growth's first-year rule, and the revision BOUND."""
     name = table['file']
-    _check(list(frame.columns[:1]) == ['Country'], f'{name}: first columns {list(frame.columns[:3])}')
+    _check(frame.index.name == 'economy', f'{name}: index is {frame.index.name!r}')
+    raw = frame.reset_index()                     # the RAW shape: economy is a column
+    prev_raw = previous.reset_index() if previous is not None else None
+    try:
+        shared = validate_schema(raw, _manifest(name), prev_raw)
+    except ValidationError as exc:
+        raise ValidationError(f'{name}: {exc}') from None
+
     years = _years(frame)
-    _check(len(years) == len(frame.columns) - 1, f'{name}: non-year column present')
-    _check(years[0] == FIRST_YEAR, f'{name}: first year {years[0]}')
     _check(years == list(range(FIRST_YEAR, years[-1] + 1)), f'{name}: gap in the year grid')
     year_cols = [f'YR{y}' for y in years]
-    _check(frame.index.name == 'economy', f'{name}: index is {frame.index.name!r}')
     _check(sorted(frame.index) == sorted(table['economies']), f'{name}: economies {sorted(frame.index)}')
-    _check(frame['Country'].notnull().all(), f'{name}: a Country label is missing')
     values = frame[year_cols]
-    _check(all(pd.api.types.is_float_dtype(values[c]) for c in year_cols), f'{name}: non-float year column')
     _check(values.abs().max().max() >= table['min_abs_max'], f'{name}: values look like ratios')
     lo, hi = table['band']
     _check(values.stack().between(lo, hi).all(), f'{name}: value out of band [{lo}, {hi}]')
     _check(years[-1] >= dt.date.today().year - MAX_STALENESS_YEARS, f'{name}: newest year is {years[-1]}')
-
-    # Nulls: only before an economy's first observation, or in the newest
-    # MAX_TRAILING_YEARS; never inside the series. GDP growth additionally has
-    # its first year empty for everyone.
-    trailing = set(year_cols[-MAX_TRAILING_YEARS:])
-    for econ in frame.index:
-        row = values.loc[econ]
-        first = row.first_valid_index()
-        _check(first is not None, f'{name}: {econ} has no data at all')
-        inner = row.loc[first:]
-        bad = [c for c in inner.index if pd.isnull(inner[c]) and c not in trailing]
-        _check(not bad, f'{name}: {econ} has a gap inside its series at {bad[:3]}')
-        if table['first_year_null']:
-            _check(pd.isnull(row[year_cols[0]]), f'{name}: {econ} has a value in {year_cols[0]}')
+    if table['first_year_null']:
+        _check(values[year_cols[0]].isnull().all(), f'{name}: a value in {year_cols[0]} -- growth is undefined in the first year')
 
     summary = {
         'dataset': name,
         'builder': os.path.relpath(os.path.abspath(__file__), REPO_ROOT),
-        'rows': int(frame.shape[0]),
-        'columns': int(frame.shape[1]),
-        'date_range': {'start': years[0], 'end': years[-1]},
+        'rows': shared['rows'],
+        'columns': shared['columns'],
+        'date_range': shared['date_range'],          # ints, from the pattern's capture group
         'overlap': None,
     }
     if previous is not None:
-        prev_years = [f'YR{y}' for y in _years(previous)]
-        _check(set(prev_years) <= set(year_cols), f'{name}: a year column disappeared')
-        common = [e for e in previous.index if e in frame.index]
-        _check(common, f'{name}: no economy in common with the previous snapshot')
-        old = previous.loc[common, prev_years]
-        new = frame.loc[common, prev_years]
-        _check(not (old.notnull() & new.isnull()).any().any(), f'{name}: a populated cell went empty')
-        diff = (old - new).abs()
-        changed = int((diff > 1e-9).sum().sum())
-        worst = float(diff.max().max()) if diff.notnull().any().any() else 0.0
-        summary['overlap'] = {
-            'window': f'{prev_years[0]}..{prev_years[-1]}',
-            'previous_end': _years(previous)[-1],
-            'cells_total': int(old.notnull().sum().sum()),
-            'cells_revised': changed,
-            'max_abs_change': round(worst, 4),
-            'new_columns': sorted(set(year_cols) - set(prev_years)),
-            'new_economies': sorted(set(frame.index) - set(previous.index)),
-        }
-        print(f'{name}: overlap {prev_years[0]}..{prev_years[-1]} over {common}: {changed} cells revised, '
-              f'max |change| {worst:.3f}; new columns {summary["overlap"]["new_columns"] or "none"}; '
-              f'new economies {summary["overlap"]["new_economies"] or "none"}')
+        ov = shared['overlap']
+        ov['previous_end'] = _years(previous)[-1]    # the int year the refresh PR title uses
+        ov['new_economies'] = sorted(set(frame.index) - set(previous.index))
+        summary['overlap'] = ov
+        worst = ov['max_abs_change']
+        print(f'{name}: overlap {ov["window"]}: {ov["cells_revised"]} of {ov["cells_total"]} cells revised, '
+              f'max |change| {worst:.3f}; new columns {ov["new_columns"] or "none"}; '
+              f'new economies {ov["new_economies"] or "none"}')
         _check(worst <= table['max_revision'], f'{name}: revision of {worst:.3f} exceeds {table["max_revision"]}')
     return summary
 
