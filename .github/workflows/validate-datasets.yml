@@ -17,7 +17,9 @@
 # catalog-freshness gate; this job is the schema half PLAN Phase 5 promised.
 #
 # Runs as a matrix over BOTH pandas majors -- requirements.txt's 2.3.3 (the
-# canary's environment) and 3.x (the lectures' anaconda=2026.07) -- and runs
+# canary's environment) and 3.0.5 (what anaconda=2026.07, the lectures' pin,
+# carries; bump it when that pin moves, never float it: a red here must be
+# reproducible a week later) -- and runs
 # BOTH validation layers: the shared manifest-driven one, and each dynamic
 # builder's own validate() on its committed bytes (`--builders`, no network).
 # The 2.3.3-only, shared-layer-only first version claimed to be "the standing
@@ -37,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pandas: ["2.3.3", "3"]
+        pandas: ["2.3.3", "3.0.5"]
     name: validate (pandas ${{ matrix.pandas }})
     steps:
       - uses: actions/checkout@v4
@@ -48,10 +50,7 @@ jobs:
           python-version: "3.12"
       # wbgapi: builders/business_cycle.py imports it at module level, and the
       # builder layer imports the module (it never calls the network here).
-      - run: pip install "pandas==${{ matrix.pandas }}.*" PyYAML==6.0.3 wbgapi==1.0.12
-        if: matrix.pandas != '3'
-      - run: pip install "pandas>=3,<4" PyYAML==6.0.3 wbgapi==1.0.12
-        if: matrix.pandas == '3'
+      - run: pip install pandas==${{ matrix.pandas }} PyYAML==6.0.3 wbgapi==1.0.12
       - run: python -c "import pandas; print('pandas', pandas.__version__)"
       - run: python scripts/validate_datasets.py
       - run: python scripts/validate_datasets.py --builders

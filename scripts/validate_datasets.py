@@ -105,21 +105,30 @@ def builder_layer() -> int:
         m = yaml.safe_load(path.read_text(encoding='utf-8')) or {}
         if m.get('class') != 'dynamic-snapshot' or m.get('builder_status') != 'committed':
             continue
-        if m['builder'] in seen:
+        # A malformed manifest (no builder, no filename) is annotated on the
+        # sidecar, never a bare KeyError -- the conformance pass catches it
+        # first in CI, but --builders also runs on its own (Copilot on #131).
+        builder, filename = m.get('builder'), m.get('filename') or path.name[:-4]
+        sidecar = path.relative_to(REPO)
+        if not builder:
+            failed += 1
+            print(f'::error file={sidecar}::dynamic snapshot with builder_status committed but no builder path')
+            print(f'FAIL {filename}: builder layer')
             continue
-        seen.add(m['builder'])
-        mod_name = pathlib.Path(m['builder']).stem
+        if builder in seen:
+            continue
+        seen.add(builder)
         try:
-            mod = importlib.import_module(mod_name)
+            mod = importlib.import_module(pathlib.Path(builder).stem)
             fn = getattr(mod, 'check_committed', None)
             if fn is None:
-                raise AttributeError(f'{m["builder"]} has no check_committed() (see builders/_template.py)')
+                raise AttributeError(f'{builder} has no check_committed() (see builders/_template.py)')
             for f in fn():
-                print(f'{"ok  builder layer":70s} {f}  ({m["builder"]})')
+                print(f'{"ok  builder layer":70s} {f}  ({builder})')
         except Exception as e:
             failed += 1
-            print(f'::error file={m["builder"]}::{type(e).__name__}: {e}')
-            print(f'FAIL {m["filename"]}: builder layer')
+            print(f'::error file={builder}::{type(e).__name__}: {e}')
+            print(f'FAIL {filename}: builder layer')
     return failed
 
 
