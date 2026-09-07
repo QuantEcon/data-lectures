@@ -45,8 +45,10 @@ import os
 import sys
 
 import pandas as pd
+import yaml
 
 from _fred import Fred
+from _validate import ValidationError, validate as validate_schema
 
 CURRENT_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(CURRENT_FILE_DIR)
@@ -60,12 +62,10 @@ COLUMNS = ['UNRATE', 'USREC', 'UMCSENT', 'CPILFESL', 'INDPRO', 'M0892AUSM156SNBR
 # is a different series.
 FIRST_OBS = {'UNRATE': '1948-01-01', 'USREC': START, 'UMCSENT': '1952-11-01',
              'CPILFESL': '1957-01-01', 'INDPRO': START, 'M0892AUSM156SNBR': '1929-04-01'}
-# Where each series becomes gap-free monthly. UMCSENT is quarterly/irregular
-# before 1978; the historical unemployment series ends in 1942-06.
-MONTHLY_FROM = {**{c: FIRST_OBS[c] for c in COLUMNS}, 'UMCSENT': '1978-01-01'}
-LAST_OBS = {'M0892AUSM156SNBR': '1942-06-01'}
-# Holes inside a series' monthly span that are known and accepted.
-KNOWN_HOLES = {'UNRATE': ['2025-10-01'], 'CPILFESL': ['2025-10-01']}
+# Where nulls may sit -- UMCSENT sparse before 1978-01, the historical series
+# ended 1942-06, the 2025-10 shutdown hole in UNRATE and CPILFESL -- is the
+# manifest's `nulls:` block (lectures/us_business_cycle_monthly.csv.yml), read
+# by the shared validator; it is not repeated here (#121).
 # Value bands: percent, 0/1, index levels.
 BANDS = {'UNRATE': (0, 30), 'USREC': (0, 1), 'UMCSENT': (20, 150),
          'CPILFESL': (20, 1000), 'INDPRO': (1, 300), 'M0892AUSM156SNBR': (0, 40)}
@@ -73,10 +73,6 @@ BANDS = {'UNRATE': (0, 30), 'USREC': (0, 1), 'UMCSENT': (20, 150),
 MAX_REVISION = {'UNRATE': 0.5, 'USREC': 0, 'UMCSENT': 5.0,
                 'CPILFESL': 3.0, 'INDPRO': 5.0, 'M0892AUSM156SNBR': 0}
 MAX_STALENESS_MONTHS = 3
-
-
-class ValidationError(Exception):
-    """The fetched data broke the published contract -- exit code 2."""
 
 
 def _check(condition, message):
@@ -102,28 +98,30 @@ def _months(index):
 
 
 def validate(frame, previous=None):
-    _check(list(frame.columns) == COLUMNS, f'columns {list(frame.columns)}')
+    """Two layers. The manifest's schema block (builders/_validate.py, #119)
+    checks the columns, dtype families, the exact null counts, the placement
+    of every null -- leading, the ended historical series, the declared holes,
+    UMCSENT's sparse early years -- the row floor and the date range; this
+    function adds what a schema cannot say: the first-of-month monthly grid,
+    each series' exact first observation, recency, value bands, USREC being
+    0/1 and complete, and the per-series revision BOUND."""
     _check(frame.index.name == 'DATE', f'index is {frame.index.name!r}')
+    raw = frame.reset_index()                    # the RAW shape: DATE is a column
+    prev_raw = previous.reset_index() if previous is not None else None
+    with open(os.path.join(PUBLISHED_DIR, OUT_FILE + '.yml')) as f:
+        manifest = yaml.safe_load(f)
+    shared = validate_schema(raw, manifest, prev_raw)
+
     _check(frame.index[0] == pd.Timestamp(START), f'starts {frame.index[0].date()}')
     _check(frame.index.is_monotonic_increasing and (frame.index.day == 1).all(), 'not first-of-month')
     _check((_months(frame.index).diff().dropna() == 1).all(), 'gap in the monthly grid')
     today = dt.date.today()
     age = (today.year * 12 + today.month) - (frame.index[-1].year * 12 + frame.index[-1].month)
     _check(age <= MAX_STALENESS_MONTHS, f'newest month is {frame.index[-1].date()}')
-
     for col in COLUMNS:
         s = frame[col]
-        first = pd.Timestamp(FIRST_OBS[col])
-        _check(s.loc[:first - pd.offsets.MonthBegin(1)].isnull().all() if first > frame.index[0] else True,
-               f'{col}: observed before its first observation {first.date()}')
-        _check(s.first_valid_index() == first, f'{col}: first observation is {s.first_valid_index()}, not {first.date()}')
-        monthly_from = pd.Timestamp(MONTHLY_FROM[col])
-        last = pd.Timestamp(LAST_OBS.get(col, frame.index[-1]))
-        span = s.loc[monthly_from:last]
-        holes = [str(d.date()) for d in span[span.isnull()].index]
-        _check(holes == KNOWN_HOLES.get(col, []), f'{col}: holes {holes} != known {KNOWN_HOLES.get(col, [])}')
-        if col in LAST_OBS:
-            _check(s.loc[last + pd.offsets.MonthBegin(1):].isnull().all(), f'{col}: observed after {last.date()}')
+        _check(s.first_valid_index() == pd.Timestamp(FIRST_OBS[col]),
+               f'{col}: first observation is {s.first_valid_index()}, not {FIRST_OBS[col]}')
         lo, hi = BANDS[col]
         _check(s.dropna().between(lo, hi).all(), f'{col}: out of band [{lo}, {hi}]')
     _check(frame['USREC'].notnull().all(), 'USREC has a missing month')
@@ -132,30 +130,17 @@ def validate(frame, previous=None):
     summary = {
         'dataset': OUT_FILE,
         'builder': os.path.relpath(os.path.abspath(__file__), REPO_ROOT),
-        'rows': int(frame.shape[0]),
-        'columns': int(frame.shape[1]),
-        'date_range': {'start': str(frame.index[0].date()), 'end': str(frame.index[-1].date())},
+        'rows': shared['rows'],
+        'columns': shared['columns'],
+        'date_range': shared['date_range'],         # ISO strings, from the DATE column
         'overlap': None,
     }
     if previous is not None:
-        _check(list(previous.columns) == COLUMNS, 'previous snapshot has different columns')
-        common = previous.index.intersection(frame.index)
-        old, new = previous.loc[common], frame.loc[common]
-        _check(not (old.notnull() & new.isnull()).any().any(), 'a populated cell went empty')
-        diff = (old - new).abs()
-        worst = {c: float(diff[c].max()) if diff[c].notnull().any() else 0.0 for c in COLUMNS}
-        changed = int((diff > 1e-9).sum().sum())
-        summary['overlap'] = {
-            'window': f'{common[0].date()}..{common[-1].date()}',
-            'previous_end': str(previous.index[-1].date()),
-            'cells_total': int(old.notnull().sum().sum()),
-            'cells_revised': changed,
-            'max_abs_change': round(max(worst.values()), 4),
-            'max_abs_change_by_series': {c: round(v, 4) for c, v in worst.items()},
-            'new_columns': [],
-        }
-        print(f'overlap window {common[0].date()}..{common[-1].date()}: {changed} cells revised; '
-              f'max |change| by series {summary["overlap"]["max_abs_change_by_series"]}')
+        ov = shared['overlap']
+        summary['overlap'] = ov
+        worst = ov['max_abs_change_by_series']
+        print(f'overlap window {ov["window"]}: {ov["cells_revised"]} cells revised; '
+              f'max |change| by series {worst}')
         for c in COLUMNS:
             _check(worst[c] <= MAX_REVISION[c], f'{c}: revision {worst[c]:.4f} exceeds {MAX_REVISION[c]}')
     return summary

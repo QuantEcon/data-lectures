@@ -20,7 +20,11 @@
 # which doubles as the public dataset registry.
 #
 # COMPLETENESS: this file documents the fields that recur across the corpus. It
-# is not a closed schema and nothing validates against it — a dataset whose
+# is not a closed schema, but since 2026-09-07 the `schema` block IS validated:
+# scripts/validate_datasets.py (run by .github/workflows/validate-datasets.yml
+# on every PR) checks every manifest's conformance to the rules recorded below
+# and, for CSVs, that the committed bytes satisfy their own schema block, via
+# builders/_validate.py (#119). Provenance fields stay descriptive — a dataset whose
 # provenance needs a field not shown here should add one rather than distort
 # itself to fit, and a field that earns its place in several manifests should
 # then be documented back here. Two such extensions are already in wide use and

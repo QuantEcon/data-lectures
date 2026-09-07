@@ -32,7 +32,7 @@ QuantEcon/data-lectures#14. The contract the refresh workflow relies on
               (an end year, an observed range, a row count) -- those live in
               the fields scripts/snapshots.py stamps, and only there
 
-Requires pandas plus whatever the source needs (add it to requirements.txt).
+Requires pandas and PyYAML plus whatever the source needs (add it to requirements.txt).
 """
 import argparse
 import datetime as dt
@@ -41,6 +41,9 @@ import os
 import sys
 
 import pandas as pd
+import yaml
+
+from _validate import ValidationError, validate as validate_schema
 
 CURRENT_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(CURRENT_FILE_DIR)
@@ -50,10 +53,6 @@ PROVENANCE_DIR = os.path.join(REPO_ROOT, 'provenance')
 OUT_FILE = '<stem>.csv'          # lectures/<stem>.csv -- the manifest's filename
 MAX_REVISION = None              # overlap bound in the data's own units; measure first
 MAX_STALENESS = None             # newest observation must be at least this recent
-
-
-class ValidationError(Exception):
-    """The fetched data broke the published contract -- exit code 2."""
 
 
 def _check(condition, message):
@@ -73,22 +72,32 @@ def pre_process(raw):
 
 
 def validate(frame, previous=None):
-    """Assert the contract the manifest's schema block promises; return the
-    run summary. Every failure is a ValidationError with a message a human
-    can act on from the canary issue."""
-    _check(len(frame) > 0, 'empty frame')
-    # columns / dtypes / known_nulls / units / recency ...
+    """Two layers (QuantEcon/data-lectures#119). The manifest's schema block
+    is the spec -- columns and pattern runs, dtype families, exact known_nulls,
+    the `nulls:` placement rule, row_count_floor, date_range, and the overlap
+    window MEASURED against `previous` -- enforced by builders/_validate.py.
+    Add here only what a schema cannot say: value bands, a grid, recency, and
+    the revision BOUND. Every failure is a ValidationError with a message a
+    human can act on from the canary issue."""
+    with open(os.path.join(PUBLISHED_DIR, OUT_FILE + '.yml')) as f:
+        manifest = yaml.safe_load(f)
+    # pass the RAW shape: the period/label column as a column, not the index
+    raw = frame.reset_index() if frame.index.name else frame
+    prev_raw = previous.reset_index() if previous is not None and previous.index.name else previous
+    shared = validate_schema(raw, manifest, prev_raw)
+    # builder-specific: bands / grid / recency ...
+    raise NotImplementedError
     summary = {
         'dataset': OUT_FILE,
         'builder': os.path.relpath(os.path.abspath(__file__), REPO_ROOT),
-        'rows': int(frame.shape[0]),
-        'columns': int(frame.shape[1]),
-        'date_range': {'start': None, 'end': None},
-        'overlap': None,
+        'rows': shared['rows'],
+        'columns': shared['columns'],
+        'date_range': shared['date_range'],
+        'overlap': shared['overlap'],
     }
     if previous is not None:
-        # compare the shared window; report and BOUND revisions, never assert equality
-        raise NotImplementedError
+        _check(shared['overlap']['max_abs_change'] <= MAX_REVISION,
+               f'revision {shared["overlap"]["max_abs_change"]} exceeds {MAX_REVISION}')
     return summary
 
 

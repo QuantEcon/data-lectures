@@ -30,7 +30,16 @@ template is [`_template.py`](_template.py) (not a builder — the underscore
 keeps it out of any manifest). Shared fetch code lives beside it under the
 same convention: [`_fred.py`](_fred.py) is the `Fred` class every FRED
 builder should use (`fred.series('UNRATE')`, `fred.frame([...])`), so a fetch
-stage is a line and `validate()` is the only thing worth reading. One
+stage is a line and `validate()` is the only thing worth reading — and most of
+*that* is shared too: [`_validate.py`](_validate.py) reads the manifest's
+`schema` block as the spec (columns and `pattern` runs, dtype families, exact
+`known_nulls`, the `nulls:` placement rule, `row_count_floor`, `date_range`)
+and measures the overlap window against the previous vintage
+([#119](https://github.com/QuantEcon/data-lectures/issues/119)). A builder
+calls `validate(frame.reset_index(), manifest, previous)` and adds only what
+a schema cannot say — value bands, a grid, recency, the revision *bound*. The
+same function runs over every committed CSV on every PR
+(`scripts/validate_datasets.py`, `validate-datasets.yml`). One
 builder per **source** for a lecture's data, writing a composite file where
 the lecture reads the series together (decided 2026-09-01 on #26).
 

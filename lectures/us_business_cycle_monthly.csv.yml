@@ -112,22 +112,27 @@ schema:
   date_range: {start: 1919-01-01, end: 2026-07-01}
   # Every null is structural — before a series' first observation, in
   # UMCSENT's sparse pre-1978 years, after the historical series' last month,
-  # or the 2025-10 shutdown hole in UNRATE and CPILFESL. Three counts are
-  # stable (leading nulls plus the one hole) and are declared exact;
-  # M0892AUSM156SNBR's grows by one per month because the series ended in
-  # 1942-06, so it is covered by the placement rule alone (#121).
-  known_nulls: {UNRATE: 349, UMCSENT: 616, CPILFESL: 457}
+  # the 2025-10 shutdown hole in UNRATE and CPILFESL, or the newest month for
+  # a series that publishes with a lag. No exact counts: every one of them
+  # moves with the newest month (M0892AUSM156SNBR gains a trailing null every
+  # month; UMCSENT, CPILFESL and INDPRO gain one whenever the refresh runs
+  # before their mid-month release), so the contract is PLACEMENT (#121).
+  # First-vintage totals for the reader: UNRATE 349, UMCSENT 616, CPILFESL
+  # 457, M0892AUSM156SNBR 1132.
+  known_nulls: {}
   # Placement rule (#121, 2026-09-07): series run down the DATE index, one per
   # column. `leading`: empty before a series' first observation; `ended`:
   # empty after its last; `inner`: the accepted holes inside a series, as a
   # list of periods or `{sparse_until: P}` for an irregular early history;
-  # `recent: 0`: the newest month must be populated for every live series
-  # (the builder requires it). Mirrors FIRST_OBS / LAST_OBS / KNOWN_HOLES /
-  # MONTHLY_FROM in builders/business_cycle_fred.py.
+  # `recent: 1`: the newest month may be unpublished for a lagging series —
+  # UNRATE lands the first Friday, CPILFESL and INDPRO around the 15th,
+  # UMCSENT's final at month end — measured 2026-09-07, when the live frame
+  # ran to 2026-08 with only UNRATE and USREC populated there. Two empty
+  # months would mean a stalled series and fail. Read by builders/_validate.py.
   nulls:
     along: rows
     leading: true
-    recent: 0
+    recent: 1
     ended: [M0892AUSM156SNBR]
     inner:
       UNRATE: [2025-10-01]
