@@ -76,12 +76,12 @@ source:
   url: https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
   # Dataset DOI where the source issues one, else null. Prefer a DOI that
   # resolves to the DATA deposit; an article DOI is better than nothing, but say
-  # which it is. In use by 16 of 33 manifests.
+  # which it is. In use by 17 of 44 manifests.
   doi: null
   # The upstream's own version identifier, quoted as the source states it — an
   # edition ("Maddison Project Database 2020"), a vintage stamp, or a file
   # header. Null where the source is genuinely unversioned; say so rather than
-  # inventing a version. In use by 10.
+  # inventing a version. In use by 21.
   version: null
   citation: >
     World Bank, World Development Indicators, series NY.GDP.MKTP.KD.ZG
@@ -191,10 +191,13 @@ integrity:
 # #121 (nulls), #122 (dtypes) — and are recorded beside the fields below.
 #
 # What the validator reads: the RAW file as written, with pandas defaults —
-# honouring `delimiter` (countries.csv is semicolon-separated) and `read_as`
-# (positional workbook reads), with no `index_col`, and with `parse_dates` on
-# every column declared `datetime64`. The manifest describes the bytes on
-# disk, not the frame a particular lecture builds from them.
+# honouring `delimiter` (countries.csv is semicolon-separated), with no
+# `index_col`, and with `parse_dates` on every column declared `datetime64`.
+# CSV only: `read_raw()` raises NotImplementedError on any other format, so the
+# 13 non-CSV manifests get the conformance pass alone, and `read_as`
+# (positional workbook reads) is the contract for those reads once they are
+# built, not a kwarg the shipped validator passes. The manifest describes the
+# bytes on disk, not the frame a particular lecture builds from them.
 
 schema:
   format: csv
