@@ -242,6 +242,9 @@ schema:
   # blanket no-nulls rule would reject). A dynamic snapshot may also declare
   # an exact count for a column whose nulls are stable by construction
   # (gdp_growth_annual's YR1960: growth is undefined in the first year).
+  # A column with no entry must have no nulls -- every column of a frozen
+  # file, and the LABEL columns of a dynamic snapshot (economy, Country, DATE:
+  # the placement rule below governs only its series).
   # There is deliberately NO ceiling form ({max: N}): a ceiling silently
   # accepts a column emptying out below the bound, which is the failure the
   # check exists to catch.

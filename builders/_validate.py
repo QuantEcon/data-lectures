@@ -24,7 +24,10 @@ What is enforced, and the decision each rule records:
                as object with bool values matches `bool`; the declared name
                must be in the canonical vocabulary (checked by the CLI's
                conformance pass, not here)
-  known_nulls  #121 -- an integer is an EXACT count
+  known_nulls  #121 -- an integer is an EXACT count; a column with no entry
+               has none -- every column of a frozen file, and the LABEL
+               columns (economy, Country, DATE) of a dynamic snapshot, whose
+               placement rule governs only its series
   nulls        #121 -- placement for dynamic snapshots: `along` (rows |
                columns) says which way a series runs; `leading` allows nulls
                before a series' first observation; `ended` lists series that
@@ -208,15 +211,30 @@ def _series_view(frame: pd.DataFrame, schema: dict, matches) -> tuple[pd.DataFra
     return table, along
 
 
-def check_known_nulls(frame: pd.DataFrame, schema: dict, dynamic: bool = False):
+def series_columns(frame: pd.DataFrame, schema: dict, matches) -> set:
+    """The columns the `nulls:` placement rule governs: the pattern-claimed
+    run of a wide file, or every non-period column of a time-indexed one.
+    Everything else is a LABEL column (economy, Country, DATE) whose nulls
+    are exact -- zero unless declared -- in every class."""
+    if not (schema.get('nulls') or {}) and not any('pattern' in e for e, _ in matches):
+        return set()
+    along = (schema.get('nulls') or {}).get('along') or 'columns'
+    if along == 'columns':
+        return {c for e, cols in matches if 'pattern' in e for c in cols}
+    return set(frame.columns) - set(datetime_columns(schema))
+
+
+def check_known_nulls(frame: pd.DataFrame, schema: dict, dynamic: bool = False, series: set = frozenset()):
     known = schema.get('known_nulls') or {}
-    if not dynamic:
-        # A frozen file declares every nulled column; one it does not declare
-        # must have none (the template's `known.get(col, 0)` rule, #121).
-        for col in frame.columns:
-            if col not in known:
-                have = int(frame[col].isnull().sum())
-                _check(have == 0, f'{col}: {have} nulls but not declared under known_nulls')
+    # A column with no declared count must have none: every column of a
+    # frozen file (the template's `known.get(col, 0)` rule, #121), and the
+    # LABEL columns of a dynamic snapshot -- the placement rule governs only
+    # its series, so a blank economy, Country or DATE would otherwise pass.
+    for col in frame.columns:
+        if col in known or (dynamic and col in series):
+            continue
+        have = int(frame[col].isnull().sum())
+        _check(have == 0, f'{col}: {have} nulls but not declared under known_nulls')
     for col, n in known.items():
         _check(col in frame.columns, f'known_nulls names {col!r}, not a column')
         _check(isinstance(n, int) and not isinstance(n, bool),
@@ -349,7 +367,7 @@ def validate(frame: pd.DataFrame, manifest: dict, previous: pd.DataFrame | None 
             _check(dtype_matches(frame[c], want),
                    f'{c}: dtype {frame[c].dtype} is not in the {want!r} family')
     check_rows(frame, schema)
-    check_known_nulls(frame, schema, dynamic)
+    check_known_nulls(frame, schema, dynamic, series_columns(frame, schema, matches))
     if dynamic:
         _check('nulls' in schema, 'a dynamic snapshot must declare a `nulls:` placement rule (#121)')
     check_placement(frame, schema, matches)
