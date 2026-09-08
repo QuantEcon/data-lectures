@@ -59,6 +59,15 @@ Python-family lecture repos — the full-universe audit plus a per-dataset
 migration tracker — deploys to this repo's GitHub Pages site alongside the
 published `lectures/` tree ([data-lectures#20](https://github.com/QuantEcon/data-lectures/issues/20)).
 
+It is one of QuantEcon's status dashboards, alongside
+[status-translations](https://quantecon.github.io/status-translations/) (coverage
+and freshness of every language edition), [status-lectures](https://github.com/QuantEcon/status-lectures)
+(build and environment configuration) and
+[status-projects](https://quantecon.github.io/status-projects/) (what projects the
+org has across every programme, and how each is going). The operations manual's
+[Dashboards directory](https://manual.quantecon.org/stats/dashboards.html) lists
+them all.
+
 ```
 python scripts/build_audit.py all --strict     # scan + render into site/
 ```
