@@ -1,0 +1,23 @@
+# Dependabot: keep the workflow pins on current majors, so hand-written
+# workflows cannot drift back onto end-of-life runtimes unnoticed.
+#
+# Two groups, the form QuantEcon/actions uses, so updates land as at most two
+# PRs a week: "github-actions" for minor/patch (low risk, merge together) and
+# "github-actions-major" for majors (read the release notes first).
+# `directory: /` covers .github/workflows/.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "⬆️"
+    groups:
+      github-actions:
+        patterns: ["*"]
+        update-types: [minor, patch]
+      github-actions-major:
+        patterns: ["*"]
+        update-types: [major]
