@@ -15,7 +15,7 @@ jobs:
   consumed-files:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # `lfs: false` is the assertion, not a saving. A manifest records the
           # sha256 of the real bytes, so if a `lectures/` file is ever
@@ -34,7 +34,7 @@ jobs:
           # by mistake arrives as real bytes, hashes to something the README
           # does not record, and goes red.
           lfs: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install pyyaml

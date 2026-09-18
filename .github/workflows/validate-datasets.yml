@@ -42,10 +42,10 @@ jobs:
         pandas: ["2.3.3", "3.0.5"]
     name: validate (pandas ${{ matrix.pandas }})
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: false          # lectures/ is plain git; a pointer here should fail (see consumed-file-check.yml)
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       # wbgapi: builders/business_cycle.py imports it at module level, and the

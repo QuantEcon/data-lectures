@@ -38,7 +38,7 @@ jobs:
     outputs:
       warnings: ${{ steps.warnings.outputs.text }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Nothing under `lectures/` may be an LFS object (.gitattributes
           # scopes LFS to `sources/**`), and this job publishes `lectures/` to
@@ -49,7 +49,7 @@ jobs:
           # as pointer text everywhere else. It also keeps `sources/` — a 99 MiB
           # LFS object — off every run of this workflow.
           lfs: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install pyyaml
@@ -85,7 +85,7 @@ jobs:
           cp -r site/. _site/
           cp -r lectures _site/lectures
           cp audit.json _site/audit.json
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
@@ -100,11 +100,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
         with:
           enablement: true
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   # The strict build is this repo's drift alarm for 8 upstream lecture repos,
   # and the weekly schedule fires when nobody is watching. It worked exactly as
