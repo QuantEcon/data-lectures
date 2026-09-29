@@ -4,8 +4,10 @@
 # OWN raw URL from two lectures and three synced translation repos (PLAN
 # Phase 8, Track D).
 #
-# The name is on the phase-2 rename review (QuantEcon/data-lectures#87,
-# decision of 2026-08-17): it migrates under its current name.
+# The name was on the phase-2 rename review (QuantEcon/data-lectures#87,
+# decision of 2026-08-17) and migrated under its current name, which the
+# naming policy then kept (QuantEcon/data-lectures#113, 2026-09-07, rule 6: a
+# consumed file keeps its name).
 #
 # PROVENANCE IS WRONG IN THE CONSUMING LECTURE, measurably. pandas.md's prose
 # says the file "is taken from the Penn World Tables" and links PWT 7.0 — but

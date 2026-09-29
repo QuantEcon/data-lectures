@@ -4,10 +4,12 @@
 #
 # THE FILENAME IS TWO LETTERS AND SAYS NOTHING — deliberately kept at migration
 # (decision 2026-08-13; a batch rename across the five generic names in
-# .dev/qeld/migration-catalog.md §5.1 is proposed separately, and any rename
-# has to be paired with a prose edit because mle.md names `mle/fp.dta` in
-# text). Until then the title and description below are the only thing that
-# tells a reader what these bytes are.
+# .dev/qeld/migration-catalog.md §5.1 was proposed separately, and any rename
+# would have to be paired with a prose edit because mle.md names `mle/fp.dta`
+# in text). The naming policy (QuantEcon/data-lectures#113, 2026-09-07) then
+# kept it for good: a verbatim release keeps its upstream name (rule 5), and a
+# consumed file keeps its name (rule 6). So the title and description below
+# are the only thing that tells a reader what these bytes are.
 #
 # NOT the same dataset as forbes-billionaires.csv in this same tree: that one
 # is a list of PEOPLE (the Forbes person-level ranking, read by heavy_tails in
