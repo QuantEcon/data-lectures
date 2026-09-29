@@ -2,7 +2,7 @@
 
 The canonical repository for **data consumed by the QuantEcon lecture series**, referenced by stable URLs.
 
-> **Status:** renamed from `QuantEcon/data` (2026-07-16) and being shaped into the canonical lecture-data repo per [QuantEcon/meta#336](https://github.com/QuantEcon/meta/issues/336). See [`PLAN.md`](PLAN.md) for the roadmap and [`AGENTS.md`](AGENTS.md) for working conventions. The full data-hosting convention is drafted in [QuantEcon.manual#108](https://github.com/QuantEcon/QuantEcon.manual/pull/108).
+> **Status:** live. Renamed from `QuantEcon/data` on 2026-07-16 per [QuantEcon/meta#336](https://github.com/QuantEcon/meta/issues/336); the lectures' static datasets finished migrating here on 2026-08-18, and dynamic snapshots are being adopted (`PLAN.md` Phase 8, P4). See [`PLAN.md`](PLAN.md) for the roadmap and [`AGENTS.md`](AGENTS.md) for working conventions. The convention itself is this README, `AGENTS.md` and [`manifest-schema.yml`](manifest-schema.yml). A style-guide page for lecture authors is tracked in [QuantEcon.manual#153](https://github.com/QuantEcon/QuantEcon.manual/issues/153) (team access), and the `data-{scope}` repository type in [QuantEcon/qeps#41](https://github.com/QuantEcon/qeps/issues/41).
 
 ## The routing rule
 
@@ -33,7 +33,7 @@ The `github.com/…/raw/` form is a 302 whose response carries an **empty** `acc
 4. Reference it from the lecture — `qeld.url('<filename>')` once the package ships, the runtime-correct direct URL until then. The lecture PR builds green immediately, no two-step merge.
 5. Add the lecture to the dataset's `consumers` list.
 
-See the [draft convention](https://github.com/QuantEcon/QuantEcon.manual/pull/108) for the full checklist and manifest schema.
+Every manifest field is documented in [`manifest-schema.yml`](manifest-schema.yml), and its `schema` rules are checked on every PR. The classes, naming rules and URL rules are in [`AGENTS.md`](AGENTS.md).
 
 ## Layout
 
@@ -43,8 +43,8 @@ See the [draft convention](https://github.com/QuantEcon/QuantEcon.manual/pull/10
 | `builders/` | one builder per constructed or dynamic dataset, `builders/<stem>.<ext>` → `lectures/<stem>.<ext2>` | no |
 | `sources/` | builder inputs that cannot be re-fetched (per-path LFS); `sources/README.md` is their audit trail | no |
 | `provenance/` | upstream metadata dumps a builder writes beside its dataset — evidence for the manifest's `source` and `license` fields, regenerated every run | no |
-| `scripts/` | repo tooling: the catalog generator, the audit dashboard, and the dynamic-snapshot plumbing (`snapshots.py`) | no |
-| `manifest-schema.yml` | the per-dataset manifest schema (strawman — see [`PLAN.md`](PLAN.md) Phase 2) | no |
+| `scripts/` | repo tooling: the catalog generator, the audit dashboard, the dataset validator (`validate_datasets.py`) and the dynamic-snapshot plumbing (`snapshots.py`) | no |
+| `manifest-schema.yml` | the per-dataset manifest schema — the authoritative field reference; its `schema` rules are enforced on every PR by `validate-datasets` | no |
 | `migration.yml` | the migration lifecycle tracker — which PRs landed and repointed each dataset (transitional; archivable when the migration programme completes) | rendered |
 
 The tree is flat because the filename is the interface: `lectures/<filename>` is

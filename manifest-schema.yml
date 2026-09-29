@@ -1,10 +1,12 @@
-# Per-dataset manifest — schema sketch (PLAN Phase 2 / QuantEcon.manual#108)
+# Per-dataset manifest — the authoritative, commented field reference (PLAN
+# Phase 2; AGENTS.md, "Every dataset needs a class and a manifest").
 #
-# STATUS: strawman. This is the shape the pilot (PLAN Phase 8) tests against;
-# every field here is provisional until proven by a real migration. Decisions
-# validated by the pilot get folded into styleguide/datasets.md (manual#108).
+# STATUS: proven by the migration. Every published dataset carries a manifest
+# in this shape, and the `schema` block is executable (see COMPLETENESS below).
+# The summary for lecture authors belongs in the manual's style guide
+# (QuantEcon.manual#153); this file stays the field-level reference.
 #
-# PLACEMENT (strawman): a manifest is a sidecar next to the file it describes,
+# PLACEMENT: a manifest is a sidecar next to the file it describes,
 # named "<full filename>.yml":
 #
 #     lectures/mpd2020.xlsx        <- the dataset
@@ -30,8 +32,9 @@
 # then be documented back here. Two such extensions are already in wide use and
 # are described where they apply: `schema.sheets` for multi-sheet workbooks, and
 # `schema.read_as` for the pandas read-kwargs a positional read needs. Adding
-# the four `source`/`license` fields below closed the last known gap between
-# this file and practice (QuantEcon/data-lectures#85).
+# the four `source`/`license` fields below closed the gap known at the time
+# (QuantEcon/data-lectures#85); `source.file_url` and `source.citation_policy`
+# were in use before they were written down here, and now are.
 
 # ---------------------------------------------------------------------------
 # Identity
@@ -74,22 +77,32 @@ source:
   name: World Bank national accounts data, and OECD National Accounts data files
   series: NY.GDP.MKTP.KD.ZG
   url: https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+  # The file's own address, where `url` is a landing page and the artifact has
+  # a stable direct link or query (a release file, an API endpoint) — the thing
+  # a re-fetch would download. Optional: omit it when `url` already is the file,
+  # and leave it null when there is no single file to point at, as here (the
+  # builder fetches this snapshot through the `wbgapi` client).
+  file_url: null
   # Dataset DOI where the source issues one, else null. Prefer a DOI that
   # resolves to the DATA deposit; an article DOI is better than nothing, but say
-  # which it is. In use by 17 of 44 manifests.
+  # which it is.
   doi: null
   # The upstream's own version identifier, quoted as the source states it — an
   # edition ("Maddison Project Database 2020"), a vintage stamp, or a file
   # header. Null where the source is genuinely unversioned; say so rather than
-  # inventing a version. In use by 21.
+  # inventing a version.
   version: null
   citation: >
     World Bank, World Development Indicators, series NY.GDP.MKTP.KD.ZG
     (GDP growth, annual %).
+  # The source's own conditions on citation, quoted, where they go beyond
+  # citing the source itself (Maddison asks for the original papers whenever
+  # its data is graphed or fewer than 12 countries are used). Optional.
+  citation_policy: null
   # Anything a reader must know before trusting these bytes that the fields
   # above cannot carry — most often that the file is NOT what its name or its
   # cited paper implies. Where that is the case, say it here AND at the top of
-  # the manifest. In use by 20.
+  # the manifest.
   note: null
 
 license:
@@ -110,7 +123,7 @@ license:
   # a named public licence: a split answer across providers, an inherited
   # exposure, a term found only in prose, or a reasoned judgement about what is
   # actually published here. A bare `permitted` beside a `name: null` is the
-  # case that most needs this field. In use by 16.
+  # case that most needs this field.
   note: null
 
 retrieved: 2024-04-10                   # ISO date the bytes were obtained, or

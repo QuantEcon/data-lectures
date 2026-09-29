@@ -35,8 +35,8 @@ license:
   # data-documentation file. Redistribution is long established in practice:
   # CRAN ships it in the AmesHousing package and OpenML serves it as dataset
   # 42165. Recorded as `permitted` on that basis, with `name: null` because
-  # there is a genuine licence statement to point at, not because one was not
-  # looked for. Attribution is carried by the citation above.
+  # there is no licence statement to point at, not because one was not looked
+  # for. Attribution is carried by the citation above.
 
 retrieved: 2026-08-03
 maintainer: QuantEcon

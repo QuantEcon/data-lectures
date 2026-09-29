@@ -1,6 +1,6 @@
 # PLAN — `qeld`, the consumer-side data package
 
-**Status:** design settled, nothing implemented · **Last updated:** 2026-08-12
+**Status:** design settled, nothing implemented · **Last updated:** 2026-09-29 (facts in §5.3, §8.3–§8.6 and the Q2 row refreshed; no decision changed)
 **Relationship to `PLAN.md`:** that document migrates *bytes* into this repo. This one gives *consumers* a
 stable way to read them. They are independent — the migration completes with or without `qeld` — but the
 call-site convention here replaces repoint rules 5–6 for any lecture that adopts it.
@@ -273,8 +273,11 @@ The best diff in the corpus is `lecture-python-advanced.myst/lectures/hansen_jag
 
 ### 5.3 `url()` alone covers the corpus
 
-After the `.npy` conversion (§8.3), **`dataBHS.mat` is the only file in the endgame that cannot be read from
-a URL**. That is what justifies dropping `fetch()`.
+After the `.npy` conversion (§8.3), **every file in the endgame can be read from a URL**: `dataBHS.mat`, the
+one exception when this was written, was converted to `dataBHS.csv` at migration
+([#98](https://github.com/QuantEcon/data-lectures/pull/98), 2026-08-18; §8.4). That is what justifies
+dropping `fetch()`. Until the conversion, the `.npy` pair is the only published format that cannot be passed
+straight to a reader function — `np.load` needs `requests` plus `BytesIO`.
 
 ### 5.4 Two latent bugs found, worth fixing regardless
 
@@ -333,7 +336,7 @@ or every migrated read classifies `local-path` and the dashboard inverts.
 | phase | work | gate |
 |---|---|---|
 | **Q1 — Audit first** | `build_audit.py` learns `qeld.url('X')` → pattern `qeld`, counted migrated **and terminal**. For `pattern == 'qeld'`, assert the key exists in `lectures/` and is not deprecated — otherwise the qeld path loses every assertion #55/#48/#47 added. `migration.yml`: `final` := every code read via qeld, with §4.1 carve-outs terminal on the direct form (the canonical-host arm was retired with D11) | `audit.json` `stats` and `problems` unchanged on today's repos (**not** "byte-identical" — the audit stamps `date.today()`) |
-| **Q2 — Schema hygiene** | Document `read_as` (used in 6 manifests) and `sheets` (5) in `manifest-schema.yml` — both are in use and neither appears in the file `AGENTS.md` calls "the authoritative, commented field reference". Add `deprecated:` (new, used nowhere yet) since §3.3 warns on it. `shape` is already documented. Delete `then: "iloc[1:]"` from `longprices.xls.yml:70` by moving `iloc[1:]` into the lecture — a post-read transform encoded as a string to evaluate is exactly what D5 excludes | `manifest-schema.yml` covers every field any manifest uses. Needs none of #14's decisions — do not block on it |
+| **Q2 — Schema hygiene** | Document `read_as` (used in 6 manifests) and `sheets` (5) in `manifest-schema.yml` — both are in use and neither appears in the file `AGENTS.md` calls "the authoritative, commented field reference". Add `deprecated:` (new, used nowhere yet) since §3.3 warns on it. `shape` is already documented. Delete `then: "iloc[1:]"` from `longprices.xls.yml:70` by moving `iloc[1:]` into the lecture — a post-read transform encoded as a string to evaluate is exactly what D5 excludes | `manifest-schema.yml` covers every field any manifest uses. Needs none of #14's decisions — do not block on it. *(2026-09-29: `read_as` and `sheets` are now described there; `deprecated:` and the `then:` cleanup remain.)* |
 | **Q3 — Package** | `packages/qeld/`: `url()`, `info()`, context detection, advisory catalog. Catalog compiler shares a freshness gate with `CATALOG.md`. Format tier-1 assertion. First release to PyPI via trusted publishing | Offline suite green on every PR: catalog compiles and is fresh; unknown key warns and still returns a URL; URL form correct per detected context; suffix fidelity incl. `.csv.gz`; `info()` fields present. CPython matrix |
 | **Q4 — Live leg** | Post-merge + scheduled job: fetch each served URL, compare to the manifest hash, open an issue on failure | Green on `main`; an induced failure opens an issue |
 | **Q5 — Browser session** | `%pip install qeld==<v>` in a real `lecture-wasm` page (**`%pip` routes through piplite, not micropip** — a console `micropip.install` is a false pass); `pd.read_excel(qeld.url('mpd2020.xlsx'), sheet_name='Regional data', header=[0,1,2], index_col=0)`; a `.csv.gz` read; record observed Pyodide and pyodide-kernel versions | Written pass/fail. Fail ⇒ wasm keeps URLs and the plan proceeds for the CPython repos |
@@ -374,12 +377,18 @@ columns (`date`/`specie_value`, `date`/`nominal_balances`). Converting to CSV de
 and two imports from `french_rev` in every consuming repo.
 
 **But the window closed.** When this was analysed both files had `consumers: []`; the A3 set has since been
-repointed (#49) and both now have two consumers. So this is no longer a free replacement — it needs the
+repointed (#49), and both now have six consumers each (intro, wasm, `lecture-intro.zh-cn`, the actions
+canary, `tom-econ370-2025` and `python-lecture-sandpit.myst`, per the manifests on 2026-09-29). So this is no
+longer a free replacement — it needs the
 `AGENTS.md` "new vintage → new filename" treatment (`caron.csv` lands alongside, consumers opt in, the `.npy`
 is swept later) or a coordinated set under repoint rules 1–3. **Decide before Q6**, since `french_rev` is a
 pilot.
 
 ### 8.4 `dataBHS.mat` — convert at migration, or exclude?
+
+**Resolved 2026-08-18: converted at migration.** `dataBHS.csv` landed in
+[#98](https://github.com/QuantEcon/data-lectures/pull/98) and the lecture reads it; the `.mat` stays as the
+builder's input in `sources/`. The analysis that led there, as written:
 
 5,588 bytes; `c`, `rb`, `rs`, each (236, 1) float64; the lecture uses only `data['c']` and the read is inside
 a `hide-input` cell, so nothing about it is taught. Trivially a 236×3 CSV — but see §4.3 on the read. A Track
@@ -387,16 +396,20 @@ C decision; the only true impossibility among static files.
 
 ### 8.5 Is `lecture-intro.zh-cn` in scope?
 
-It carries data reads, appears in **zero** `consumers` blocks, is excluded from `SCAN_REPOS` by decision, has
-no data CI, publishes on a `publish*` tag, and inherits install cells automatically via the `.md`-only sync —
+It carries data reads, is excluded from `SCAN_REPOS` by decision, has no data CI, publishes on a `publish*` tag, and inherits install cells automatically via the `.md`-only sync —
 so it acquires whatever intro acquires without anyone deciding. It also has files with no data-lectures key
-and no business having one (`country_code_cn.csv`, a translation asset).
+and no business having one (`country_code_cn.csv`, a translation asset). When this was written it appeared
+in no `consumers` block; the Track A and P3 repoints have since recorded it in 25 `consumers` entries (as of
+2026-09-29), so its reads are now in the manifests even though no CI sees them.
 **Recommendation: explicit non-goal for v1, with one fixed rule instead of machinery — any sweep touching an
 intro file also touches zh-cn.**
 
 ### 8.6 The rename list for generic filenames
 
-§5.5. Needs a pass before Tracks B and C migrate, and each rename needs its prose pairing found by grep.
+§5.5. **Settled.** The list moved to [#87](https://github.com/QuantEcon/data-lectures/issues/87) on
+2026-08-17, and the naming policy ([#113](https://github.com/QuantEcon/data-lectures/issues/113),
+2026-09-07) decided it: a consumed file keeps its name (`manifest-schema.yml` naming rule 6), and `fp.dta`, a
+verbatim release, keeps its upstream name (rule 5). Tracks B and C migrated under their current names.
 
 ### 8.7 Open from the original report
 

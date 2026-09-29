@@ -3,8 +3,10 @@
 # lectures/_static/lecture_specific/match_transport/ and was read by relative
 # path (PLAN Phase 8, wave C2).
 #
-# The name is on the phase-2 rename review (QuantEcon/data-lectures#87,
-# decision of 2026-08-17): it migrates under its current name. The org-wide
+# The name was on the phase-2 rename review (QuantEcon/data-lectures#87,
+# decision of 2026-08-17) and migrated under its current name, which the
+# naming policy then kept (QuantEcon/data-lectures#113, 2026-09-07, rule 6: a
+# consumed file keeps its name). The org-wide
 # Trees sweep (2026-08-17, re-derived in QuantEcon/data-lectures#96) found
 # four copies of this basename org-wide and all four are THE SAME BLOB
 # (29a0e219…) — inherited duplicates in lecture-dp, lecture-dp.monorepo and
