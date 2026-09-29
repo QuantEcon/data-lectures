@@ -891,7 +891,7 @@ datasets:
     status: landed
     prior_pattern: none
     landed:
-      pr: QuantEcon/data-lectures#XXX
+      pr: QuantEcon/data-lectures#144
       date: 2026-09-29
     repoints: []
     cutover: null
