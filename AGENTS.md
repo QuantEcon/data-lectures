@@ -176,7 +176,7 @@ The generated dashboard (`scripts/build_audit.py`, [#20](https://github.com/Quan
 ```
 lectures/            # the published tree — flat, live on Pages; read via raw URLs
                      #   today, qeld.url() once the package ships (PLAN-QELD-PACKAGE.md)
-                     #   44 datasets, 44 manifests (complete since 2026-09-01;
+                     #   45 datasets, 45 manifests (complete since 2026-09-01;
                      #   the business_cycle set added three on 2026-09-01, #114).
                      #   Manifests are sidecars: <filename>.yml
 builders/            # one builder per published dataset — NOT published
