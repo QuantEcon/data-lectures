@@ -126,7 +126,10 @@ license:
     `annual.consumption` is his `C` column times a constant. An inherited exposure,
     served publicly from lecture-python-advanced.myst since 2026-04-10. No
     permission has been sought from Yale or from Professor Shiller.
-    Registered for licence review on QuantEcon/data-lectures#35.
+    Registered for licence review on QuantEcon/data-lectures#35. FRED's Terms of
+    Use clause (p), on storing or caching FRED content, is recorded once, for
+    all FRED-derived files, in AGENTS.md, "Licensing and attribution"
+    (2026-09-30).
 
 retrieved: null                 # no upstream-retrieval date was recorded, and
                                 # none is reconstructed from git history

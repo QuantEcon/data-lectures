@@ -120,7 +120,10 @@ license:
     2026-08-17 against a positive control (FRED's SP500 page, which does carry
     S&P Dow Jones Indices' "Reproduction … is prohibited" notice), so the zero is
     a real zero and not a broken check. Nothing to register on
-    QuantEcon/data-lectures#35.
+    QuantEcon/data-lectures#35. These bytes came from the Zenodo deposit, not
+    from FRED directly. FRED's Terms of Use clause (p), on storing or caching
+    FRED content, is recorded once, for all FRED-derived files, in AGENTS.md,
+    "Licensing and attribution" (2026-09-30).
 
 retrieved: null                 # inherited-undated: the bytes arrived in
                                 # lecture-python-advanced.myst with no recorded

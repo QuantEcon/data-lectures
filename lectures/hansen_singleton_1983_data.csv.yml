@@ -104,7 +104,9 @@ license:
     and the reason it is written down rather than waved through. An inherited
     exposure, served publicly from lecture-python.myst since 2026-06-26. No
     permission has been sought from either provider. Registered for licence
-    review on QuantEcon/data-lectures#35.
+    review on QuantEcon/data-lectures#35. FRED's Terms of Use clause (p), on
+    storing or caching FRED content, is recorded once, for all FRED-derived
+    files, in AGENTS.md, "Licensing and attribution" (2026-09-30).
 
 retrieved: null                 # the builder fetches live and no retrieval date
                                 # was recorded upstream; not reconstructed from
