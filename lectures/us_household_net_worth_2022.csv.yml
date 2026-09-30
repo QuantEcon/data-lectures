@@ -102,8 +102,8 @@ consumers:
   - repo: QuantEcon/lecture-python-intro
     file: lectures/wealth_tax.md
     note: >
-      New lecture in preparation, not yet merged; it will read this file
-      directly from its first commit.
+      New lecture, merged in lecture-python-intro#852 (2026-09-30), reading
+      this file directly from its first commit.
 
 builder: builders/us_household_net_worth_2022.py
 builder_status: committed
