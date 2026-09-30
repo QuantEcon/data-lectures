@@ -41,16 +41,16 @@ source:
     all items less food and energy, index 1982-84=100, SA, from 1957-01
     (BLS). INDPRO — industrial production: total index, 2017=100, SA, from
     1919-01 (Board of Governors). M0892AUSM156SNBR — unemployment rate for
-    the United States, %, NSA, 1929-04 to 1942-06 (NBER Macrohistory,
+    the United States, %, SA, 1929-04 to 1942-06 (NBER Macrohistory,
     chapter 8).
   citation: >
     U.S. Bureau of Labor Statistics (UNRATE, CPILFESL); Federal Reserve Bank
     of St. Louis, NBER based Recession Indicators (USREC); University of
-    Michigan, Surveys of Consumers (UMCSENT); Board of Governors of the
-    Federal Reserve System, Industrial Production and Capacity Utilization
-    (INDPRO); National Bureau of Economic Research, Macrohistory Database
-    (M0892AUSM156SNBR). All retrieved from FRED, Federal Reserve Bank of St.
-    Louis.
+    Michigan, Survey Research Center, Surveys of Consumers (UMCSENT); Board of
+    Governors of the Federal Reserve System, Industrial Production and Capacity
+    Utilization (INDPRO); National Bureau of Economic Research, Macrohistory
+    Database (M0892AUSM156SNBR). All retrieved from FRED, Federal Reserve Bank
+    of St. Louis.
   note: >
     fredgraph.csv titles its date column `observation_date`; the library
     renames it to `DATE`, the header every other FRED file here carries.
@@ -63,22 +63,40 @@ license:
   name: null
   url: https://fred.stlouisfed.org/legal/
   redistribution: permitted
-  verified: 2026-09-01
+  verified: 2026-09-30
   note: >
-    Split provenance, one answer. FRED classifies each series on its page
-    (checked 2026-09-01): UNRATE is "public domain: citation requested", and
-    CPILFESL, INDPRO and USREC are US federal statistics or built from the
-    NBER's published dates (the fred_data.csv manifest's 2026-08-17 check of
-    federal series pages against FRED's S&P 500 page as a positive control is
-    the precedent). UMCSENT is the one third-party series: FRED classifies it
-    "copyrighted: citation required" (fred.stlouisfed.org/legal/#copyright-
-    citation-required) — the University of Michigan's terms permit use with
-    citation, which is exactly what this repo's cache-with-attribution policy
-    provides; the manifest's `source.citation` names the Surveys of
-    Consumers. M0892AUSM156SNBR is NBER Macrohistory data the NBER publishes
-    openly. So `permitted`, with the Michigan attribution as the condition
-    that makes it so; if Michigan's terms are ever read as forbidding a
-    cached CSV, the alternative is to drop UMCSENT from the composite.
+    Split provenance, one answer, re-examined 2026-09-30 (#35). FRED labels each
+    series on its page (checked 2026-09-30): UNRATE, CPILFESL and INDPRO "Public
+    Domain: Citation Requested"; USREC, M0892AUSM156SNBR and UMCSENT
+    "Copyrighted: Citation Required", which FRED's legal page
+    (fred.stlouisfed.org/legal/#copyright-citation-required) defines as usable,
+    "provided you have not engaged in any prohibited uses", "with proper
+    attribution of the source and acknowledgment that you obtained the data from
+    FRED". USREC is built from the NBER's published chronology, and
+    M0892AUSM156SNBR is NBER Macrohistory data the NBER publishes openly.
+    UMCSENT is the one series whose FRED notes carry its owner's copyright
+    notice, "Copyright, 2016, Surveys of Consumers, University of Michigan.
+    Reprinted with permission.", and FRED sends any use of such a series beyond
+    your own personal use to the owner. Michigan publishes two texts that point
+    different ways. Its data portal's usage agreement
+    (data.sca.isr.umich.edu/agreement.php) forbids redistributing "the data and
+    materials from the Surveys of Consumers website" without written consent.
+    Its FAQ (data.sca.isr.umich.edu/faq.php) answers the reprint question with
+    "Any data, tables, or charts available to the public on our main website can
+    be used without permission", and asks for the citation "University of
+    Michigan, Survey Research Center, Surveys of Consumers". The headline index
+    is main-website data: www.sca.isr.umich.edu/tables.html serves it as
+    tbmics.csv, and on 2026-09-30 every UMCSENT value then committed here
+    equalled that table. So `permitted` on the FAQ, with Michigan's citation in
+    `source.citation` as the condition. The line this draws, the main site's
+    public tables permitted and the portal-only tables restricted, is the one
+    bbh_michigan_monthly.csv records as well, and it is why that file stays
+    `restricted`. If Michigan ever reads its terms against a cached CSV, UMCSENT
+    leaves the composite: in place while `consumers` is empty; once it is not, a
+    UMCSENT-free file lands under a new filename, the consumers move to it, and
+    this file is then withdrawn rather than kept serving. FRED's Terms of Use
+    clause (p), on storing or caching FRED content, is recorded once, for all
+    FRED-derived files, in AGENTS.md, "Licensing and attribution" (2026-09-30).
 
 # Stamped by scripts/snapshots.py on every merged refresh.
 retrieved: 2026-09-01
@@ -103,7 +121,7 @@ schema:
     - {name: UMCSENT, dtype: float64, description: "Michigan consumer sentiment index, 1966Q1=100; empty before 1952-11, sparse (quarterly then irregular) until 1978-01, monthly since; validate() bounds it in [20, 150]"}
     - {name: CPILFESL, dtype: float64, description: "CPI less food and energy, index 1982-84=100, SA; empty before 1957-01 and for 2025-10; validate() bounds it in [20, 1000]"}
     - {name: INDPRO, dtype: float64, description: "industrial production index, 2017=100, SA; complete from 1919-01; validate() bounds it in [1, 300]"}
-    - {name: M0892AUSM156SNBR, dtype: float64, description: "unemployment rate, %, NSA, from the NBER Macrohistory database; populated 1929-04 to 1942-06 only; validate() bounds it in [0, 40]"}
+    - {name: M0892AUSM156SNBR, dtype: float64, description: "unemployment rate, %, SA, from the NBER Macrohistory database; populated 1929-04 to 1942-06 only; validate() bounds it in [0, 40]"}
   row_count_floor: 1291         # 1919-01 .. 2026-07 in the first vintage;
                                 # grows by one row per month. validate()
                                 # asserts the grid and recency (newest month

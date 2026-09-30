@@ -58,7 +58,8 @@ source:
     (H.15)", retrieved from FRED, Federal Reserve Bank of St. Louis (series
     GS1, GS5, GS10, DFII5, DFII10); Federal Reserve Bank of St. Louis, "NBER
     based Recession Indicators for the United States" (USREC), from the
-    National Bureau of Economic Research's business cycle chronology.
+    National Bureau of Economic Research's business cycle chronology, retrieved
+    from FRED.
   note: >
     The lecture's prose names exactly these six series and FRED as the source,
     and for once the prose survives measurement: the committed file reproduces
@@ -72,7 +73,7 @@ license:
   name: null
   url: https://fred.stlouisfed.org/series/USREC
   redistribution: permitted
-  verified: 2026-08-18
+  verified: 2026-09-30
   note: >
     Five of the six series are the Board of Governors' H.15 release delivered
     through FRED — US Government works. The sixth, USREC, is constructed by the
@@ -83,8 +84,16 @@ license:
     federal series page; the same check could not be re-run for this manifest
     on 2026-08-18 because fred.stlouisfed.org returned 403 to both the target
     pages and the control from the authoring environment, so `permitted` rests
-    on the series' federal provenance plus that dated precedent. Nothing to
-    register on QuantEcon/data-lectures#35.
+    on the series' federal provenance plus that dated precedent. That precedent
+    covered other series, not USREC. Checked 2026-09-30, the five H.15 series
+    are labelled "Public Domain: Citation Requested" and USREC "Copyrighted:
+    Citation Required", usable, "provided you have not engaged in any prohibited
+    uses", "with proper attribution of the source and acknowledgment that you
+    obtained the data from FRED", which `source.citation` gives, so all six
+    answers now stand on their labels. Nothing to
+    register on QuantEcon/data-lectures#35. FRED's Terms of Use clause (p), on
+    storing or caching FRED content, is recorded once, for all FRED-derived
+    files, in AGENTS.md, "Licensing and attribution" (2026-09-30).
 
 retrieved: null                 # inherited-undated: the bytes arrived in
                                 # lecture-python-advanced.myst with no recorded
