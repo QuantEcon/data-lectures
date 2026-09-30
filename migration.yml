@@ -833,67 +833,83 @@ datasets:
   # The dynamic-snapshot prototype. The BYTES have been in the published tree
   # since the 2026-07-16 flatten (#10; originally QuantEcon/data b857c5c,
   # 2025-02-16), but `landed` means file + manifest (see the lifecycle above),
-  # and the manifest arrived with #109 — so that is the landing PR. No
-  # consumer: intro's business_cycle still makes the live wbgapi call the
-  # builder reproduces; whether it adopts the snapshot is the P4 decision.
-  # Renamed from business_cycle_data.csv on 2026-09-07 under the naming policy
-  # (#113), while `consumers` was still empty; no URL was ever read.
+  # and the manifest arrived with #109 — so that is the landing PR. Renamed
+  # from business_cycle_data.csv on 2026-09-07 under the naming policy (#113),
+  # while `consumers` was still empty; no URL was ever read under the old name.
+  # Its one consumer is lecture-wasm's business_cycle, which reads all four P4
+  # files (QuantEcon/lecture-wasm#70). Intro's business_cycle keeps the live
+  # wbgapi call the builder reproduces, because there the API is the lesson
+  # (decided 2026-09-01).
   gdp_growth_annual.csv:
     pilot: P4
-    status: landed
+    status: repointed
     prior_pattern: null           # never read from anywhere — the lecture
-                                  # fetches live (api pattern), so there is no
+                                  # fetched live (api pattern), so there was no
                                   # prior file read to migrate
     landed:
       pr: QuantEcon/data-lectures#109
       date: 2026-09-01
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#85
+        date: B_MERGE_DATE
     cutover: null
 
   # The rest of the business_cycle set (#114): two more World Bank tables from
   # the same builder, and the FRED half as one composite monthly file. Names
-  # settled 2026-09-07 (#113). Consumer-to-be: lecture-wasm (lecture-wasm#70).
+  # settled 2026-09-07 (#113). One lecture-wasm PR repointed all four, and the
+  # records flipped the same day (#146), after P3's acceptance test: the strict
+  # audit dry-run in both directions (PLAN Phase 8, P4).
   unemployment_rate_annual.csv:
     pilot: P4
-    status: landed
+    status: repointed
     prior_pattern: null
     landed:
       pr: QuantEcon/data-lectures#114
       date: 2026-09-01
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#85
+        date: B_MERGE_DATE
     cutover: null
 
   private_credit_to_gdp.csv:
     pilot: P4
-    status: landed
+    status: repointed
     prior_pattern: null
     landed:
       pr: QuantEcon/data-lectures#114
       date: 2026-09-01
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#85
+        date: B_MERGE_DATE
     cutover: null
 
   us_business_cycle_monthly.csv:
     pilot: P4
-    status: landed
+    status: repointed
     prior_pattern: null
     landed:
       pr: QuantEcon/data-lectures#114
       date: 2026-09-01
-    repoints: []
+    repoints:
+      - repo: QuantEcon/lecture-wasm
+        pr: QuantEcon/lecture-wasm#85
+        date: B_MERGE_DATE
     cutover: null
 
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people
-# who are not doing the migration); `scope` carries the insider detail.
-pending:
-  - pilot: P4
-    title: Maintained snapshots for lectures that fetch live API data
-    scope: the dynamic-snapshot case — a maintained UNRATE twin for the incidental FRED consumers
-    datasets: []          # produces a NEW file here; no existing static file moves
-    tracking:
-      - QuantEcon/meta#338
+# who are not doing the migration); `scope` carries the insider detail. None is
+# planned: the last entry, P4 ("a maintained UNRATE twin"), became the four
+# records above and was removed when they were repointed.
+pending: []
 
-# Interim → final URL cutover (status: repointed → final) is tracked as one
-# sweep, not per dataset: QuantEcon/data-lectures#15, gated on Phase 4 DNS.
+# repointed → final is qeld adoption (the lifecycle above; D11, 2026-08-12):
+# every consumer code read resolves through qeld.url(). That step is the
+# proposed qeld-package project's (PLAN-QELD-PACKAGE.md; #66, #88) and is
+# tracked there, not per dataset here. The data.quantecon.org URL cutover this
+# comment used to point at (#15, gated on Phase 4 DNS) was retired with the
+# custom-domain plan (#37).

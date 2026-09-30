@@ -40,10 +40,9 @@ source:
   url: https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
   doi: null
   version: >
-    Unknown for the committed bytes — WDI carries a database-level
-    `lastupdated` stamp but the export recorded none (see `retrieved`). The
-    live database at the 2026-09-01 check reported lastupdated 2026-07-13 and
-    had moved on from these bytes (see integrity.upstream).
+    Live WDI at each refresh; the vintage is pinned by `retrieved` and
+    integrity.upstream, not by a source-side edition (WDI carries only a
+    database-level lastupdated stamp).
   citation: >
     World Bank, World Development Indicators, series NY.GDP.MKTP.KD.ZG (GDP
     growth, annual %), from World Bank national accounts data and OECD
@@ -70,36 +69,30 @@ license:
     is the model case for this repo's cache-with-attribution policy
     (AGENTS.md, "Licensing and attribution").
 
-# `retrieved` is stamped by scripts/snapshots.py on every merged refresh; null
-# until the first one. The inherited bytes were produced by the committed
-# builder in QuantEcon/data commit b857c5c of 2025-02-16 — but that is when
-# QuantEcon ran the script and committed the output, and AGENTS.md says not to
-# reconstruct a retrieval date from git history. The vintage is pinned by
-# content instead: YR2023 is the last column and is populated for all five
-# economies, which places the export after the WDI release that first carried
-# 2023 growth, and integrity.upstream records how far the live series has
-# moved since.
+# Stamped by scripts/snapshots.py on every merged refresh, so it dates the
+# bytes committed now. It was null until the first refresh (#112) replaced the
+# inherited bytes (QuantEcon/data b857c5c, 2025-02-16), which carried no
+# retrieval date; AGENTS.md says not to reconstruct one from git history.
 retrieved: 2026-09-01
 maintainer: QuantEcon
 
 # ---------------------------------------------------------------------------
 # Integrity (PLAN Phase 7)
 # ---------------------------------------------------------------------------
-# No migration check applies: no lecture has ever read this file (it was
-# "never adopted" — PLAN "The audit (2026-07-15)"), so there is no prior copy
-# to byte-match and no figure a change here could alter today.
+# No migration check applied: no lecture read this file before lecture-wasm
+# adopted it in P4 (it was "never adopted" — PLAN "The audit (2026-07-15)"),
+# so there was no prior copy to byte-match.
 
 integrity:
   sha256: 41df23233ea238e4166c5c21cc383791015d4c9af6868b840901a8ce083c9da8
   upstream:
-    # `diverged`, not `failing`: the builder was re-run in full against live
-    # WDI and its output differs from these bytes in the way a revised
-    # aggregate is expected to. For a dynamic snapshot this is the normal
-    # state between refreshes, not a defect — the refresh is the resolution,
-    # and it is a deliberate PR, not something this manifest asks for.
     # status / date / against / note are stamped by scripts/snapshots.py on
-    # every merged refresh (the delta block below is dropped at the same time,
-    # since a fresh snapshot is `verified` by construction).
+    # every merged refresh: a fresh snapshot is `verified` by construction,
+    # since these bytes are the builder's validated output from the live
+    # source that day. The World Bank goes on revising the series, so a
+    # re-run between refreshes is expected to differ from these bytes. For a
+    # dynamic snapshot that is the normal state, not a defect: the next
+    # refresh is the resolution, and it is a deliberate PR.
     status: verified
     date: 2026-09-01
     against: builders/business_cycle.py
@@ -143,13 +136,26 @@ schema:
 # ---------------------------------------------------------------------------
 # Consumers — how a correction knows what to rebuild
 # ---------------------------------------------------------------------------
-# None yet. Decided 2026-09-01: lecture-python-intro KEEPS its live wbgapi
-# calls (the API is the lesson there), and lecture-wasm — where business_cycle
-# is currently excluded from the build because pyodide cannot reach the API —
-# will read this file and its two siblings plus us_business_cycle_monthly.csv
-# (QuantEcon/lecture-wasm#70). When that repoint lands, record it here with
-# `on_refresh: rebuild`, and `cadence` below becomes load-bearing.
-consumers: []
+# lecture-wasm's business_cycle reads this file, its two World Bank siblings
+# and us_business_cycle_monthly.csv from raw/main (QuantEcon/lecture-wasm#70).
+# The snapshots are what let lecture-wasm re-enable the lecture, which it had
+# excluded because its live reads could not run in the browser: neither
+# wbgapi nor pandas_datareader ships with Pyodide, and FRED's fredgraph.csv
+# sends no CORS header. Decided 2026-09-01:
+# lecture-python-intro KEEPS its live wbgapi calls (the API is the lesson
+# there), so it is not a consumer. With a reader, `cadence` below is
+# load-bearing: the page shows whatever vintage is committed.
+#
+# `on_refresh: rebuild`, because no prose in the lecture quotes a value a
+# refresh can move: its numbers are the years of historical events, and its
+# ranges run "to the present". The value dispatches nothing today. The page
+# runs in the reader's browser and reads raw/main when it runs, so a merged
+# refresh reaches its readers with no rebuild (PLAN Phase 5, consumer
+# fan-out).
+consumers:
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/business_cycle.md
+    on_refresh: rebuild
 
 builder: builders/business_cycle.py
 builder_status: committed       # four-stage since 2026-09-01 (PLAN Phase 5);

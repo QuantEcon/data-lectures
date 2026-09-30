@@ -45,7 +45,11 @@ api:
   lecture-python-intro:business_cycle:pandas_datareader:
     series: UNRATE, USREC, M0892AUSM156SNBR, UMCSENT, CPILFESL, INDPRO
     pedagogy: mixed
-    note: snapshot pipeline already exists (data-lectures gdp_growth_annual.csv, business_cycle_data.csv until 2026-09-07) but is unadopted
+    note: >
+      intro keeps this live call by decision (2026-09-01), because the API is
+      part of the lesson here; its snapshot twin, data-lectures
+      us_business_cycle_monthly.csv, is what lecture-wasm's business_cycle
+      reads (QuantEcon/lecture-wasm#70)
   lecture-python-intro:commod_price:yfinance:
     series: CT=F
     pedagogy: incidental
@@ -133,14 +137,6 @@ api:
   # lecture-wasm mirrors intro's sources; live APIs are the repo's core problem
   # (pyodide cannot reach them — meta#143), so every entry here is a migration
   # target, not an endorsement.
-  lecture-wasm:business_cycle:wbgapi:
-    series: NY.GDP.MKTP.KD.ZG, SL.UEM.TOTL.NE.ZS, FS.AST.PRVT.GD.ZS
-    pedagogy: mixed
-    note: mirror of intro's business_cycle; cannot run under pyodide
-  lecture-wasm:business_cycle:pandas_datareader:
-    series: UNRATE, USREC, M0892AUSM156SNBR, UMCSENT, CPILFESL, INDPRO
-    pedagogy: mixed
-    note: mirror of intro's business_cycle; cannot run under pyodide
   lecture-wasm:commod_price:yfinance:
     series: CT=F
     pedagogy: incidental

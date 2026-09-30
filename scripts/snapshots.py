@@ -331,7 +331,7 @@ def cmd_pr_body(args) -> int:
             action = c.get("on_refresh", "unset")
             lines.append(f"- `{c.get('repo')}` — `{c.get('file')}` — `on_refresh: {action}`"
                          + (" → open an issue there with this summary" if action == "review"
-                            else " → dispatch a rebuild" if action == "rebuild"
+                            else " → dispatch a rebuild (not wired yet: PLAN Phase 5)" if action == "rebuild"
                             else " → decide, then record `on_refresh` in the manifest"))
     else:
         lines.append("- none recorded — nothing to rebuild or notify.")
