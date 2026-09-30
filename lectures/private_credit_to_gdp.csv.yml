@@ -73,8 +73,13 @@ schema:
   known_nulls: {}
   nulls: {along: columns, leading: true, recent: 2, ended: [], inner: {}}
 
-# None yet — see gdp_growth_annual.csv.yml (QuantEcon/lecture-wasm#70).
-consumers: []
+# lecture-wasm's business_cycle reads this file (QuantEcon/lecture-wasm#70);
+# lecture-python-intro keeps its live call. See gdp_growth_annual.csv.yml for
+# the decision and for why `on_refresh` is `rebuild`.
+consumers:
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/business_cycle.md
+    on_refresh: rebuild
 
 builder: builders/business_cycle.py
 builder_status: committed

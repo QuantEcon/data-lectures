@@ -20,7 +20,8 @@
 # Who gets told, per AGENTS.md "Refresh, break, or schema change": a break is
 # an issue HERE; a merged refresh reaches consumers per the manifest's
 # `on_refresh` (the fan-out is not wired yet — the PR body lists what it would
-# do, and today no snapshot has a consumer).
+# do; the first consumer, lecture-wasm's business_cycle, reads raw/main in
+# the reader's browser and needs no dispatch, PLAN Phase 5).
 #
 # Token: the PR is opened with QUANTECON_SERVICES_PAT when the org secret is
 # available to this repo, falling back to the workflow token. The fallback

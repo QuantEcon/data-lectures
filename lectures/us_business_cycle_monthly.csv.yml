@@ -139,13 +139,16 @@ schema:
       CPILFESL: [2025-10-01]
       UMCSENT: {sparse_until: 1978-01-01}
 
-# None yet. Decided 2026-09-01: lecture-python-intro keeps its live
-# pandas_datareader calls (the API is the lesson there); lecture-wasm will
-# read this file once business_cycle is re-enabled in its build
-# (QuantEcon/lecture-wasm#70) — record it here with `on_refresh: rebuild`.
-# The python.myst unemployment_linear and unemployment_shocks lectures read
-# UNRATE live over the same window and are candidates for a later adoption.
-consumers: []
+# lecture-wasm's business_cycle reads this file (QuantEcon/lecture-wasm#70).
+# Decided 2026-09-01: lecture-python-intro keeps its live pandas_datareader
+# calls (the API is the lesson there). See gdp_growth_annual.csv.yml for why
+# `on_refresh` is `rebuild`. The python.myst unemployment_linear and
+# unemployment_shocks lectures read UNRATE live over the same window and are
+# candidates for a later adoption.
+consumers:
+  - repo: QuantEcon/lecture-wasm
+    file: lectures/business_cycle.md
+    on_refresh: rebuild
 
 builder: builders/business_cycle_fred.py
 builder_status: committed
