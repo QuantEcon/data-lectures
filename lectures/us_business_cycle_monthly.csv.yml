@@ -99,18 +99,18 @@ license:
     FRED-derived files, in AGENTS.md, "Licensing and attribution" (2026-09-30).
 
 # Stamped by scripts/snapshots.py on every merged refresh.
-retrieved: 2026-09-01
+retrieved: 2026-10-05
 maintainer: QuantEcon
 
 integrity:
-  sha256: e6f8e0dea7999246f3bf23b4410dac14e70bac475351560a1f13895132e45f72
+  sha256: 189e007588c96a001502ac0a14cd45be28a100bd9c46abc7c8bf5adb29d4e79e
   upstream:
     # Stamped by scripts/snapshots.py on every merged refresh: a fresh
     # snapshot is `verified` by construction.
     status: verified
-    date: 2026-09-01
+    date: 2026-10-05
     against: builders/business_cycle_fred.py
-    note: "Refreshed 2026-09-01 by the scheduled refresh: these bytes are the builder's validated output from the live source that day, so they are verified by construction. Overlap window n/a: 0 of 0 cells revised, max |change| 0."
+    note: "Refreshed 2026-10-05 by the scheduled refresh: these bytes are the builder's validated output from the live source that day, so they are verified by construction. Overlap window 1919-01-01..2026-07-01: 5 of 5192 cells revised, max |change| 0.1297."
 
 schema:
   format: csv
@@ -127,7 +127,7 @@ schema:
                                 # asserts the grid and recency (newest month
                                 # at most three months old), not this count.
   # `end` is stamped by scripts/snapshots.py on every refresh.
-  date_range: {start: 1919-01-01, end: 2026-07-01}
+  date_range: {start: 1919-01-01, end: 2026-09-01}
   # Every null is structural — before a series' first observation, in
   # UMCSENT's sparse pre-1978 years, after the historical series' last month,
   # the 2025-10 shutdown hole in UNRATE and CPILFESL, or the newest month for
