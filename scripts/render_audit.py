@@ -19,6 +19,9 @@ GH = "https://github.com"
 DL = f"{GH}/QuantEcon/data-lectures"
 RAW = f"{DL}/raw/main/lectures"
 PREV_SNAPSHOT = "2026-07-15"
+# The status-projects registry row that tracks qeld adoption, the lifecycle's
+# `final` step (ruled 2026-09-29); kept whole so it never breaks at its hyphen.
+QELD_ROW = '<span style="white-space:nowrap">(qeld-package)</span>'
 
 PATTERN_META = {
     # key: (pill css class, label, one-line description)
@@ -251,6 +254,9 @@ tr.row-migrated td { background: var(--ok-bg); }
 }
 .step:first-child::before { display: none; }
 .step.done::before { background: var(--ok); }
+/* a step another project owns (qeld adoption): dashed, never "next" */
+.step.handoff .dot { border-style: dashed; }
+.step.handoff::before { background: repeating-linear-gradient(90deg, var(--line) 0 5px, transparent 5px 9px); }
 .step .slbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
 .step.done .slbl { color: var(--ok); }
 .step .sdetail { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
@@ -361,9 +367,21 @@ def migration_meter(audit: dict) -> str:
     mig = audit["migration"] or {}
     recs = mig.get("datasets") or {}
     n_total = audit["stats"]["static_files"]
-    n_repointed = sum(1 for r in recs.values() if r.get("status") in ("repointed", "final"))
-    n_landed = sum(1 for r in recs.values() if r.get("status") == "landed")
-    queued = sorted({f for w in (mig.get("pending") or []) for f in w.get("datasets") or []})
+    # Count over the denominator only -- the static files lectures read today
+    # -- so each file lands in exactly one bucket and the remainder cannot go
+    # negative. A landed record for a file no lecture reads yet (a new snapshot,
+    # or a new dataset landed ahead of its lecture) is outside the denominator:
+    # it is shown as its own category, never subtracted from it.
+    statuses = [dataset_status(d["file"], mig)[0] for d in audit["datasets"]]
+    n_repointed = sum(1 for s in statuses if s in ("repointed", "final"))
+    n_landed = statuses.count("landed")
+    n_queued = statuses.count("queued")
+    static = {d["file"] for d in audit["datasets"]}
+    n_awaiting = sum(1 for f, r in recs.items()
+                     if f not in static and r.get("status") == "landed")
+    awaiting = (f" Not in it: landed, awaiting first consumer ({n_awaiting}) — "
+                f"file{'s' if n_awaiting != 1 else ''} published here that no lecture "
+                f"reads yet." if n_awaiting else "")
     pct = lambda n: max(0.8, 100 * n / n_total) if n else 0
     segs = ""
     if n_repointed:
@@ -376,9 +394,9 @@ def migration_meter(audit: dict) -> str:
 <div class="legend">
 <span class="key"><span class="swatch" style="background:var(--meter-a)"></span>migrated — every consuming lecture reads the central copy ({n_repointed})</span>
 <span class="key"><span class="swatch" style="background:var(--meter-b)"></span>copied here, lectures not yet switched ({n_landed})</span>
-<span class="key"><span class="swatch" style="background:var(--meter-track); border:1px solid var(--line)"></span>not migrated ({n_total - n_repointed - n_landed}, of which {len(queued)} queued for the next waves)</span>
+<span class="key"><span class="swatch" style="background:var(--meter-track); border:1px solid var(--line)"></span>not migrated ({n_total - n_repointed - n_landed}, of which {n_queued} queued for the next waves)</span>
 </div>
-<p class="note">Denominator: the {n_total} distinct static files lectures read today. The full
+<p class="note">Denominator: the {n_total} distinct static files lectures read today.{awaiting} The full
 per-series manifest and the milestone plan are on the
 <a href="migration.html">migration tracker</a>.</p>
 """
@@ -656,12 +674,16 @@ def stepper(fname: str, rec: dict, verified: bool) -> str:
         "landed": pr_link(str((rec.get("landed") or {}).get("pr", ""))) +
                   f'<br>{esc((rec.get("landed") or {}).get("date", ""))}',
         "repointed": "<br>".join(pr_link(str(r.get("pr", ""))) for r in rec.get("repoints") or []),
-        "final": ("awaits qeld adoption" if status != "final"
+        # `final` is qeld adoption (D11), which the qeld project tracks. The
+        # migration is complete at `repointed`, so this step is labelled as
+        # the qeld project's and never renders as a dataset's next step.
+        "final": (f"qeld adoption — tracked separately {QELD_ROW}" if status != "final"
                   else esc((rec.get("cutover") or {}).get("date", ""))),
     }
     steps = ""
     for i, name in enumerate(STATUS_STEPS):
-        cls = "done" if i <= reached else ("next" if i == reached + 1 else "")
+        cls = ("done" if i <= reached else "handoff" if name == "final"
+               else "next" if i == reached + 1 else "")
         steps += (f'<div class="step {cls}"><div class="dot"></div>'
                   f'<div class="slbl">{name}</div>'
                   f'<div class="sdetail">{detail.get(name, "")}</div></div>')
@@ -673,10 +695,11 @@ def stepper(fname: str, rec: dict, verified: bool) -> str:
 
 def milestones(audit: dict) -> str:
     """The migration programme as reader-facing milestones — completed waves
-    (derived from migration.yml records), upcoming waves, the broad sweep, and
-    the qeld adoption milestone. This section is what lets the rest of the dashboard
-    stay plan-agnostic: wave codes like P3 mean something only because they
-    are presented here."""
+    (derived from migration.yml records), upcoming waves, the broad sweep
+    (complete once every static file is migrated), and the qeld adoption
+    milestone, shown as the qeld project's rather than as migration work. This
+    section is what lets the rest of the dashboard stay plan-agnostic: wave
+    codes like P3 mean something only because they are presented here."""
     mig = audit["migration"] or {}
     recs = mig.get("datasets") or {}
     manifests = audit["manifests"]
@@ -715,21 +738,51 @@ consumed by {n_series} lecture series{" — completed " + esc(max(dates)) if don
 """
     n_unsched = sum(1 for d in audit["datasets"]
                     if dataset_status(d["file"], mig)[0] == "unscheduled")
-    items += f"""
+    # The broad sweep is complete once every static file (every file a lecture
+    # reads today) is migrated: no static record pending or landed, nothing
+    # queued, nothing unscheduled. Computed from the statuses the table above
+    # uses, so a file a lecture starts reading reopens it; a landed record no
+    # lecture reads yet is outside the denominator and does not hold it open.
+    # Its date is the last repoint of a file the lectures already read from
+    # somewhere else. A dataset born here (prior_pattern none, or null for a
+    # snapshot) was never remaining, so its first consumer does not move it.
+    static = [d["file"] for d in audit["datasets"]]
+    swept = bool(static) and all(
+        dataset_status(f, mig)[0] in ("repointed", "final") for f in static)
+    swept_on = max((str(rp["date"]) for f in static
+                    if (recs.get(f) or {}).get("prior_pattern") not in (None, "none")
+                    for rp in recs[f].get("repoints") or []
+                    if rp.get("date")), default="")
+    if swept:
+        items += f"""
+<div class="finding ok">
+<b>✓ Broad sweep — every remaining static file{" — completed " + esc(swept_on) if swept_on else ""}</b>
+<p>All {len(static)} static files the lectures read today are migrated: every consuming
+lecture reads the central copy.</p>
+</div>
+"""
+    else:
+        items += f"""
 <div class="finding">
 <b>○ Broad sweep — every remaining static file</b>
 <p>The {n_unsched} not-yet-scheduled files move once the waves above have proven the
 process for each kind of data. Mechanical from there: one data PR here, one switch PR
 per consuming lecture repo.</p>
 </div>
+"""
+    items += f"""
 <div class="finding">
-<b>○ Stable interface — lecture code reads <code>qeld.url('&lt;file&gt;')</code></b>
-<p>Migrated lectures currently read this repository's GitHub URL directly. Once the
+<b>↗ Stable interface — lecture code reads <code>qeld.url('&lt;file&gt;')</code> — tracked separately {QELD_ROW}</b>
+<p>This step belongs to the <code>qeld</code> project, not to the migration's remaining
+work: a dataset's migration is complete at <em>repointed</em>.
+Migrated lectures currently read this repository's GitHub URL directly. Once the
 <code>qeld</code> package ships, each code read is switched to a <code>qeld.url()</code>
 call that resolves to the same URL — one constant interface point that survives any
 future backend rework. (This milestone replaced the <code>data.quantecon.org</code>
 URL sweep on 2026-08-12 — {issue_link("QuantEcon/data-lectures#37")},
-{issue_link("QuantEcon/data-lectures#15")}.) No dataset has made this step yet.</p>
+{issue_link("QuantEcon/data-lectures#15")}.) No dataset has made this step yet. The plan
+is <a href="{DL}/blob/main/PLAN-QELD-PACKAGE.md">PLAN-QELD-PACKAGE.md</a>, with its
+decisions tracked at {issue_link("QuantEcon/data-lectures#66")}.</p>
 </div>
 """
     return f"""
@@ -800,8 +853,9 @@ claim a migration that didn't happen.</p>
 <b>landed</b> — the file and its metadata are merged into the central repo; lectures unchanged.
 <b>repointed</b> — every consuming lecture now reads the central copy (shown as
 <em>✓ migrated</em> in the table below).
-<b>final</b> — every code read resolves through the <code>qeld</code> package
-(the last milestone below).</p>
+<b>final</b> — every code read resolves through the <code>qeld</code> package. That step
+is the qeld project's, tracked separately {QELD_ROW}; a dataset's migration is complete
+at <em>repointed</em>.</p>
 {consistency}
 {series_manifest(audit)}
 {milestones(audit)}

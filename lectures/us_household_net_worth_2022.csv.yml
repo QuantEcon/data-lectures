@@ -1,0 +1,109 @@
+# Manifest for us_household_net_worth_2022.csv.
+
+filename: us_household_net_worth_2022.csv
+title: United States — household net worth with survey weights, SCF 2022
+description: >
+  Net worth (2022 dollars) and survey weight for the 4,595 households in the
+  public release of the Federal Reserve's 2022 Survey of Consumer Finances,
+  one row per household and imputation implicate (five per household, 22,975
+  rows). The SCF oversamples wealthy households, so estimates must use the
+  weights: the weight is already divided by five, so summing it over all rows
+  gives the number of US households (about 131.3 million). Used to study the
+  distribution of wealth, including its upper tail, and the base of a wealth
+  tax. The SCF's unit is the "family" (primary economic unit); "household" is
+  used here as the lectures use it.
+
+# Constructed: four columns selected from the summary extract's 357, with the
+# Stata small-int id columns cast to int64. Values are otherwise untouched.
+# The survey wave is a closed release, so this is not a dynamic snapshot; a
+# later SCF wave would arrive under a new filename ("Corrections vs vintages").
+class: constructed
+
+source:
+  name: Survey of Consumer Finances (SCF), Board of Governors of the Federal Reserve System
+  url: https://www.federalreserve.gov/econres/scfindex.htm
+  file_url: https://www.federalreserve.gov/econres/files/scfp2022s.zip
+  series: >
+    2022 SCF summary extract public data, Stata version (scfp2022s.zip, member
+    rscfp2022.dta; "Last Updated 4/3/2024" on the SCF page); columns yy1, y1,
+    wgt, networth
+  doi: null
+  version: 2022 SCF summary extract, updated 2024-04-03
+  citation: >
+    Board of Governors of the Federal Reserve System, 2022 Survey of Consumer
+    Finances, summary extract public data (rscfp2022),
+    https://www.federalreserve.gov/econres/scfindex.htm.
+  note: >
+    Read before trusting the upper tail. Sample design is dual-frame: an
+    area-probability sample (3,298 interviews) plus a list sample drawn from
+    IRS Statistics of Income records that deliberately oversamples wealthy
+    families (1,304 interviews). The Forbes 400 are excluded by design, and
+    the 7 respondents whose net worth reached the Forbes cutoff were removed
+    from the public file (4,602 -> 4,595 households). For disclosure
+    avoidance, the dollar items that networth is summed from are rounded (a
+    randomized, mean-preserving scheme; to the nearest $10,000 above $1
+    million) and some
+    extreme or randomly selected cases were blurred or had values set to
+    missing and re-imputed. Missing responses are multiply imputed, hence
+    five implicates per household; statistics should be computed per
+    implicate (or pooled with wgt as given) rather than treating implicates
+    as independent observations. Upstream archive sha256 3bb4d890ae2463ff6039ec7692e375f544dd98a55a37ca2cb2340354b9cc9d80,
+    rscfp2022.dta sha256 6b8dd2d935a76ed225ddebc80fb2db22a467f0c80d9a1acaa67b4584aa4bafd1
+    (HTTP Last-Modified 2024-04-03). The Fed server returns 403 to Python's
+    default user agent; the builder sends a browser-like one.
+
+license:
+  name: US Government work — public domain
+  url: https://www.federalreserve.gov/disclaimer.htm
+  redistribution: permitted
+  verified: 2026-09-29
+  note: >
+    The Board's website policy (Disclaimer, "Copyright/trademark") states:
+    "Unless otherwise indicated, information on Board's website is in the
+    public domain and may be copied and distributed without permission.
+    Please cite to the Board as the source of the information." The SCF pages
+    publish the summary extract for public download and state no further
+    terms for it; the restrictions they describe concern the confidential
+    internal data, which this file does not contain. Attribution is carried
+    by the citation above.
+
+retrieved: 2026-09-29
+maintainer: QuantEcon
+
+integrity:
+  sha256: 0283e50d792fe12e0132b5d76d4c22762c613d534a0ae5df7c895f21b17a106a
+  upstream:
+    status: verified
+    date: 2026-09-29
+    against: https://www.federalreserve.gov/econres/files/scfp2022s.zip (rscfp2022.dta)
+    note: >
+      Written by running the committed builder against the Fed's file on the
+      retrieval date; it reproduces this hash byte for byte under both pandas
+      2.3.3 and 3.0.5. The 2022 extract is a closed release, but the Fed has
+      re-issued it before (the archive is dated 2024-04-03, after the 2023
+      first release), so a later re-run could differ.
+
+schema:
+  format: csv
+  columns:
+    - {name: yy1, dtype: int64, description: household id (repeated across its five implicates)}
+    - {name: y1, dtype: int64, description: "household-implicate id: 10 * yy1 + implicate number (1-5); unique"}
+    - {name: wgt, dtype: float64, description: "survey weight, already divided by 5: summed over all rows it gives the number of US households"}
+    - {name: networth, dtype: float64, description: "net worth in 2022 dollars (SCF definition: total assets minus total debt); can be negative"}
+  row_count_floor: 22975
+  date_range: {start: 2022, end: 2022}
+  known_nulls: {}
+  # Exactly 22,975 rows by design (4,595 households x 5 implicates), sorted by
+  # y1. The builder asserts the count, five implicates per household, y1 =
+  # 10 * yy1 + implicate, positive weights and a weight total in the range
+  # of the US household count.
+
+consumers:
+  - repo: QuantEcon/lecture-python-intro
+    file: lectures/wealth_tax.md
+    note: >
+      New lecture, merged in lecture-python-intro#852 (2026-09-30), reading
+      this file directly from its first commit.
+
+builder: builders/us_household_net_worth_2022.py
+builder_status: committed

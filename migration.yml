@@ -883,6 +883,22 @@ datasets:
     repoints: []
     cutover: null
 
+  # A new dataset with no prior life in a lecture repo, landed ahead of the
+  # lecture that reads it (lecture-python-intro `wealth_tax`), which merged
+  # reading this repo's raw URL from its first commit.
+  us_household_net_worth_2022.csv:
+    pilot: P5
+    status: repointed
+    prior_pattern: none
+    landed:
+      pr: QuantEcon/data-lectures#144
+      date: 2026-09-29
+    repoints:
+      - repo: QuantEcon/lecture-python-intro
+        pr: QuantEcon/lecture-python-intro#852
+        date: 2026-09-30
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people

@@ -68,6 +68,7 @@ re-fetched** — see `AGENTS.md`.
 | `japan_earthquakes.py` | `japan_earthquakes.csv` | committed |
 | `japan_population_by_age.py` | `japan_population_by_age.csv` | committed |
 | `us_adult_heights.py` | `us_adult_heights.csv` | committed |
+| `us_household_net_worth_2022.py` | `us_household_net_worth_2022.csv` | committed — four columns of the Fed's 2022 SCF summary extract (Stata, fetched from federalreserve.gov with a browser-like user agent). Reproduces its output byte for byte under pandas 2.3.3 and 3.0.5 (2026-09-29) |
 | `NEWQDATA.py` | `NEWQDATA.csv` | committed — reads a committed input (`sources/NEWQDATA.MAT`) instead of fetching. Its upstream is published nowhere; see `sources/README.md`. Reproduces its output byte for byte |
 | `dataBHS.py` | `dataBHS.csv` | committed — the second `sources/` reader (`sources/dataBHS.mat`, un-refetchable; see `sources/README.md`). A value-preserving MATLAB-to-CSV conversion; validates the consuming lecture's hardcoded moments on every run |
 | `bbh_macro_quarterly.py` | `bbh_macro_quarterly.csv` | committed — range-reads one workbook out of the 198.8 MB Zenodo replication package. Reproduces its output byte for byte (2026-08-17) |

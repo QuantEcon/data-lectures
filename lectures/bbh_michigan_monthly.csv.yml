@@ -106,7 +106,7 @@ license:
   # (AGENTS.md, "Licensing and attribution"). The gate answer is `restricted`
   # because the layer beneath the deposit says so — see the note.
   redistribution: restricted
-  verified: 2026-08-17
+  verified: 2026-09-30
   note: >
     Split answer, and the halves disagree. The Zenodo record declares
     "cc-by-4.0" (Zenodo API, metadata.license.id, read 2026-08-17), and the
@@ -131,9 +131,25 @@ license:
     have to re-derive them: what is published here is four aggregate columns for
     the all-households cell only — not the demographic breakdowns the deposit
     ships, and not the microdata — and these are the same published aggregates
-    Michigan puts on its own tables pages. Michigan's terms bind someone who
+    Michigan puts on its data portal's tables pages
+    (data.sca.isr.umich.edu/tables.php). Michigan's terms bind someone who
     obtains the data from its website; QuantEcon obtained them from a CC BY 4.0
     deposit. That argument is not obviously wrong and is not obviously enough.
+    Re-examined 2026-09-30 alongside us_business_cycle_monthly.csv (#35).
+    Michigan also publishes a FAQ (data.sca.isr.umich.edu/faq.php) that
+    answers the reprint question with "Any data, tables, or charts available
+    to the public on our main website can be used without permission". It does
+    not reach this file. The main site's tables page
+    (www.sca.isr.umich.edu/tables.html) offers the sentiment index, its
+    components and the median inflation expectations, while this file's
+    px1_mean and three expectation shares come from the portal's tables 32 and
+    30 only. So the main site's public tables are `permitted` and the
+    portal-only tables `restricted`: this file stays `restricted`, and the
+    composite's UMCSENT column sits on the permitted side. The UNRATE column is
+    FRED data, though these bytes came from the Zenodo deposit, not from FRED
+    directly. FRED's Terms of Use clause (p), on storing or caching FRED
+    content, is recorded once, for all FRED-derived files, in AGENTS.md,
+    "Licensing and attribution" (2026-09-30).
     Inherited exposure: served publicly from lecture-python-advanced.myst since
     2026-06-12, and reachable today at
     https://python-advanced.quantecon.org/_static/lecture_specific/subjective_beliefs_business_cycles/bbh_michigan_monthly.csv
