@@ -1,8 +1,8 @@
 # Manifest for private_credit_to_gdp.csv — the third of three World Bank
 # tables builders/business_cycle.py writes for the intro `business_cycle`
-# lecture. The FILENAME IS PROVISIONAL (naming policy: QuantEcon/data-lectures#113)
-# and free to change while `consumers` is empty. Landed 2026-09-01 as part of
-# the P4 dynamic-snapshot pilot.
+# lecture. Named under the naming policy settled 2026-09-07
+# (QuantEcon/data-lectures#113: named for the variable), and final. Landed
+# 2026-09-01 as part of the P4 dynamic-snapshot pilot.
 
 filename: private_credit_to_gdp.csv
 title: World Bank domestic credit to the private sector (% of GDP) — United Kingdom, 1960 onward

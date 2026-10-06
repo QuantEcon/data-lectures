@@ -7,9 +7,10 @@
 # python-advanced.quantecon.org/dataBHS.mat is 404 while the published
 # five_preferences.ipynb is 200 and calls loadmat('dataBHS.mat'). The
 # downloadable notebook could not run. Serving the data from this repo as CSV
-# removes the 404 and the scipy dependency at once. The stem is preserved so
-# the real rename rides the phase-2 review (QuantEcon/data-lectures#87) with
-# its wave-mates.
+# removes the 404 and the scipy dependency at once. The stem was preserved so
+# a real rename could ride the phase-2 review (QuantEcon/data-lectures#87) with
+# its wave-mates; the naming policy (QuantEcon/data-lectures#113, 2026-09-07,
+# rule 6) then kept the name, so no rename is planned.
 #
 # Because the extension changes, this file is NOT a byte-identical migration
 # and cannot claim the usual repoint gate ("a migration moves bytes"). The

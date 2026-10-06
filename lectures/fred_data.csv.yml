@@ -3,11 +3,12 @@
 # lectures/_static/lecture_specific/risk_aversion_or_mistaken_beliefs/ and was
 # read over the repo's OWN raw URL (PLAN Phase 8, wave C2).
 #
-# The name is on the phase-2 rename review (QuantEcon/data-lectures#87,
-# decision of 2026-08-17): it migrates under its current name, and the org-wide
-# Trees sweep of 2026-08-17 (re-derived in the QuantEcon/data-lectures#96
-# validation) found no other file of this name anywhere in the org, so the
-# deferral introduces no ambiguity.
+# The name was on the phase-2 rename review (QuantEcon/data-lectures#87,
+# decision of 2026-08-17) and migrated under its current name, which the
+# naming policy then kept (QuantEcon/data-lectures#113, 2026-09-07, rule 6: a
+# consumed file keeps its name). The org-wide Trees sweep of 2026-08-17
+# (re-derived in the QuantEcon/data-lectures#96 validation) found no other file
+# of this name anywhere in the org, so keeping it introduces no ambiguity.
 #
 # The builder below is a RECONSTRUCTION, not a recovered original: no build
 # script for this file has ever existed in the lecture repo. Unlike the BBH
