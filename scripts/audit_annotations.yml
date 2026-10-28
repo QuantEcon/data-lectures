@@ -79,13 +79,15 @@ api:
       moved here from prob_dist by lecture-python-intro#811, which split the
       observed-data half of that lecture into observed_distributions; prob_dist
       no longer calls yfinance
-  lecture-python-intro:mle:yfinance:
+  lecture-python-intro:mle_intro:yfinance:
     series: AMZN
     pedagogy: incidental
     note: >
       one download of monthly AMZN returns over a fixed 2000-2024 window, to
       refit by maximum likelihood the Student's t that fitting_distributions
-      fits by moments; arrived with lecture-python-intro#849's rewrite of mle
+      fits by moments; arrived with lecture-python-intro#849's rewrite of mle,
+      renamed mle_intro by lecture-python-intro#857 (lecture-python.myst
+      publishes a different mle)
   lecture-python-programming:pandas:wbgapi:
     series: GC.DOD.TOTL.GD.ZS
     pedagogy: lesson
