@@ -1,0 +1,75 @@
+# Manifest for gdp_population_by_country_2000.csv.
+
+filename: gdp_population_by_country_2000.csv
+title: Population, GDP and expenditure shares — seven countries, year 2000
+description: >
+  A seven-row teaching extract cut from test_pwt.csv: seven countries
+  (Argentina, Australia, India, Israel, Malawi, South Africa, United States) in
+  the year 2000, with population (POP, thousands), total PPP-converted GDP
+  (tcgdp, millions of international dollars), and the consumption and government
+  shares of GDP (cc, cg). A running example for a first lecture on tabular data.
+  Not citable Penn World Table data; see source.note.
+
+# Constructed: test_pwt.csv with three columns and one row removed. The values
+# are copied as text, so they match the parent digit for digit.
+class: constructed
+
+source:
+  name: test_pwt.csv in this repo, itself a Penn World Table teaching extract of unestablished vintage
+  url: https://github.com/QuantEcon/data-lectures/blob/main/lectures/test_pwt.csv
+  doi: null
+  version: null
+  series: country, POP, tcgdp, cc, cg
+  citation: >
+    Heston, Alan, Robert Summers, and Bettina Aten. Penn World Table (Center
+    for International Comparisons of Production, Income and Prices, University
+    of Pennsylvania; now maintained by the Groningen Growth and Development
+    Centre). Exact version unrecorded, as for test_pwt.csv.
+  note: >
+    Inherits the provenance gap recorded in test_pwt.csv.yml, whose values match
+    none of PWT 7.0, 6.3, 6.2 or 6.1. Removed from the parent: the columns
+    `country isocode`, `year` (2000 in every row) and `XRAT`, and the Uruguay row.
+
+license:
+  name: null
+  url: https://www.rug.nl/ggdc/productivity/pwt/
+  redistribution: permitted
+  verified: 2026-08-18
+  note: >
+    The same position as the parent test_pwt.csv, established on the date above.
+    This file publishes a subset of bytes already served from this repo.
+
+retrieved: 2026-11-06           # the date this subset was cut from test_pwt.csv
+maintainer: QuantEcon
+
+integrity:
+  sha256: e0ebe12698debd3ada4aa8d134396bc2f48da6d04343be328da95d0df4a900e5
+  upstream:
+    status: unverifiable
+    date: 2026-11-06
+    against: null
+    note: >
+      The builder reproduces this file from test_pwt.csv, but no downloadable PWT
+      release reproduces the parent's values, so the upstream check stops there.
+
+schema:
+  format: csv
+  columns:
+    - {name: country, dtype: str, description: "country name, 7 unique — Argentina, Australia, India, Israel, Malawi, South Africa, United States"}
+    - {name: POP, dtype: float64, description: "population, thousands. Observed 6114.57-1006300.297"}
+    - {name: tcgdp, dtype: float64, description: "total PPP-converted GDP, millions of international dollars. Observed 5026.22-9898700"}
+    - {name: cc, dtype: float64, description: "consumption share of PPP-converted GDP per capita, percent. Observed 64.44-75.72"}
+    - {name: cg, dtype: float64, description: "government share of PPP-converted GDP per capita, percent. Observed 5.58-14.07"}
+  row_count_floor: 7            # exact by design: a frozen teaching extract
+  date_range: {start: 2000, end: 2000}
+  known_nulls: {}
+
+consumers:
+  - repo: jstac/py_for_ds_public
+    file: lectures/working_with_data.md
+    note: >
+      Reads a byte-identical local copy under `_static/lecture_specific/` when
+      the book is built, and this file when a downloaded notebook runs elsewhere.
+
+builder: builders/gdp_population_by_country_2000.py
+builder_status: committed

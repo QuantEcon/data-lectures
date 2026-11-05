@@ -899,6 +899,19 @@ datasets:
         date: 2026-09-30
     cutover: null
 
+  # A smaller teaching extract cut from test_pwt.csv for the Python for Data
+  # Science book (jstac/py_for_ds_public), which is outside the audit's scan set
+  # and keeps a local copy. test_pwt.csv and its consumers are unchanged.
+  gdp_population_by_country_2000.csv:
+    pilot: P5
+    status: landed
+    prior_pattern: none
+    landed:
+      pr: QuantEcon/data-lectures#PRNUM
+      date: 2026-11-06
+    repoints: []
+    cutover: null
+
 # Planned waves that have not landed anything here yet. `datasets` names the
 # files as the audit sees them today, so the dashboard can join the two views.
 # `title` is the reader-facing milestone name (the dashboard is read by people
