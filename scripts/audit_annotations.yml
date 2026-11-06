@@ -109,7 +109,7 @@ api:
   lecture-python.myst:kesten_processes:yfinance:
     series: ^IXIC
     pedagogy: incidental
-  lecture-python.myst:phillips_drifts_volatilities:fredgraph.csv URL:
+  lecture-python.myst:phillips_drifts_volatilities_2:fredgraph.csv URL:
     series: CPIAUCSL, UNRATE, TB3MS
     pedagogy: incidental
     note: >
@@ -117,10 +117,14 @@ api:
       (NEWQDATA.csv) to test whether the extra quarter-century changes the
       findings. Snapshot-ready, but a snapshot would need periodic refresh —
       the section's point is the *latest* vintage
-  lecture-python.myst:phillips_lost_conquest:pandas_datareader:
+  lecture-python.myst:phillips_lost_conquest:fredgraph.csv URL:
     series: PCEPI, GDPC1, GDPPOT, FEDFUNDS
     pedagogy: incidental
-  lecture-python.myst:phillips_two_stories:pandas_datareader:
+  lecture-python.myst:phillips_policy_evaluation:fredgraph.csv URL:
+    series: CPIAUCSL, LNS14000028
+    pedagogy: incidental
+    note: LNS14000028 is the unemployment rate for white men 20+
+  lecture-python.myst:phillips_two_stories:fredgraph.csv URL:
     series: CPIAUCNS, LNS14000028
     pedagogy: incidental
     note: LNS14000028 is the unemployment rate for white men 20+
